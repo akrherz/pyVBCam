@@ -1,10 +1,10 @@
-# Library for Messing with the Canon VB-C10
+# Library for Messing with the Canon VB-C10, VB-C50i
 
 import socket, urllib2, re, string, traceback, time, sys, logging
 
 class vbcam:
 
-	def __init__(self, id, d):
+	def __init__(self, id, d, user, passwd):
 		self.error = 0
 		self.id = id
 		self.d = d
@@ -19,7 +19,7 @@ class vbcam:
 		socket.setdefaulttimeout(60)
 
 		pm = urllib2.HTTPPasswordMgrWithDefaultRealm()
-		pm.add_password(None, "%s:%s" % (d['ip'], d['port']) ,'root', 'snet8')
+		pm.add_password(None, "%s:%s" % (d['ip'], d['port']) ,user, passwd)
 		ah = urllib2.HTTPBasicAuthHandler(pm)
 		opener = urllib2.build_opener(ah)
 		urllib2.install_opener(opener)
