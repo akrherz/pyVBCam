@@ -1,6 +1,7 @@
 # Library for Messing with the Canon VB-C10, VB-C50i
 
 import socket, urllib2, re, string, traceback, time, sys, logging
+socket.setdefaulttimeout(60)
 
 class vbcam:
 
@@ -15,14 +16,13 @@ class vbcam:
     self.settings = {}
     self.cid = None
     self.haveControl = False
+    self.retries = 360
 
-    socket.setdefaulttimeout(60)
 
     pm = urllib2.HTTPPasswordMgrWithDefaultRealm()
     pm.add_password(None, "%s:%s" % (d['ip'], d['port']) ,user, passwd)
     ah = urllib2.HTTPBasicAuthHandler(pm)
-    opener = urllib2.build_opener(ah)
-    urllib2.install_opener(opener)
+    self.opener = urllib2.build_opener(ah)
 
 
     self.getSettings()
@@ -120,13 +120,13 @@ class vbcam:
   def http(self, s):
     c = 0
     r = None
-    while (c < 10):
+    while (c < self.retries):
       try:
         r = self.realhttp(s)
         if (r is not None):
-          c = 10
-      except URLError:
-        logging.warning("URLError Raised")
+          break
+      except urllib2.URLError, e:
+        logging.warning(e)
       except KeyboardInterrupt:
         sys.exit(0)
       except:
@@ -135,8 +135,8 @@ class vbcam:
     return r
 
   def realhttp(self, s):
-    print 'http://%s:%s/-wvhttp-01-/%s' % (self.ip, self.port, s)
-    r = urllib2.urlopen('http://%s:%s/-wvhttp-01-/%s' % (self.ip, self.port, s) )
+    logging.debug('http://%s:%s/-wvhttp-01-/%s' % (self.ip, self.port, s))
+    r = self.opener.open('http://%s:%s/-wvhttp-01-/%s' % (self.ip, self.port, s) )
     logging.debug("HTTP request => %s, status = %s" % (s, r.headers.status))
     if (r.headers.status != ""):
       logging.warning("HTTP Request Failed: reason %s" \
