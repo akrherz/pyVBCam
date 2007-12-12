@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # Get still image for the website mostly
 
+from secret import *
+
 from pyIEM import cameras
 import pg
-db = pg.connect('mesosite')
+db = pg.connect('mesosite', host=DBHOST)
 
 from twisted.internet import reactor
 #reactor.suggestThreadPoolSize(40)
@@ -11,7 +13,6 @@ from twisted.internet import reactor
 import StringIO, mx.DateTime, os, sys
 from PIL import Image, ImageDraw, ImageFont
 
-from secret import *
 os.chdir(BASE)
 sys.path = [BASE+"/vbcam"] + sys.path
 import vbcam
