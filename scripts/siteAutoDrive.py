@@ -31,7 +31,7 @@ time.sleep(init_delay + random.random() )
 sts = mx.DateTime.now()
 ets = sts + mx.DateTime.RelativeDateTime(seconds = secs)
 
-dir = ("frames.%s_%s" % (filename, mx.DateTime.now())).replace(" ", "_")
+dir = ("autoframes.%s_%s" % (filename, mx.DateTime.now())).replace(" ", "_")
 
 os.makedirs(dir)
 os.chdir(dir)
