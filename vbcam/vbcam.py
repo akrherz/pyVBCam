@@ -113,6 +113,9 @@ class vbcam:
 
   def getSettings(self):
     d = self.http("GetCameraInfo")
+    if (type(d) is not type("a")):
+      logging.warning("Failed Get on Settings")
+      return
     tokens = re.findall("([^=]*)=([^=]*)\n", d)
     for i in range(len(tokens)):
       self.settings[ tokens[i][0] ] = tokens[i][1]
