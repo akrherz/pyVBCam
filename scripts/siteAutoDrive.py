@@ -93,6 +93,9 @@ while (i < frames ):
     time.sleep(delay)
     i += 1
 
+# Lets sleep for around 3 minutes, so that we don't have 27 ffmpegs going 
+time.sleep( 180 * random.random() )
+
 # Create something for KCCI
 os.system("ffmpeg -i %05d.jpg -b 2000k out.mov < /dev/null >& /dev/null")
 os.system("/home/ldm/bin/pqinsert -p 'lapse c %s %s/%s.qt BOGUS qt' out.mov" % (sts.strftime("%Y%m%d%H%M"), network, filename) )
