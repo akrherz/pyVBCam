@@ -76,8 +76,11 @@ class vbcam:
 
   def pan2dir(self, pan=None):
     """ Figure out the direction based on a given pan, yikes? """
-    if (pan == None):
+    if (pan is None and self.settings.has_key('pan_current_value')):
       pan = self.settings['pan_current_value']
+    elif (pan is None):
+      logging.warning("Don't have pan_current_value set, asumming 0")
+      pan = 0
     deg_pan = float(int(pan)) / float(100)
     off = self.pan0 + deg_pan
     if (off < 0):
