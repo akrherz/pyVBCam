@@ -2,7 +2,7 @@
 
 import socket, urllib2, re, string, traceback, time, sys, logging
 socket.setdefaulttimeout(60)
-log = logging.getLogger("vbcam")
+log = logging.getLogger()
 
 class vbcam:
 
