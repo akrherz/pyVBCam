@@ -3,6 +3,8 @@
 
 from secret import *
 
+import logging
+
 from pyIEM import cameras
 import pg
 db = pg.connect('mesosite', host=DBHOST)
@@ -29,7 +31,7 @@ def camRunner( cid ):
   password = 'snet8'
   if (cid[:4] == "KELO"):
     password = "kecam501"
-  cam = vbcam.vbcam(cid, d, 'root', password)
+  cam = vbcam.vbcam(cid, d, 'root', password, logLevel=logging.INFO)
   cam.retries = 2
 
   # Get Still
