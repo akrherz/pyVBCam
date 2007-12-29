@@ -5,7 +5,8 @@ socket.setdefaulttimeout(60)
 
 class vbcam:
 
-  def __init__(self, id, d, user, passwd):
+  def __init__(self, id, d, user, passwd, logLevel=logging.WARNING):
+    logging.basicConfig(level=logLevel)
     self.error = 0
     self.id = id
     self.d = d
