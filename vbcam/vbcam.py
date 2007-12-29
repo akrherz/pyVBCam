@@ -3,12 +3,12 @@
 import socket, urllib2, re, string, traceback, time, sys, logging
 socket.setdefaulttimeout(60)
 logging.basicConfig(level=logging.DEBUG)
-log = logging.getLogger()
 
 class vbcam:
 
   def __init__(self, id, d, user, passwd, logLevel=logging.WARNING):
-    log.setLevel(logLevel)
+    self.log = logging.getLogger()
+    self.log.setLevel(logLevel)
     self.error = 0
     self.id = id
     self.d = d
@@ -82,7 +82,7 @@ class vbcam:
     if (pan is None and self.settings.has_key('pan_current_value')):
       pan = self.settings['pan_current_value']
     elif (pan is None):
-      log.warning("Don't have pan_current_value set, asumming 0")
+      self.log.warning("Don't have pan_current_value set, asumming 0")
       pan = 0
     deg_pan = float(int(pan)) / float(100)
     off = self.pan0 + deg_pan
@@ -120,7 +120,7 @@ class vbcam:
   def getSettings(self):
     d = self.http("GetCameraInfo")
     if (type(d) is not type("a")):
-      log.warning("Failed Get on Settings")
+      self.log.warning("Failed Get on Settings")
       return
     tokens = re.findall("([^=]*)=([^=]*)\n", d)
     for i in range(len(tokens)):
@@ -135,20 +135,20 @@ class vbcam:
         if (r is not None):
           break
       except urllib2.URLError, e:
-        log.warning(e)
+        self.log.warning(e)
       except KeyboardInterrupt:
         sys.exit(0)
       except:
-        traceback.print_exc(log)
+        traceback.print_exc(self.log)
       c += 1
     return r
 
   def realhttp(self, s):
-    log.debug('http://%s:%s/-wvhttp-01-/%s' % (self.ip, self.port, s))
+    self.log.debug('http://%s:%s/-wvhttp-01-/%s' % (self.ip, self.port, s))
     r = self.opener.open('http://%s:%s/-wvhttp-01-/%s' % (self.ip, self.port, s) )
-    log.debug("HTTP request => %s, status = %s" % (s, r.headers.status))
+    self.log.debug("HTTP request => %s, status = %s" % (s, r.headers.status))
     if (r.headers.status != ""):
-      log.warning("HTTP Request Failed: reason %s" \
+      self.log.warning("HTTP Request Failed: reason %s" \
         % ( r.info() ) )
       return None
     return r.read()
