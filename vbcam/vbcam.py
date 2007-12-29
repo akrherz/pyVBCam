@@ -2,6 +2,7 @@
 
 import socket, urllib2, re, string, traceback, time, sys, logging
 socket.setdefaulttimeout(60)
+logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger()
 
 class vbcam:
