@@ -30,19 +30,19 @@ for id in cameras.cams.keys():
 
   sql = "UPDATE webcam_scheduler SET \
          begints = '%s'::timestamp - '70 minutes'::interval,\
-         endts = '%s'::timestamp + '20 minutes'::interval WHERE \
+         endts = '%s'::timestamp + '30 minutes'::interval WHERE \
          cid = '%s' and filename ~* '_eve' " % \
          (s2.strftime("%Y-%m-%d %H:%M"), s2.strftime("%Y-%m-%d %H:%M"), id)
   mydb.query(sql)
   sql = "UPDATE webcam_scheduler SET \
-         begints = '%s'::timestamp - '20 minutes'::interval,\
+         begints = '%s'::timestamp - '30 minutes'::interval,\
          endts = '%s'::timestamp + '70 minutes'::interval WHERE \
          cid = '%s' and filename ~* '_sunrise' " % \
          (r2.strftime("%Y-%m-%d %H:%M"), r2.strftime("%Y-%m-%d %H:%M"), id)
   mydb.query(sql)
   sql = "UPDATE webcam_scheduler SET \
-         begints = '%s'::timestamp - '20 minutes'::interval,\
-         endts = '%s'::timestamp + '20 minutes'::interval WHERE \
+         begints = '%s'::timestamp - '30 minutes'::interval,\
+         endts = '%s'::timestamp + '30 minutes'::interval WHERE \
          cid = '%s' and filename ~* '_day' " % \
          (r2.strftime("%Y-%m-%d %H:%M"), s2.strftime("%Y-%m-%d %H:%M"), id)
   mydb.query(sql)
