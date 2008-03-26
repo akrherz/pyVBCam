@@ -99,6 +99,7 @@ def camRunner( cid ):
   slaughter()
 
 def slaughter():
+  pg.close()
   os.kill(os.getpid(), 9)
 
 cid = sys.argv[1]
