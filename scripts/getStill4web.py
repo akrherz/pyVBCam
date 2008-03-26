@@ -28,9 +28,9 @@ def camRunner( cid ):
   if (not d['online']):
     return
 
-  password = 'snet8'
+  password = vbcam_pass['KCCI']
   if (cid[:4] == "KELO"):
-    password = "kecam501"
+    password = vbcam_pass['KELO']
   cam = vbcam.vbcam(cid, d, 'root', password, logLevel=logging.INFO)
   cam.retries = 2
 
