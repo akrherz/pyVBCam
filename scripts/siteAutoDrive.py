@@ -42,7 +42,7 @@ dateHT = 370
 isKELO = False
 if (network == "KELO"):
   isKELO = True
-c = vbcam.vbcam(site, cameras.cams[site], 'root', vbcam_pass[network])
+c = vbcam.vbcam(site, cameras.cams[site], vbcam_user[network], vbcam_pass[network])
 
 logging.info("Camera Settings: %s" % ( c.settings, ) )
 
