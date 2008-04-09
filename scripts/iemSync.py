@@ -15,7 +15,7 @@ cams = []
 for id in sys.argv[1:5]:
     network = id[:4]
     print network, id
-    cams.append( vbcam.vbcam(id, cameras.cams[id], 'root', vbcam_pass[network]) )
+    cams.append( vbcam.vbcam(id, cameras.cams[id], vbcam_user[network], vbcam_pass[network]) )
 
 x = [0,320,0,320]
 y = [0,0,240,240]
