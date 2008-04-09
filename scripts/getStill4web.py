@@ -28,10 +28,10 @@ def camRunner( cid ):
   if (not d['online']):
     return
 
-  password = vbcam_pass['KCCI']
-  if (cid[:4] == "KELO"):
-    password = vbcam_pass['KELO']
-  cam = vbcam.vbcam(cid, d, 'root', password, logLevel=logging.INFO)
+  network = cid[:4]
+  password = vbcam_pass[network]
+  user = vbcam_user[network]
+  cam = vbcam.vbcam(cid, d, user, password, logLevel=logging.INFO)
   cam.retries = 2
 
   # Get Still
@@ -91,7 +91,7 @@ def camRunner( cid ):
   os.system(cmd)
 
   # Upload to website!
-  if (cid[:4] == "KELO"):
+  if (network == "KELO"):
     n = int(cid[5:])
     cmd = "lftp -e 'put %s-640x480.jpg -o cam%s.jpg; quit' -u %s" % (cid, n, kelo_ftp_str)
     os.system(cmd)
