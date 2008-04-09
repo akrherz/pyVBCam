@@ -20,7 +20,7 @@ network = cid[:4]
 clat = cameras.cams[cid]['lat']
 clon = cameras.cams[cid]['lon']
 cameras.cams[cid]['pan0'] += int(sys.argv[2])
-camera = vbcam.vbcam(cid, cameras.cams[cid], 'root', vbcam_pass[network])
+camera = vbcam.vbcam(cid, cameras.cams[cid], vbcam_user[network], vbcam_pass[network])
 
 # Figure out solar location
 sun = ephem.Sun()
