@@ -40,8 +40,12 @@ logging.basicConfig(filename="%s.log"%(site,),filemode='w' )
 
 dateHT = 370
 isKELO = False
+isKCRG = False
 if (network == "KELO"):
   isKELO = True
+if (network == "KCRG"):
+  isKCRG = True
+
 c = vbcam.vbcam(site, cameras.cams[site], vbcam_user[network], vbcam_pass[network])
 
 logging.info("Camera Settings: %s" % ( c.settings, ) )
@@ -71,8 +75,12 @@ while (i < frames ):
     if (not isKELO):
       str = "%s   %s" % (mesonet.drct2dirTxt(drct), now.strftime("%-I:%M %p") )
       (w, h) = font.getsize(str)
-      draw.rectangle( [205-w-10,dateHT,205,dateHT+h], fill="#000000" )
-      draw.text((200-w,dateHT), str, font=font)
+      if (isKCRG):
+        draw.rectangle( [545-w-10,dateHT,545,dateHT+h], fill="#000000" )
+        draw.text((540-w,dateHT), str, font=font)
+      else:
+        draw.rectangle( [205-w-10,dateHT,205,dateHT+h], fill="#000000" )
+        draw.text((200-w,dateHT), str, font=font)
 
       str = "%s" % (now.strftime("%d %b %Y"), )
     else:
