@@ -24,9 +24,9 @@ class vbcam:
 
     pm = urllib2.HTTPPasswordMgrWithDefaultRealm()
     pm.add_password(None, "%s:%s" % (d['ip'], d['port']) ,user, passwd)
-    ah = urllib2.HTTPBasicAuthHandler(pm)
-    self.opener = urllib2.build_opener(ah)
-
+    self.ah = urllib2.HTTPBasicAuthHandler(pm)
+    opener = urllib2.build_opener(self.ah)
+    urllib2.install_opener(opener)
 
     self.getSettings()
 
@@ -128,30 +128,32 @@ class vbcam:
 
   def http(self, s):
     c = 0
-    r = None
+    data = None
     while (c < self.retries):
       try:
-        r = self.realhttp(s)
-        if (r is not None):
+        data = self.realhttp(s)
+        if (data is not None):
           break
       except urllib2.URLError, e:
-        self.log.warning(e)
+        self.log.debug( e )
       except KeyboardInterrupt:
         sys.exit(0)
       except:
         traceback.print_exc(self.log)
       c += 1
-    return r
+    return data
 
   def realhttp(self, s):
-    self.log.debug('http://%s:%s/-wvhttp-01-/%s' % (self.ip, self.port, s))
-    r = self.opener.open('http://%s:%s/-wvhttp-01-/%s' % (self.ip, self.port, s) )
-    self.log.debug("HTTP request => %s, status = %s" % (s, r.headers.status))
+    r = urllib2.urlopen('http://%s:%s/-wvhttp-01-/%s' % (self.ip, self.port, s) )
+    self.log.debug("HTTP request => %s, status = '%s'" % (s, r.headers.status))
     if (r.headers.status != ""):
-      self.log.warning("HTTP Request Failed: reason %s" \
-        % ( r.info() ) )
-      return None
-    return r.read()
+      self.log.warning("HTTP Request Failed: reason %s" % ( r.info() ) )
+      data = None
+    else:
+      data = r.read()
+    r.close()
+    del r
+    return data
 
 
 
