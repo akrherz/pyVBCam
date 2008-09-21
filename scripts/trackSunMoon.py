@@ -17,7 +17,7 @@ sys.path = [BASE+"/vbcam"] + sys.path
 import vbcam
 os.chdir("tmp/")
 
-
+mydirs = [0,23,45,67,90,112,135,157,180,202,225,247,270,292,315,337]
 
 font = ImageFont.truetype(BASE+'lib/LTe50874.ttf', 22)
 cid = sys.argv[1]
@@ -73,23 +73,51 @@ while (1):
     buf.seek(0)
     i0 = Image.open( buf )
 
+
+    draw = ImageDraw.Draw(i0)
+
+    # Drct and Time 
     now = mx.DateTime.now()
     str = "%s   %s" % (cam.drct2txt(drct), now.strftime("%-I:%M %p") )
     (w, h) = font.getsize(str)
-
-    draw = ImageDraw.Draw(i0)
     draw.rectangle( [75,370,205,370+h], fill="#000000" )
-    draw.rectangle( [318,238,322,242], fill="#000000" )
     draw.text((200-w,370), str, font=font)
-    str2 = "%s %s" % (body.az, body.alt)
-    (w, h) = font.getsize(str2)
+
+    # Center Dot
+    draw.rectangle( [318,238,322,242], fill="#000000" )
+
+    # Tracking details of cam
+    #str2 = "%s %s" % (body.az, body.alt)
+    #(w, h) = font.getsize(str2)
     #draw.rectangle( [320,250,550,250+h], fill="#000000" )
     #draw.text((550-w,250), str2, font=font)
+
+    # Draw grid lines on the image
+    zoom = cam.getZoom()
+    leftside = drct - (zoom/2)
+    rightside = drct + (zoom/2)
+    pos = leftside
+    while (pos < rightside):
+      i = int(pos)
+      if (mydirs.__contains__(i)):
+        x = ( pos - leftside ) / zoom * 640
+        if (x < 10 or x > 630):
+          pos += 1
+          continue
+        draw.rectangle( [x-2,230,x+3,260], fill="#ffffff" )
+        draw.rectangle( [x-1,231,x+2,259], fill="#000000" )
+        ms = cam.drct2txt(i)
+        (w, h) = font.getsize(ms)
+        draw.rectangle( [x-(w/2)-5,260,x+(w/2),260+h], fill="#000000" )
+        draw.text((x-(w/2),260), ms, font=font)
+      pos += 1
+
     del draw
 
     i0.save('%05i.jpg' % (stepi,))
     del i0
     del buf
+    #os.system("xv 00000.jpg")
     time.sleep(delay)
 
     stepi += 1
