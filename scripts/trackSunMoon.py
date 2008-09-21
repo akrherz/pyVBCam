@@ -95,22 +95,22 @@ while (1):
     # Draw grid lines on the image
     zoom = cam.getZoom()
     leftside = drct - (zoom/2)
-    rightside = drct + (zoom/2)
-    pos = leftside
-    while (pos < rightside):
-      i = int(pos)
-      if (mydirs.__contains__(i)):
-        x = ( pos - leftside ) / zoom * 640
-        if (x < 10 or x > 630):
-          pos += 1
+    dx = zoom / 640.0
+    i =0
+    while (i < 640):
+      deg = leftside + (dx*i)
+      if (int(deg*100) % 100 == 0 and mydirs.__contains__(int(deg))):
+        print "i=%s, left=%s, zoom=%s" % (i, leftside, zoom)
+        if (i < 10 or i > 630):
+          i += 1
           continue
-        draw.rectangle( [x-2,230,x+3,260], fill="#ffffff" )
-        draw.rectangle( [x-1,231,x+2,259], fill="#000000" )
-        ms = cam.drct2txt(i)
+        draw.rectangle( [i-2,230,i+3,260], fill="#ffffff" )
+        draw.rectangle( [i-1,231,i+2,259], fill="#000000" )
+        ms = cam.drct2txt(deg)
         (w, h) = font.getsize(ms)
-        draw.rectangle( [x-(w/2)-5,260,x+(w/2),260+h], fill="#000000" )
-        draw.text((x-(w/2),260), ms, font=font)
-      pos += 1
+        draw.rectangle( [i-(w/2)-5,260,i+(w/2),260+h], fill="#000000" )
+        draw.text((i-(w/2),260), ms, font=font)
+      i += 1
 
     del draw
 
