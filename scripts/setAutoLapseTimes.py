@@ -36,7 +36,7 @@ for id in cameras.cams.keys():
   mydb.query(sql)
   sql = "UPDATE webcam_scheduler SET \
          begints = '%s'::timestamp - '30 minutes'::interval,\
-         endts = '%s'::timestamp + '70 minutes'::interval WHERE \
+         endts = '%s'::timestamp + '45 minutes'::interval WHERE \
          cid = '%s' and filename ~* '_sunrise' " % \
          (r2.strftime("%Y-%m-%d %H:%M"), r2.strftime("%Y-%m-%d %H:%M"), id)
   mydb.query(sql)
