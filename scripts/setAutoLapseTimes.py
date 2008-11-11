@@ -25,8 +25,8 @@ for id in cameras.cams.keys():
   ob.date = '%s 10:00' % (mx.DateTime.gmt().strftime("%Y/%m/%d"), )
   sun.compute(ob)
   #print id, sun.rise_time, sun.set_time
-  r2 = mydate(sun.rise_time)
-  s2 = mydate(sun.set_time)
+  r2 = mydate( ob.next_rising(sun) )
+  s2 = mydate( ob.next_setting(sun) )
 
   sql = "UPDATE webcam_scheduler SET \
          begints = '%s'::timestamp - '45 minutes'::interval,\
