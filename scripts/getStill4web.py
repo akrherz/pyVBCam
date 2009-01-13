@@ -91,10 +91,10 @@ def camRunner( cid ):
   os.system(cmd)
 
   # Upload to website!
-  if (network == "KELO"):
-    n = int(cid[5:])
-    cmd = "lftp -e 'put %s-640x480.jpg -o cam%s.jpg; quit' -u %s" % (cid, n, kelo_ftp_str)
-    os.system(cmd)
+  #if (network == "KELO"):
+  #  n = int(cid[5:])
+  #  cmd = "lftp -e 'put %s-640x480.jpg -o cam%s.jpg; quit' -u %s" % (cid, n, kelo_ftp_str)
+  #  os.system(cmd)
 
   slaughter()
 
