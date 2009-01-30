@@ -82,7 +82,7 @@ class vbcam:
     if (pan is None and self.settings.has_key('pan_current_value')):
       pan = self.settings['pan_current_value']
     elif (pan is None):
-      self.log.warning("Don't have pan_current_value set, asumming 0")
+      self.log.debug("Don't have pan_current_value set, asumming 0")
       pan = 0
     deg_pan = float(int(pan)) / float(100)
     off = self.pan0 + deg_pan
@@ -120,7 +120,7 @@ class vbcam:
   def getSettings(self):
     d = self.http("GetCameraInfo")
     if (type(d) is not type("a")):
-      self.log.warning("Failed Get on Settings")
+      self.log.debug("Failed Get on Settings")
       return
     tokens = re.findall("([^=]*)=([^=]*)\n", d)
     for i in range(len(tokens)):
@@ -147,7 +147,7 @@ class vbcam:
     r = urllib2.urlopen('http://%s:%s/-wvhttp-01-/%s' % (self.ip, self.port, s) )
     self.log.debug("HTTP request => %s, status = '%s'" % (s, r.headers.status))
     if (r.headers.status != ""):
-      self.log.warning("HTTP Request Failed: reason %s" % ( r.info() ) )
+      self.log.debug("HTTP Request Failed: reason %s" % ( r.info() ) )
       data = None
     else:
       data = r.read()
