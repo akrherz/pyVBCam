@@ -31,6 +31,9 @@ def camRunner( cid ):
   network = cid[:4]
   password = vbcam_pass[network]
   user = vbcam_user[network]
+  if vbcam_user.has_key(cid):
+    password = vbcam_pass[cid]
+    user = vbcam_user[cid]
   cam = vbcam.vbcam(cid, d, user, password, logLevel=logging.INFO)
   cam.retries = 2
 
