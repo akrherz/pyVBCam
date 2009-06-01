@@ -10,10 +10,16 @@ os.chdir(BASE)
 sys.path = [BASE+"/vbcam"] + sys.path
 import vbcam
 
-id = sys.argv[1]
-network = id[:4]
+cid = sys.argv[1]
+network = cid[:4]
 
-c = vbcam.vbcam(id, cameras.cams[id], vbcam_user[network], vbcam_pass[network])
+password = vbcam_pass[network]
+user = vbcam_user[network]
+if vbcam_user.has_key(cid):
+    password = vbcam_pass[cid]
+    user = vbcam_user[cid]
+
+c = vbcam.vbcam(id, cameras.cams[cid], user, password)
 
 keys = c.settings.keys()
 keys.sort()

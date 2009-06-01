@@ -22,7 +22,13 @@ os.chdir(dir)
 
 logging.basicConfig(filename="%s.log"%(site,),filemode='w' )
 
-c = vbcam.vbcam(site, cameras.cams[site], vbcam_user[network], vbcam_pass[network])
+password = vbcam_pass[network]
+user = vbcam_user[network]
+if vbcam_user.has_key(site):
+    password = vbcam_pass[site]
+    user = vbcam_user[site]
+
+c = vbcam.vbcam(site, cameras.cams[site], user, password)
 logging.info("Camera Settings: %s" % ( c.settings, ) )
 
 font = ImageFont.truetype(BASE+'lib/veramono.ttf', 22)
