@@ -9,7 +9,7 @@ for cid in cameras.cams.keys():
   if not cameras.cams[cid]['online']:
     continue
 
-  if cid == "KCRG-014" and (now.hour > 18 or now.hour < 8):
+  if cid == "KCRG-014" and (now.hour > 17 or now.hour < 8):
     continue
 
   os.system("./getStill4web.py %s &" % (cid,) )
