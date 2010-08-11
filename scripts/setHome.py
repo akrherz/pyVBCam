@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 # Script to set the camera to some location
 
 import secret, sys, os, time
