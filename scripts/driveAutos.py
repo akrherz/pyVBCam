@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Drive build script!
 
 from secret import *
