@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Get still image for the website mostly
 
 from secret import *
