@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 from pyIEM import cameras
 import os, mx.DateTime
@@ -12,4 +11,4 @@ for cid in cameras.cams.keys():
   if cid == "KCRG-014" and (now.hour > 17 or now.hour < 8):
     continue
 
-  os.system("./getStill4web.py %s &" % (cid,) )
+  os.system("/mesonet/python/bin/python getStill4web.py %s &" % (cid,) )
