@@ -8,9 +8,6 @@ from pyIEM import mesonet, cameras
 from PIL import Image, ImageDraw, ImageFont
 import sys, os, shutil, random
 
-from pyxmpp.jid import JID
-from pyxmpp.jabber.simple import send_message
-
 os.chdir(BASE)
 sys.path = [BASE+"/vbcam"] + sys.path
 import vbcam
@@ -124,9 +121,3 @@ shutil.copyfile("out.flv", "/mesonet/share/lapses/auto/%s.flv" % (filename,) )
 # Create tar file of images
 os.system("tar -cf %s_frames.tar *.jpg" % (filename,) )
 shutil.copyfile("%s_frames.tar" % (filename,), "/mesonet/share/lapses/auto/%s_frames.tar" % (filename,))
-
-jabberTxt = "Webcam scheduler done! delivered %s.qt" % (filename,)
-bare = "akrherz@iemchat.com/alert_%s" %(mx.DateTime.now().ticks(),)
-jid=JID(bare)
-recpt=JID('kcci_wx2@iemchat.com')
-#send_message(jid,'hello',recpt,jabberTxt,'Ba')
