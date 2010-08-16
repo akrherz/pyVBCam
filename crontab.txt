@@ -1,6 +1,6 @@
 ###
 # Webcam stuff
-*/5 * * * * cd /mesonet/scripts/pyVBCam/scripts; /mesonet/python/bin/python acquireRT.py >& /dev/null
+* * * * * cd /mesonet/scripts/pyVBCam/scripts; /mesonet/python/bin/python acquireRT.py
 0 * * * * cd /mesonet/scripts/pyVBCam/scripts;  /mesonet/python/bin/python driveAutos.py
 1 3 * * * cd /mesonet/scripts/pyVBCam/scripts; /mesonet/python/bin/python setAutoLapseTimes.py
 10 2 * * * cd /mesonet/scripts/pyVBCam/tmp; rm -rf autoframes.*
