@@ -102,19 +102,11 @@ while (i < frames ):
     time.sleep(delay)
     i += 1
 
-# KCCI wanted no lapses between 5 and 6:30, OK....
-if network == 'KCCI':
-    now = mx.DateTime.now()
-    if now.hour == 17 or (now.hour == 18 and now.minute < 30):
-        endts = now + mx.DateTime.RelativeDateTime(hour=18,minute=30)
-        time.sleep( (endts - now).seconds )
+
 
 # Lets sleep for around 6 minutes, so that we don't have 27 ffmpegs going 
 time.sleep( 360. * random.random() )
 
-# Create something for KCCI
-os.system("ffmpeg -i %05d.jpg -b 2000k out.mov < /dev/null >& /dev/null")
-os.system("/home/ldm/bin/pqinsert -p 'lapse c %s %s/%s.qt BOGUS qt' out.mov" % (sts.strftime("%Y%m%d%H%M"), network, filename) )
 
 # Create something for website
 os.system("ffmpeg -i %05d.jpg -s 320x240 -vcodec wmv1 out.wmv < /dev/null >& /dev/null")
@@ -127,3 +119,18 @@ shutil.copyfile("out.flv", "/mesonet/share/lapses/auto/%s.flv" % (filename,) )
 # Create tar file of images
 os.system("tar -cf %s_frames.tar *.jpg" % (filename,) )
 shutil.copyfile("%s_frames.tar" % (filename,), "/mesonet/share/lapses/auto/%s_frames.tar" % (filename,))
+
+# KCCI wanted no lapses between 5 and 6:30, OK....
+if network == 'KCCI':
+    now = mx.DateTime.now()
+    if now.hour == 17 or (now.hour == 18 and now.minute < 30):
+        endts = now + mx.DateTime.RelativeDateTime(hour=18,minute=30)
+        time.sleep( (endts - now).seconds )
+    
+        # Lets sleep for around 6 minutes, so that we don't have 27 ffmpegs going 
+        time.sleep( 360. * random.random() )
+        
+# Create something for KCCI
+os.system("ffmpeg -i %05d.jpg -b 2000k out.mov < /dev/null >& /dev/null")
+os.system("/home/ldm/bin/pqinsert -p 'lapse c %s %s/%s.qt BOGUS qt' out.mov" % (sts.strftime("%Y%m%d%H%M"), network, filename) )
+
