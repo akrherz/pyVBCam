@@ -102,6 +102,13 @@ while (i < frames ):
     time.sleep(delay)
     i += 1
 
+# KCCI wanted no lapses between 5 and 6:30, OK....
+if network == 'KCCI':
+    now = mx.DateTime.now()
+    if now.hour == 17 or (now.hour == 18 and now.minute < 30):
+        endts = now + mx.DateTime.RelativeDateTime(hour=18,minute=30)
+        time.sleep( (endts - now).seconds )
+
 # Lets sleep for around 6 minutes, so that we don't have 27 ffmpegs going 
 time.sleep( 360. * random.random() )
 
