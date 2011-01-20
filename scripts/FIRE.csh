@@ -7,5 +7,5 @@ foreach q (KCCI-001 KCCI-003 KCCI-004 KCCI-006 KCCI-008 KCCI-009 KCCI-010 KCCI-0
 #foreach q (KCRG-001 KCRG-002 KCRG-003 KCRG-004 KCRG-005 KCRG-006 KCRG-007 KCRG-008 KCRG-009 KCRG-010 KCRG-011 KCRG-012 KCRG-013)
 
 #foreach q (KELO-001 KELO-002 KELO-003 KELO-004)
-  /mesonet/python/bin/python longLapse.py $q 2 >& /dev/null &
+  python longLapse.py $q 2 >& /dev/null &
 end

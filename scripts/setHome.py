@@ -1,7 +1,8 @@
 # Script to set the camera to some location
 
 import secret, sys, os, time
-from pyIEM import cameras
+import pg
+db = pg.connect('mesosite', host=secret.DBHOST)
 
 os.chdir(secret.BASE)
 sys.path = [secret.BASE+"/vbcam"] + sys.path
@@ -25,7 +26,10 @@ user = secret.vbcam_user[network]
 if secret.vbcam_user.has_key(cid):
     password = secret.vbcam_pass[cid]
     user = secret.vbcam_user[cid]
-cam = vbcam.vbcam(cid, cameras.cams[cid], user, password)
+
+rs = db.query("""SELECT * from webcams where id = '%s'""" % (cid,)).dictresult()
+
+cam = vbcam.vbcam(cid, rs[0], user, password)
 
 cam.pan( database[cid]['p'] )
 time.sleep(1)

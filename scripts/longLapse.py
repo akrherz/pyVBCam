@@ -1,16 +1,17 @@
-
-from secret import *
+import secret
 
 import httplib, re, time, logging
 import StringIO, mx.DateTime
-from pyIEM import mesonet, cameras
 from PIL import Image, ImageDraw, ImageFont
 import sys, os
+import pg
 
-os.chdir(BASE)
-sys.path = [BASE+"/vbcam"] + sys.path
+db = pg.connect('mesosite', host=secret.DBHOST)
+
+
+sys.path = [secret.BASE+"/vbcam"] + sys.path
 import vbcam
-os.chdir("tmp/")
+os.chdir("%s/tmp/" % (secret.BASE,))
 
 site = sys.argv[1]
 network = site[:4]
@@ -21,21 +22,24 @@ os.chdir(dir)
 
 logging.basicConfig(filename="%s.log"%(site,),filemode='w' )
 
-password = vbcam_pass[network]
-user = vbcam_user[network]
-if vbcam_user.has_key(site):
-    password = vbcam_pass[site]
-    user = vbcam_user[site]
+password = secret.vbcam_pass[network]
+user = secret.vbcam_user[network]
+if secret.vbcam_user.has_key(site):
+    password = secret.vbcam_pass[site]
+    user = secret.vbcam_user[site]
 
-c = vbcam.vbcam(site, cameras.cams[site], user, password)
+rs = db.query("""SELECT * from webcams where id = '%s'""" % (site,)).dictresult()
+db.close()
+
+c = vbcam.vbcam(site, rs[0], user, password)
 logging.info("Camera Settings: %s" % ( c.settings, ) )
 
-font = ImageFont.truetype(BASE+'lib/veramono.ttf', 22)
+font = ImageFont.truetype(secret.BASE+'lib/veramono.ttf', 22)
 #c.panDrct(335)
 
 #dirs = [0, 45, 90, 135, 180, 225, 270, 315, 360, 45, 90]
 i = 0
-while (i < 100000):
+while i < 100000:
     logging.info("i = %s" % (i,) )
 
     # Set up buffer for image to go to
@@ -49,7 +53,7 @@ while (i < 100000):
     i0 = Image.open( buf )
 
     now = mx.DateTime.now()
-    str = "%3s %8s" % (mesonet.drct2dirTxt(drct), now.strftime("%-I:%M %p") )
+    str = "%3s %8s" % (vbcam.drct2dirTxt(drct), now.strftime("%-I:%M %p") )
     (w, h) = font.getsize(str)
 
     draw = ImageDraw.Draw(i0)
@@ -63,4 +67,3 @@ while (i < 100000):
     del buf
     time.sleep(int(sys.argv[2]))
     i += 1
-

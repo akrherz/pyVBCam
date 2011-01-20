@@ -1,25 +1,25 @@
-#!/usr/bin/env python
 
-from secret import *
+import secret
 
 import sys, os
 import ephem
 import math
 import time
 import mx.DateTime
-from pyIEM import cameras
 from PIL import Image, ImageDraw, ImageFont
 import StringIO
 import logging
+import pg
+mesosite = pg.connect('mesosite', host=secret.DBHOST)
 
-os.chdir(BASE)
-sys.path = [BASE+"/vbcam"] + sys.path
+os.chdir(secret.BASE)
+sys.path = [secret.BASE+"/vbcam"] + sys.path
 import vbcam
 os.chdir("tmp/")
 
 mydirs = [0,23,45,67,90,112,135,157,180,202,225,247,270,292,315,337]
 
-font = ImageFont.truetype(BASE+'lib/LTe50874.ttf', 22)
+font = ImageFont.truetype(secret.BASE+'lib/LTe50874.ttf', 22)
 cid = sys.argv[1]
 network = cid[:4]
 body = sys.argv[2]
@@ -37,11 +37,14 @@ else:
     body = ephem.Moon()
     logging.debug("Tracking the moon!")
 
+rs = db.query("""SELECT *, x(geom) as lon, y(geom) as lat from webcams where id = '%s'""" % (cid,)).dictresult()
+row = rs[0]
+db.close()
 
-cam = vbcam.vbcam(cid, cameras.cams[cid], vbcam_user[network], vbcam_pass[network] )
+cam = vbcam.vbcam(cid, row, secret.vbcam_user[network], secret.vbcam_pass[network] )
 
 here = ephem.Observer()
-here.long, here.lat = str(cameras.cams[cid]['lon']), str(cameras.cams[cid]['lat'])
+here.long, here.lat = str(row['lon']), str(row['lat'])
 
 cam.zoom(30.0)
 cam.getSettings()

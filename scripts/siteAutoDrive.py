@@ -1,16 +1,14 @@
-
-from secret import *
-
+import secret
 import httplib, re, time, logging
 import StringIO, mx.DateTime
-from pyIEM import mesonet, cameras
 from PIL import Image, ImageDraw, ImageFont
 import sys, os, shutil, random
+import pg
+db = pg.connect('mesosite', host=secret.DBHOST)
 
-os.chdir(BASE)
-sys.path = [BASE+"/vbcam"] + sys.path
+sys.path = [secret.BASE+"/vbcam"] + sys.path
 import vbcam
-os.chdir("tmp/")
+os.chdir("%s/tmp/" % (secret.BASE,))
 
 
 init_delay = int(sys.argv[1])
@@ -42,12 +40,14 @@ if (network == "KELO"):
 if (network == "KCRG"):
   isKCRG = True
 
-password = vbcam_pass[network]
-user = vbcam_user[network]
-if vbcam_user.has_key(site):
-  password = vbcam_pass[site]
-  user = vbcam_user[site]
-c = vbcam.vbcam(site, cameras.cams[site], user, password)
+password = secret.vbcam_pass[network]
+user = secret.vbcam_user[network]
+if secret.vbcam_user.has_key(site):
+  password = secret.vbcam_pass[site]
+  user = secret.vbcam_user[site]
+rs = db.query("""SELECT * from webcams where id = '%s'""" % (site,)).dictresult()
+
+c = vbcam.vbcam(site, rs[0], user, password)
 
 logging.info("Camera Settings: %s" % ( c.settings, ) )
 
@@ -74,7 +74,7 @@ while (i < frames ):
     draw = ImageDraw.Draw(i0)
 
     if (not isKELO):
-      str = "%s   %s" % (mesonet.drct2dirTxt(drct), now.strftime("%-I:%M %p") )
+      str = "%s   %s" % (vbcam.drct2dirTxt(drct), now.strftime("%-I:%M %p") )
       (w, h) = font.getsize(str)
       if (isKCRG):
         draw.rectangle( [545-w-10,dateHT,545,dateHT+h], fill="#000000" )
@@ -85,7 +85,7 @@ while (i < frames ):
 
       str = "%s" % (now.strftime("%d %b %Y"), )
     else:
-      str = "%s  %s" % (now.strftime("%d %b %Y %-I:%M %p"), mesonet.drct2dirTxt(drct))
+      str = "%s  %s" % (now.strftime("%d %b %Y %-I:%M %p"), vbcam.drct2dirTxt(drct))
     (w, h) = sfont.getsize(str)
     draw.rectangle( [0,480-h,0+w,480], fill="#000000" )
     draw.text((0,480-h), str, font=sfont)
@@ -110,15 +110,15 @@ time.sleep( 360. * random.random() )
 
 # Create something for website
 os.system("ffmpeg -i %05d.jpg -s 320x240 -vcodec wmv1 out.wmv < /dev/null >& /dev/null")
-shutil.copyfile("out.wmv", "/mesonet/share/lapses/auto/%s.wmv" % (filename,) )
+shutil.copyfile("out.wmv", "/mnt/mesonet/share/lapses/auto/%s.wmv" % (filename,) )
 
 # Create Flash Video in full res!
 os.system("ffmpeg -i %05d.jpg -b 1000k out.flv < /dev/null >& /dev/null")
-shutil.copyfile("out.flv", "/mesonet/share/lapses/auto/%s.flv" % (filename,) )
+shutil.copyfile("out.flv", "/mnt/mesonet/share/lapses/auto/%s.flv" % (filename,) )
 
 # Create tar file of images
 os.system("tar -cf %s_frames.tar *.jpg" % (filename,) )
-shutil.copyfile("%s_frames.tar" % (filename,), "/mesonet/share/lapses/auto/%s_frames.tar" % (filename,))
+shutil.copyfile("%s_frames.tar" % (filename,), "/mnt/mesonet/share/lapses/auto/%s_frames.tar" % (filename,))
 
 # KCCI wanted no lapses between 5 and 6:30, OK....
 if network == 'KCCI':

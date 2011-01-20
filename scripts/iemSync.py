@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from secret import *
+import secret
 
 from PIL import Image, ImageDraw, ImageFont
 from pyIEM import cameras
@@ -20,7 +20,7 @@ for id in sys.argv[1:5]:
 x = [0,320,0,320]
 y = [0,0,240,240]
 
-font = ImageFont.truetype(BASE+'lib/veramono.ttf', 22)
+font = ImageFont.truetype(secret.BASE+'lib/veramono.ttf', 22)
 
 dir = "iemsync.%s" % (mx.DateTime.now().strftime("%Y%m%d%H%M%S"),)
 os.makedirs(dir)
