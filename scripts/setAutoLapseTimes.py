@@ -25,7 +25,7 @@ for row in rs:
   ob.long = `row['lon']`
   ob.date = '%s 10:00' % (mx.DateTime.gmt().strftime("%Y/%m/%d"), )
   sun.compute(ob)
-  #print id, sun.rise_time, sun.set_time
+  #print row['id'], sun.rise_time, sun.set_time
   r2 = mydate( ob.next_rising(sun) )
   s2 = mydate( ob.next_setting(sun) )
 
@@ -33,17 +33,17 @@ for row in rs:
          begints = '%s'::timestamp - '45 minutes'::interval,\
          endts = '%s'::timestamp + '45 minutes'::interval WHERE \
          cid = '%s' and filename ~* '_eve' " % \
-         (s2.strftime("%Y-%m-%d %H:%M"), s2.strftime("%Y-%m-%d %H:%M"), id)
+         (s2.strftime("%Y-%m-%d %H:%M"), s2.strftime("%Y-%m-%d %H:%M"), row['id'])
   mesosite.query(sql)
   sql = "UPDATE webcam_scheduler SET \
          begints = '%s'::timestamp - '30 minutes'::interval,\
          endts = '%s'::timestamp + '45 minutes'::interval WHERE \
          cid = '%s' and filename ~* '_sunrise' " % \
-         (r2.strftime("%Y-%m-%d %H:%M"), r2.strftime("%Y-%m-%d %H:%M"), id)
+         (r2.strftime("%Y-%m-%d %H:%M"), r2.strftime("%Y-%m-%d %H:%M"), row['id'])
   mesosite.query(sql)
   sql = "UPDATE webcam_scheduler SET \
          begints = '%s'::timestamp - '30 minutes'::interval,\
          endts = '%s'::timestamp + '30 minutes'::interval WHERE \
          cid = '%s' and filename ~* '_day' " % \
-         (r2.strftime("%Y-%m-%d %H:%M"), s2.strftime("%Y-%m-%d %H:%M"), id)
+         (r2.strftime("%Y-%m-%d %H:%M"), s2.strftime("%Y-%m-%d %H:%M"), row['id'])
   mesosite.query(sql)
