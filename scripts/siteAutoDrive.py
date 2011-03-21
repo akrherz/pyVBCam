@@ -55,9 +55,12 @@ font = ImageFont.truetype('../../lib/veramono.ttf', 22)
 sfont = ImageFont.truetype('../../lib/veramono.ttf', 14)
 
 i = 0
+fails = 0
 frames = movie_duration * 30
 while (i < frames ):
     logging.info("i = %s" % (i,) )
+    if fails > 10:
+        sys.exit(0)
 
     # Set up buffer for image to go to
     buf = StringIO.StringIO()
@@ -67,7 +70,12 @@ while (i < frames ):
     drct = c.getDirection()
     buf.write( c.getOneShot() )
     buf.seek(0)
-    i0 = Image.open( buf )
+    try:
+        i0 = Image.open( buf )
+    except IOError:
+        time.sleep(delay)
+        fails += 1
+        continue
 
     now = mx.DateTime.now()
 
