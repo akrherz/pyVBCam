@@ -73,7 +73,7 @@ while (i < frames ):
     try:
         i0 = Image.open( buf )
     except IOError:
-        time.sleep(delay)
+        time.sleep(10)
         fails += 1
         continue
 
