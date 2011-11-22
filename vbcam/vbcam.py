@@ -1,4 +1,8 @@
-# Library for Messing with the Canon VB-C10, VB-C50i
+"""
+ Python Library for Messing with the Canon VB-C10, VB-C50i, VB-C60
+
+$Id: $:
+"""
 
 import socket, urllib2, re, string, traceback, time, sys, logging
 socket.setdefaulttimeout(60)
