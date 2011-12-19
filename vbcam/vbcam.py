@@ -4,8 +4,7 @@
 $Id: $:
 """
 
-import socket, urllib2, re, string, traceback, time, sys, logging
-socket.setdefaulttimeout(60)
+import urllib2, re, string, traceback, time, sys, logging
 logging.basicConfig(level=logging.DEBUG)
 
 def drct2dirTxt(dir):
@@ -187,7 +186,8 @@ class vbcam:
     return data
 
   def realhttp(self, s):
-    r = urllib2.urlopen('http://%s:%s/-wvhttp-01-/%s' % (self.ip, self.port, s) )
+    r = urllib2.urlopen('http://%s:%s/-wvhttp-01-/%s' % (self.ip, self.port, s), 
+                        timeout=30 )
     self.log.debug("HTTP request => %s, status = '%s'" % (s, r.headers.status))
     if (r.headers.status != ""):
       self.log.debug("HTTP Request Failed: reason %s" % ( r.info() ) )
