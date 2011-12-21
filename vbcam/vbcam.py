@@ -5,7 +5,6 @@ $Id: $:
 """
 
 import urllib2, re, string, traceback, time, sys, logging
-logging.basicConfig(level=logging.DEBUG)
 
 def drct2dirTxt(dir):
   if (dir == None):
@@ -49,8 +48,6 @@ def drct2dirTxt(dir):
 class vbcam:
 
   def __init__(self, id, d, user, passwd, logLevel=logging.WARNING):
-    self.log = logging.getLogger()
-    self.log.setLevel(logLevel)
     self.error = 0
     self.id = id
     self.d = d
@@ -61,7 +58,6 @@ class vbcam:
     self.settings = {}
     self.cid = None
     self.haveControl = False
-    self.retries = 360
 
 
     pm = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -70,7 +66,10 @@ class vbcam:
     opener = urllib2.build_opener(self.ah)
     urllib2.install_opener(opener)
 
+    # Make the initial attempt take less time!
+    self.retries = 6
     self.getSettings()
+    self.retries = 60
 
 
   def closeConnection(self):
@@ -124,7 +123,7 @@ class vbcam:
     if (pan is None and self.settings.has_key('pan_current_value')):
       pan = self.settings['pan_current_value']
     elif (pan is None):
-      self.log.debug("Don't have pan_current_value set, asumming 0")
+      logging.debug("Don't have pan_current_value set, asumming 0")
       pan = 0
     deg_pan = float(int(pan)) / float(100)
     off = self.pan0 + deg_pan
@@ -162,7 +161,7 @@ class vbcam:
   def getSettings(self):
     d = self.http("GetCameraInfo")
     if (type(d) is not type("a")):
-      self.log.debug("Failed Get on Settings")
+      logging.debug("Failed Get on Settings")
       return
     tokens = re.findall("([^=]*)=([^=]*)\n", d)
     for i in range(len(tokens)):
@@ -171,26 +170,26 @@ class vbcam:
   def http(self, s):
     c = 0
     data = None
-    while (c < self.retries):
+    while c < self.retries:
       try:
         data = self.realhttp(s)
         if (data is not None):
           break
       except urllib2.URLError, e:
-        self.log.debug( e )
+        logging.debug('urllib2 cmd: %s error: %r retries: %s' % ( s, e, self.retries - c) )
       except KeyboardInterrupt:
         sys.exit(0)
       except:
-        traceback.print_exc(self.log)
+        traceback.print_exc(logging)
       c += 1
     return data
 
   def realhttp(self, s):
     r = urllib2.urlopen('http://%s:%s/-wvhttp-01-/%s' % (self.ip, self.port, s), 
                         timeout=30 )
-    self.log.debug("HTTP request => %s, status = '%s'" % (s, r.headers.status))
+    logging.debug("HTTP request => %s, status = %s" % (s, r.code))
     if (r.headers.status != ""):
-      self.log.debug("HTTP Request Failed: reason %s" % ( r.info() ) )
+      logging.debug("HTTP Request Failed: reason %s" % ( r.info() ) )
       data = None
     else:
       data = r.read()
