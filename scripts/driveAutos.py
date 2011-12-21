@@ -23,7 +23,7 @@ for i in range(len(rs)):
   init_delay = (sts.minute * 60)
   #delay = int(secs / (movie_seconds * 30) - 3)
   #if (delay < 0): delay = 0
-  cmd = "python siteAutoDrive.py %s %s %s %s %s &" % (init_delay, rs[i]['cid'], secs, rs[i]['filename'], movie_seconds)
+  cmd = "python do_auto_lapse.py %s %s %s %s %s &" % (init_delay, rs[i]['cid'], secs, rs[i]['filename'], movie_seconds)
   #print cmd
   os.system(cmd)
   time.sleep(1)  # Jitter to keep dups
