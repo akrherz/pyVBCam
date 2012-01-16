@@ -75,7 +75,7 @@ class Lapse(object):
                 stamp = "%s   %s" % (vbcam.drct2dirTxt(drct), 
                                    now.strftime("%-I:%M %p") )
                 (width, height) = self.font.getsize(stamp)
-                if self.network == 'KCRG':
+                if self.network == 'KCRG2':
                     draw.rectangle( [545-width-10, self.date_height, 545, 
                                      self.date_height+height], fill="#000000" )
                     draw.text((540-width, self.date_height), stamp, 
