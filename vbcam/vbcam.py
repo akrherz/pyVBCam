@@ -4,7 +4,14 @@
 $Id: $:
 """
 
-import urllib2, re, string, traceback, time, sys, logging
+import urllib2
+import re
+import string
+import traceback
+import time
+import sys
+import logging
+import socket
 
 def drct2dirTxt(dir):
   if (dir == None):
@@ -175,8 +182,11 @@ class vbcam:
         data = self.realhttp(s)
         if (data is not None):
           break
+      except socket.timeout:
+        logging.debug('urllib2 timout!')
       except urllib2.URLError, e:
-        logging.debug('urllib2 cmd: %s error: %r retries: %s' % ( s, e, self.retries - c) )
+        logging.debug('urllib2 cmd: %s error: %r retries: %s' % ( s, e, 
+                                                self.retries - c) )
       except KeyboardInterrupt:
         sys.exit(0)
       except:
