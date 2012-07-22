@@ -1,10 +1,9 @@
 """
  Python Library for Messing with the Canon VB-C10, VB-C50i, VB-C60
-
-$Id: $:
 """
 
 import urllib2
+import httplib
 import re
 import string
 import traceback
@@ -178,20 +177,23 @@ class vbcam:
     c = 0
     data = None
     while c < self.retries:
-      try:
-        data = self.realhttp(s)
-        if (data is not None):
-          break
-      except socket.timeout:
-        logging.debug('urllib2 timout!')
-      except urllib2.URLError, e:
-        logging.debug('urllib2 cmd: %s error: %r retries: %s' % ( s, e, 
+        try:
+            data = self.realhttp(s)
+            if data is not None:
+                break
+        except socket.timeout:
+            logging.debug('urllib2 timout!')
+        except urllib2.URLError, e:
+            logging.debug('urllib2 cmd: %s error: %r retries: %s' % ( s, e, 
                                                 self.retries - c) )
-      except KeyboardInterrupt:
-        sys.exit(0)
-      except:
-        traceback.print_exc(logging)
-      c += 1
+        except httplib.BadStatusLine:
+            logging.info('httplib.BadStatusLine from IP: %s (%s)' % (self.ip, 
+                                                                self.name))
+        except KeyboardInterrupt:
+            sys.exit(0)
+        except:
+            traceback.print_exc(logging)
+        c += 1
     return data
 
   def realhttp(self, s):
