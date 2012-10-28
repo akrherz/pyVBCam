@@ -1,15 +1,22 @@
-#!/usr/bin/env python
-# Something to calibrate the location of the webcam and direction!
+"""
+ Something to calibrate the location of the webcam and direction!
+"""
+import secret
 
-from secret import *
+import sys
+import math
+import StringIO
+import os
+import ephem
+import mx.DateTime
+import Image
+import ImageDraw
+import pg
+mesosite = pg.connect('mesosite', host=secret.DBHOST, user='nobody')
 
-import sys, math, StringIO, os
-import ephem, mx.DateTime
-from PIL import Image, ImageDraw
-from pyIEM import cameras
 
-os.chdir(BASE)
-sys.path = [BASE+"/vbcam"] + sys.path
+os.chdir(secret.BASE)
+sys.path = [secret.BASE+"/vbcam"] + sys.path
 import vbcam
 os.chdir("tmp/")
 
@@ -17,10 +24,18 @@ os.chdir("tmp/")
 # Which webcam, establish existing lat/lon and pan0
 cid = sys.argv[1]
 network = cid[:4]
-clat = cameras.cams[cid]['lat']
-clon = cameras.cams[cid]['lon']
-cameras.cams[cid]['pan0'] += int(sys.argv[2])
-camera = vbcam.vbcam(cid, cameras.cams[cid], vbcam_user[network], vbcam_pass[network])
+
+# Get db info
+rs = mesosite.query(""" SELECT x(geom) as lon, y(geom) as lat, *
+ from webcams where id = '%s'
+""" % (cid,)).dictresult()
+
+
+clat = rs[0]['lat']
+clon = rs[0]['lon']
+rs[0]['pan0'] = int(rs[0]['pan0']) + int(sys.argv[2])
+camera = vbcam.vbcam(cid, rs[0], secret.vbcam_user[network], 
+                     secret.vbcam_pass[network])
 
 # Figure out solar location
 sun = ephem.Sun()
