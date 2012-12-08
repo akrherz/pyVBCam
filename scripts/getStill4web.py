@@ -7,7 +7,7 @@ from twisted.internet import reactor
 import StringIO, mx.DateTime, os, sys
 from PIL import Image, ImageDraw, ImageFont
 
-db = pg.connect('mesosite', host=secret.DBHOST, user='nobody')
+db = pg.connect('mesosite', host=secret.DBHOST)
 
 #reactor.suggestThreadPoolSize(40)
 
