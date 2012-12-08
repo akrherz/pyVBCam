@@ -7,7 +7,7 @@ from twisted.internet import reactor
 import StringIO, mx.DateTime, os, sys
 from PIL import Image, ImageDraw, ImageFont
 
-db = pg.connect('mesosite', host=secret.DBHOST)
+db = pg.connect('mesosite', host=secret.DBHOST, user='nobody')
 
 #reactor.suggestThreadPoolSize(40)
 
@@ -38,7 +38,11 @@ def camRunner( cid ):
         return
     i0 = Image.open( buf )
     # 320x240 variant
-    i320 = i0.resize((320, 240), Image.ANTIALIAS) 
+    try:
+        i320 = i0.resize((320, 240), Image.ANTIALIAS) 
+    except:
+        slaughter()
+        return
 
     # Get direction cam is looking
     drct = cam.getDirection() 
