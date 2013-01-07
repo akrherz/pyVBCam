@@ -95,6 +95,7 @@ class Lapse(object):
             buf.seek(0)
             try:
                 imgdata = Image.open( buf )
+                draw = ImageDraw.Draw(imgdata)
             except IOError, exp:
                 logging.debug( exp )
                 time.sleep(10)
@@ -102,9 +103,7 @@ class Lapse(object):
                 continue
         
             now = datetime.datetime.now()
-        
-            draw = ImageDraw.Draw(imgdata)
-        
+            
             if self.network != 'KELO':
                 stamp = "%s   %s" % (vbcam.drct2dirTxt(drct), 
                                    now.strftime("%-I:%M %p") )
