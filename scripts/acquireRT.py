@@ -6,7 +6,7 @@ config = ConfigParser.ConfigParser()
 config.read('settings.ini')
 
 import psycopg2
-dbconn = psycopg2.connect("host=%s user=%s name=%s" % (config.get('database', 'host'),
+dbconn = psycopg2.connect("host=%s user=%s dbname=%s" % (config.get('database', 'host'),
                                               config.get('database', 'user'),
                                               config.get('database', 'name')))
 cursor = dbconn.cursor()
