@@ -1,32 +1,43 @@
-# Drive build script!
+"""
+ Drive build script!
+"""
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read('settings.ini')
 
-from secret import *
-import secret
-import mx.DateTime, os, time
+import datetime
+import time
+import subprocess
+import psycopg2
+import psycopg2.extras
+dbconn = psycopg2.connect("host=%s user=%s dbname=%s" % (config.get('database', 'host'),
+                                              config.get('database', 'user'),
+                                              config.get('database', 'name')))
+cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-import pg
-mesosite = pg.connect('mesosite', host=secret.DBHOST)
+lookingfor = datetime.datetime.now().strftime("%Y%m%d%H")
 
-lookingfor = mx.DateTime.now().strftime("%Y%m%d%H")
+sql = """SELECT *, oid from webcam_scheduler WHERE 
+    to_char(begints, 'YYYYMMDDHH24') = '%s' or (to_char(begints, 'HH24') = '%s' 
+    and is_daily IS TRUE)""" % (lookingfor, lookingfor[8:])
+cursor.execute(sql)
 
-sql = """SELECT *, oid from webcam_scheduler WHERE to_char(begints, 'YYYYMMDDHH24') = '%s' 
-    or (to_char(begints, 'HH24') = '%s' and is_daily IS TRUE)""" % (lookingfor, lookingfor[8:])
-rs = mesosite.query(sql).dictresult()
+for row in cursor:
+    sts = row['begints']
+    ets = row['endts']
+    if ets < sts:
+        ets += datetime.timedelta(days=1)
+    movie_seconds = row['movie_seconds']
+    secs = (ets - sts).seconds
+    init_delay = sts.minute * 60
+    cmd = "python do_auto_lapse.py %s %s %s %s %s &" % (init_delay, 
+                    row['cid'], secs, row['filename'], movie_seconds)
+    subprocess.call(cmd, shell=True)
+    time.sleep(1)  # Jitter to keep dups
 
-for i in range(len(rs)):
-  sts = mx.DateTime.strptime(rs[i]['begints'][:16], "%Y-%m-%d %H:%M")
-  ets = mx.DateTime.strptime(rs[i]['endts'][:16], "%Y-%m-%d %H:%M")
-  if (ets < sts):
-    ets += mx.DateTime.RelativeDateTime(days=1)
-  movie_seconds = float(rs[i]['movie_seconds'])
-  secs = (ets - sts).seconds
-  init_delay = (sts.minute * 60)
-  #delay = int(secs / (movie_seconds * 30) - 3)
-  #if (delay < 0): delay = 0
-  cmd = "python do_auto_lapse.py %s %s %s %s %s &" % (init_delay, rs[i]['cid'], secs, rs[i]['filename'], movie_seconds)
-  #print cmd
-  os.system(cmd)
-  time.sleep(1)  # Jitter to keep dups
+    if not row['is_daily']:
+        cursor.execute("DELETE from webcam_scheduler WHERE oid = %s" % (row['oid'],) )
 
-  if (rs[i]['is_daily'] == 'f'):
-    mesosite.query("DELETE from webcam_scheduler WHERE oid = %s" % (rs[i]['oid'],) )
+cursor.close()
+dbconn.commit()
+dbconn.close()

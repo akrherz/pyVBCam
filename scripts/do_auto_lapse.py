@@ -1,23 +1,57 @@
 """
   Drives the production of auto timed webcam lapses
-$Id: $:
 """
-import secret
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read('settings.ini')
+
+import datetime
+import time
+import subprocess
+import psycopg2
+import psycopg2.extras
+dbconn = psycopg2.connect("host=%s user=%s dbname=%s" % (config.get('database', 'host'),
+                                              config.get('database', 'user'),
+                                              config.get('database', 'name')))
+cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                '../vbcam'))
+
+sys.path.insert(0, '../vbcam/')
 import vbcam
 
 import time
-import StringIO, mx.DateTime
+import StringIO
+import datetime
 from PIL import Image, ImageDraw, ImageFont
 import shutil, random
-import iemdb
-import psycopg2.extras
 import logging
+import urllib2
 
+from pyiem import iemtz
+
+class scrape(object):
     
+    def __init__(self, cid, row):
+        self.cid = cid
+        self.row = row
+        
+    def getDirection(self):
+        return self.row['pan0']
+    
+    def getOneShot(self):
+        now = datetime.datetime.now()
+        now = now.replace(tzinfo=iemtz.Central)
+
+        url = self.row['scrape_url']
+        req = urllib2.Request(url)
+        req2 = urllib2.urlopen(req)
+        modified = req2.info().getheader('Last-Modified')
+        if modified:
+            gmt = datetime.datetime.strptime(modified, "%a, %d %b %Y %H:%M:%S %Z")
+            now = gmt + datetime.timedelta(seconds=now.utcoffset().seconds)
+        return req2.read() 
 
 class Lapse(object):
     """
@@ -67,7 +101,7 @@ class Lapse(object):
                 fails += 1
                 continue
         
-            now = mx.DateTime.now()
+            now = datetime.datetime.now()
         
             draw = ImageDraw.Draw(imgdata)
         
@@ -105,7 +139,7 @@ class Lapse(object):
         """
         Sleep logic between frames
         """
-        secs_left = (self.ets - mx.DateTime.now()).seconds
+        secs_left = (self.ets - datetime.datetime.now()).seconds
         delay = (secs_left -((self.frames - i) * 2)) / (self.frames - i) 
         logging.info("secs_left = %.2f, frames_left = %d, delay = %.2f", 
                      secs_left,  self.frames - i, delay)
@@ -144,9 +178,9 @@ class Lapse(object):
         
         # KCCI wanted no lapses between 5 and 6:30, OK....
         if self.network == 'KCCI':
-            now = mx.DateTime.now()
+            now = datetime.datetime.now()
             if now.hour == 17 or (now.hour == 18 and now.minute < 30):
-                endts = now + mx.DateTime.RelativeDateTime(hour=18, minute=30)
+                endts = now.replace(hour=18, minute=30)
                 time.sleep( (endts - now).seconds )
             
                 # Lets sleep for around 6 minutes, 
@@ -173,7 +207,7 @@ def setup_job(job):
     job.frames = job.movie_duration * 30
 
     outdir = "../tmp/autoframes.%s_%s" % (job.filename, 
-                                   mx.DateTime.now().strftime("%Y%m%d%H%M%S"))
+                                   datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
     os.makedirs(outdir)
     os.chdir(outdir)
 
@@ -186,29 +220,33 @@ def bootstrap(job):
     """
     Get us off and running!
     """
-    mesosite = iemdb.connect('mesosite', bypass=True)
-    mcursor = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    mcursor.execute("""SELECT * from webcams where id = '%s'""" % (job.site,))
-    row = mcursor.fetchone()
+    cursor.execute("""SELECT * from webcams where id = %s""", (job.site,) )
+    row = cursor.fetchone()
+    if row['scrape_url'] is None:
+        network = row['network']
+        password = config.get(network, 'password')
+        user = config.get(network, 'user')
+        if config.has_section(job.site):
+            password = config.get(job.site, 'password')
+            user = config.get(job.site, 'user')
+        
+        job.camera = vbcam.vbcam(job.site, row, user, password)
+        cursor.close()
+        dbconn.close()
     
-    password = secret.vbcam_pass.get(job.site, 
-                                     secret.vbcam_pass.get(job.network))
-    user = secret.vbcam_user.get(job.site, 
-                                 secret.vbcam_user.get(job.network))
-    job.camera = vbcam.vbcam(job.site, row, user, password)
-    mesosite.close()
-
-    if job.camera.settings == {}:
-        logging.info("Failed to reach camera, aborting...")
-        sys.exit(0)
+        if job.camera.settings == {}:
+            logging.info("Failed to reach camera, aborting...")
+            sys.exit(0)
+    else:
+        job.camera = scrape(job.site, row)
 
     # Initially sleep until it is go time!
     logging.debug("Initial sleep of: %s", job.init_delay)
     time.sleep(job.init_delay + random.random() )
 
     # compute
-    sts = mx.DateTime.now()
-    job.ets = sts + mx.DateTime.RelativeDateTime(seconds = job.secs)
+    sts = datetime.datetime.now()
+    job.ets = sts + datetime.timedelta(seconds = job.secs)
 
 if __name__ == '__main__':
     JOB = Lapse()

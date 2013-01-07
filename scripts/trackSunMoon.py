@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw, ImageFont
 import StringIO
 import logging
 import pg
-mesosite = pg.connect('mesosite', host=secret.DBHOST)
+mesosite = pg.connect('mesosite', host=secret.DBHOST, user='nobody')
 
 os.chdir(secret.BASE)
 sys.path = [secret.BASE+"/vbcam"] + sys.path
@@ -37,9 +37,8 @@ else:
     body = ephem.Moon()
     logging.debug("Tracking the moon!")
 
-rs = db.query("""SELECT *, x(geom) as lon, y(geom) as lat from webcams where id = '%s'""" % (cid,)).dictresult()
+rs = mesosite.query("""SELECT *, x(geom) as lon, y(geom) as lat from webcams where id = '%s'""" % (cid,)).dictresult()
 row = rs[0]
-db.close()
 
 cam = vbcam.vbcam(cid, row, secret.vbcam_user[network], secret.vbcam_pass[network] )
 

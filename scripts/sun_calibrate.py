@@ -2,7 +2,7 @@
  Something to calibrate the location of the webcam and direction!
 """
 import secret
-
+import time
 import sys
 import math
 import StringIO
@@ -50,10 +50,11 @@ azimuth = float(sun.az) * 360.0/(2*math.pi)
 camera.zoom(40)
 camera.tilt(0)
 camera.panDrct(azimuth)
+time.sleep(5)
 
 # Get still image
 buf = StringIO.StringIO()
-buf.write( camera.getStillImage() )
+buf.write( camera.getOneShot() )
 buf.seek(0)
 i0 = Image.open( buf )
 
