@@ -57,7 +57,7 @@ def camRunner( cid ):
             now = gmt + datetime.timedelta(seconds=now.utcoffset().seconds)
             # Round up to nearest 5 minute bin
             roundup = 5 - now.minute % 5
-            now += datetime.timedelta(minutes=roundup)
+            gmt += datetime.timedelta(minutes=roundup)
         buf = StringIO.StringIO( req2.read() )
         buf.seek(0)
     if buf.len == 0:
