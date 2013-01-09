@@ -21,9 +21,7 @@ import os
 sys.path.insert(0, '../vbcam/')
 import vbcam
 
-import time
 import StringIO
-import datetime
 from PIL import Image, ImageDraw, ImageFont
 import shutil, random
 import logging
@@ -85,7 +83,8 @@ class Lapse(object):
         
         while i < self.frames :
             logging.info("i = %s", (i,) )
-            if fails > 10:
+            if fails > 50:
+                logging.info("failed too many times")
                 sys.exit(0)
         
             # Set up buffer for image to go to
