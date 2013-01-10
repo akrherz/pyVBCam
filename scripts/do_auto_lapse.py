@@ -27,7 +27,7 @@ import shutil, random
 import logging
 import urllib2
 
-from pyiem import iemtz
+import pytz
 
 class scrape(object):
     
@@ -40,7 +40,7 @@ class scrape(object):
     
     def getOneShot(self):
         now = datetime.datetime.now()
-        now = now.replace(tzinfo=iemtz.Central)
+        now = now.replace(tzinfo=pytz.timezone("America/Chicago"))
 
         url = self.row['scrape_url']
         req = urllib2.Request(url)
@@ -89,10 +89,11 @@ class Lapse(object):
         
             # Set up buffer for image to go to
             buf = StringIO.StringIO()
-            drct = self.camera.getDirection()
-            buf.write( self.camera.getOneShot() )
-            buf.seek(0)
+
             try:
+                drct = self.camera.getDirection()
+                buf.write( self.camera.getOneShot() )
+                buf.seek(0)
                 imgdata = Image.open( buf )
                 draw = ImageDraw.Draw(imgdata)
             except IOError, exp:
