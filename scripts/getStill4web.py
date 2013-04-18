@@ -117,9 +117,13 @@ def camRunner( cid ):
 
     # Put into LDM
     cmd = "/home/ldm/bin/pqinsert -p 'webcam c %s camera/stills/%s.jpg camera/%s/%s_%s.jpg jpg' ../tmp/%s-320x240.jpg" % (gmt.strftime("%Y%m%d%H%M"), cid, cid, cid, gmt.strftime("%Y%m%d%H%M"), cid)
-    subprocess.call(cmd, shell=True)
+    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE)
+    proc.stderr.read()
     cmd = "/home/ldm/bin/pqinsert -p 'webcam ac %s camera/640x480/%s.jpg camera/%s/%s_%s.jpg jpg' ../tmp/%s-640x480.jpg" % (gmt.strftime("%Y%m%d%H%M"), cid, cid, cid, gmt.strftime("%Y%m%d%H%M"), cid )
-    subprocess.call(cmd, shell=True)
+    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE)
+    proc.stderr.read()
 
     slaughter()
 
