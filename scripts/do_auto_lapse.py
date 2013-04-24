@@ -138,7 +138,11 @@ class Lapse(object):
         """
         Sleep logic between frames
         """
-        secs_left = (self.ets - datetime.datetime.now()).seconds
+        delta = self.ets - datetime.datetime.now()
+        if delta.days < 0:
+            secs_left = 0
+        else:
+            secs_left = delta.seconds
         delay = (secs_left -((self.frames - i) * 2)) / (self.frames - i) 
         logging.info("secs_left = %.2f, frames_left = %d, delay = %.2f", 
                      secs_left,  self.frames - i, delay)
