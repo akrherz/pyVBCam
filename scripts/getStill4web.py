@@ -14,7 +14,7 @@ import datetime
 import urllib2
 import logging
 from PIL import Image, ImageDraw, ImageFont
-from pyiem import iemtz
+import pytz
 import psycopg2
 import psycopg2.extras
 dbconn = psycopg2.connect("host=%s user=%s dbname=%s" % (config.get('database', 'host'),
@@ -30,7 +30,7 @@ def camRunner( cid ):
     cursor.execute("""SELECT * from webcams where id = %s """, (cid,))
     row = cursor.fetchone()
     now = datetime.datetime.now()
-    now = now.replace(tzinfo=iemtz.Central)
+    now = now.replace(tzinfo=pytz.timezone("America/Chicago"))
     gmt = datetime.datetime.utcnow()
     network = row['network']
     if row['scrape_url'] is None:
@@ -50,7 +50,12 @@ def camRunner( cid ):
     else:
         url = row['scrape_url']
         req = urllib2.Request(url)
-        req2 = urllib2.urlopen(req)
+        try:
+            req2 = urllib2.urlopen(req)
+        except Exception, exp:
+            if now.minute == 0:
+                print 'Exception for %s: %s' % (cid, exp)
+            return
         modified = req2.info().getheader('Last-Modified')
         if modified:
             gmt = datetime.datetime.strptime(modified, "%a, %d %b %Y %H:%M:%S %Z")
@@ -136,9 +141,11 @@ def slaughter():
 def killer():
     os.kill(os.getpid(), 9)
 
+def eb():
+    pass
+
 cid = sys.argv[1]
 reactor.callInThread( camRunner, cid )
-
 
 # You have 1 minute to finish :)
 reactor.callLater(57, slaughter)
