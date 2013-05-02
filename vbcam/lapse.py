@@ -2,150 +2,182 @@
 import os
 import time
 import StringIO
+import datetime
+import urllib2
+import logging
+import sys
+import shutil
+import random
+
 from PIL import Image, ImageDraw, ImageFont
-import mx.DateTime
+import pytz
 
-class lapse:
+import vbcam
 
-    def __init__(self, camera, delay=10, basedirectory="./", 
-      fontfile='LTe50874.ttf'):
-        self.ok = 1
-        self.camera = camera
-        self.delay = delay
-        if (basedirectory != None):
-            self.directory = "%s/frames.%s.%s"%(basedirectory, self.camera.id,\
-             mx.DateTime.now().strftime("%Y%m%d%H%M") )
-            self.setup()
-        self.cnt = 0
-        # Controlbacks
-        self.cbControls = []
-        # Drawbacks
-        self.cbDraws = []
-        self.font = ImageFont.truetype(fontfile, 22)
-        self.font12 = ImageFont.truetype(fontfile, 12)
-        self.font14 = ImageFont.truetype(fontfile, 14)
-        self.targetDrct = None
-        self.targetTime = None
-
-    def setTarget(self, drct, ts=None):
-        """ Set a point and direction in time that we need to get to by... """
-        now = mx.DateTime.now()
-        if (ts == None):  # Go immediately!
-            self.camera.panDrct( drct )
-            return
-        self.targetTime = ts
-        self.targetDrct = drct
-
-    def trackTarget(self):
-        print "self.targetTime: %s self.targetDrct %s" % (self.targetTime, self.targetDrct)
-        now = mx.DateTime.now()
-        if (self.targetTime < now):
-            return
-        steps = float(self.targetTime - now) / (float(self.delay) +3.0)
-        if (steps == 0):
-            return
-        cdir = self.camera.getDirection()
-        offset = (self.targetDrct - cdir) / steps
-        print "steps: %s offset: %s" % (steps, offset)
-        self.camera.panDrct( cdir + offset )
-
-    def addControl(self, f):
-        """ Add a control callback """
-        self.cbControls.append( f )
-
-    def addDraw(self, f):
-        """ Add a drawing callback """
-        self.cbDraws.append( f )
-
-    def setup(self):
-        """  Setup the directory for output images to be placed..."""
-        if (not os.path.isdir(self.directory)):
-            os.makedirs(self.directory)
-
-    def run(self):
-        while (self.ok):
-            self.step()
-            time.sleep(self.delay)
-
-    def loadStillImage(self):
-        """ Get latest still image from the camera """ 
-        buf = StringIO.StringIO()
-        buf.write( self.camera.getStillImage() )
-        buf.seek(0)
-        self.frame = Image.open( buf )
-        buf.seek(0)
-        self.orig = Image.open( buf )
-        del buf
-
-    def step(self):
-        """ Move on in time, grab the image, draw stuff on it """
-        # Call Controls
-        for c in self.cbControls:
-            apply( c )
-        self.loadStillImage()
-        # Call Draws
-        for c in self.cbDraws:
-            apply( c )
-        self.frame.save('%s/%05i.jpg' % (self.directory, self.cnt) )
-        del self.frame
-        self.cnt += 1
-
-    def drawStamp(self):
-        now = mx.DateTime.now()
-        str = "%s   %s" % (self.camera.getDirectionText(), now.strftime("%-I:%M %p") )
-        (w, h) = self.font.getsize(str)
-
-        draw = ImageDraw.Draw(self.frame)
-        draw.rectangle( [205-w-20,370,205,370+h], fill="#000000" )
-        draw.text((200-w,370), str, font=self.font)
-        del draw
-
-    def drawCaption(self):
-        now = mx.DateTime.now()
-        str = "%s [%s] %s" % (self.camera.d['name'], self.camera.getDirectionText(), now.strftime("%d %b %Y %-I:%M %p") )
-        (w, h) = self.font12.getsize(str)
-
-        draw = ImageDraw.Draw(self.frame)
-        draw.rectangle( [0,480-h,0+w,480], fill="#000000" )
-        draw.text((1,480-h), str, font=self.font12)
-        del draw
-
-    def stdwxh(self, width=320, height=240, fn=None):
-        if (fn == None): fn = "%s.jpg" % (self.camera.id, )
-        c = self.orig.resize((width,height))
-        # Draw Caption
-        now = mx.DateTime.now()
-        str = "%s [%s] %s" % (self.camera.d['name'], self.camera.getDirectionText(), now.strftime("%d %b %Y %-I:%M %p") )
-        (w, h) = self.font14.getsize(str)
-
-        draw = ImageDraw.Draw(c)
-        draw.rectangle( [0,height-h,0+w,height], fill="#000000" )
-        draw.text((1,height-h), str, font=self.font14)
-        del draw
-
-
-        c.save(fn)
-        del c
-
-
-    def drawTarget(self):
-        """ I will draw an '+' on the screen where I am targetting"""
-        drct = float(self.camera.getDirection())
-        zoom = self.camera.getZoom()
-        tilt = self.camera.getTilt()
-
-        leftedge_pan = drct - (zoom/2.0)
-        rightedge_pan = drct + (zoom/2.0)
-        dx = ((rightedge_pan - leftedge_pan) / 640.0) 
-        if (self.targetDrct < leftedge_pan):
-            drawx=2
-        elif (self.targetDrct > rightedge_pan):
-            drawx=638
-        else:
-            drawx = (self.targetDrct - leftedge_pan) / dx
-
-        print "lp: %s rp: %s drawx: %s target: %s" % (leftedge_pan, rightedge_pan,drawx, self.targetDrct)
-        draw = ImageDraw.Draw(self.frame)
-        draw.rectangle( [drawx-2,238,drawx+2,242], fill="#ffffff" )
-        del draw
+class scrape(object):
+    
+    def __init__(self, cid, row):
+        self.cid = cid
+        self.row = row
         
+    def getDirection(self):
+        return self.row['pan0']
+    
+    def getOneShot(self):
+        now = datetime.datetime.now()
+        now = now.replace(tzinfo=pytz.timezone("America/Chicago"))
+
+        url = self.row['scrape_url']
+        req = urllib2.Request(url)
+        req2 = urllib2.urlopen(req)
+        modified = req2.info().getheader('Last-Modified')
+        if modified:
+            gmt = datetime.datetime.strptime(modified, "%a, %d %b %Y %H:%M:%S %Z")
+            now = gmt + datetime.timedelta(seconds=now.utcoffset().seconds)
+        return req2.read() 
+
+class Lapse(object):
+    """
+    Represents a timelapse!
+    """
+    font = ImageFont.truetype('../lib/veramono.ttf', 22)
+    sfont = ImageFont.truetype('../lib/veramono.ttf', 14)
+    date_height = 370
+    
+    def __init__(self):
+        """
+        Constructor
+        """
+        self.camera = None
+        self.ets = None
+        self.frames = None
+        self.init_delay = None
+        self.movie_duration = None
+        self.filename = None
+        self.network = None
+        self.site = None
+        
+    
+    def create_lapse(self):
+        """
+        Create the timelapse frames, please
+        """
+        i = 0
+        fails = 0
+        # Assume 30fps
+        
+        while i < self.frames :
+            logging.info("i = %s, fails = %s" % (i, fails) )
+            if fails > 5:
+                logging.info("failed too many times")
+                sys.exit(0)
+        
+            # Set up buffer for image to go to
+            buf = StringIO.StringIO()
+
+            try:
+                drct = self.camera.getDirection()
+                buf.write( self.camera.getOneShot() )
+                buf.seek(0)
+                imgdata = Image.open( buf )
+                draw = ImageDraw.Draw(imgdata)
+                fails = 0
+            except IOError, exp:
+                logging.exception( exp )
+                time.sleep(10)
+                fails += 1
+                continue
+        
+            now = datetime.datetime.now()
+            
+            if self.network != 'KELO':
+                stamp = "%s   %s" % (vbcam.drct2dirTxt(drct), 
+                                   now.strftime("%-I:%M %p") )
+                (width, height) = self.font.getsize(stamp)
+                if self.network == 'KCRG2':
+                    draw.rectangle( [545-width-10, self.date_height, 545, 
+                                     self.date_height+height], fill="#000000" )
+                    draw.text((540-width, self.date_height), stamp, 
+                              font=self.font)
+                else:
+                    draw.rectangle( [205-width-10, self.date_height, 205, 
+                                     self.date_height+height], fill="#000000" )
+                    draw.text((200-width, self.date_height), stamp, 
+                              font=self.font)
+        
+                stamp = "%s" % (now.strftime("%d %b %Y"), )
+            else:
+                stamp = "%s  %s" % (now.strftime("%d %b %Y %-I:%M %p"), 
+                                  vbcam.drct2dirTxt(drct))
+            (width, height) = self.sfont.getsize(stamp)
+            draw.rectangle( [0, 480-height, 0+width, 480], fill="#000000" )
+            draw.text((0, 480-height), stamp, font=self.sfont)
+            del draw
+        
+            imgdata.save('%05i.jpg' % ( i,))
+            self.wait_for_next_frame(i)
+            del imgdata
+            del buf
+            i += 1
+
+    def wait_for_next_frame(self, i):
+        """
+        Sleep logic between frames
+        """
+        delta = self.ets - datetime.datetime.now()
+        if delta.days < 0:
+            secs_left = 0
+        else:
+            secs_left = delta.seconds
+        delay = (secs_left -((self.frames - i) * 2)) / (self.frames - i) 
+        logging.info("secs_left = %.2f, frames_left = %d, delay = %.2f", 
+                     secs_left,  self.frames - i, delay)
+        if delay > 0: 
+            time.sleep(delay)
+
+
+    def postprocess(self):
+        """
+        Postprocess our frames!
+        """
+        ffmpeg = 'ffmpeg -i %05d.jpg'
+        devnull = '< /dev/null >& /dev/null'
+        # Lets sleep for around 6 minutes, 
+        # so that we don't have 27 ffmpegs going 
+        randsleep = 360. * random.random()
+        logging.info("Sleeping %.2f seconds before launching ffmpeg", 
+                     randsleep)
+        time.sleep( randsleep )
+        
+        # Create something for website
+        os.system("%s -s 320x240 -vcodec wmv1 out.wmv %s" % (ffmpeg, devnull))
+        shutil.copyfile("out.wmv", "/mesonet/share/lapses/auto/%s.wmv" % (
+                                                            self.filename,) )
+        
+        # Create Flash Video in full res!
+        os.system("%s -b 1000k out.flv %s" % (ffmpeg, devnull))
+        shutil.copyfile("out.flv", "/mesonet/share/lapses/auto/%s.flv" % (
+                                                            self.filename,) )
+        
+        # Create tar file of images
+        os.system("tar -cf %s_frames.tar *.jpg" % (self.filename,) )
+        shutil.copyfile("%s_frames.tar" % (self.filename,), 
+                        "/mesonet/share/lapses/auto/%s_frames.tar" % (
+                                                            self.filename,))
+        
+        # KCCI wanted no lapses between 5 and 6:30, OK....
+        if self.network == 'KCCI':
+            now = datetime.datetime.now()
+            if now.hour == 17 or (now.hour == 18 and now.minute < 30):
+                endts = now.replace(hour=18, minute=30)
+                time.sleep( (endts - now).seconds )
+            
+                # Lets sleep for around 6 minutes, 
+                # so that we don't have 27 ffmpegs going 
+                time.sleep( 360. * random.random() )
+                
+        # Create something for KCCI
+        os.system("%s -b 2000k out.mov %s" % (ffmpeg, devnull))
+        pqinsert = '/home/ldm/bin/pqinsert'
+        os.system("%s -p 'lapse c 000000000000 %s/%s.qt BOGUS qt' out.mov" % (
+                            pqinsert, self.network, self.filename) )
