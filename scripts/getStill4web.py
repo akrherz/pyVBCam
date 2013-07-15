@@ -39,7 +39,10 @@ def camRunner( cid ):
         if config.has_section(cid):
             password = config.get(cid, 'password')
             user = config.get(cid, 'user')
-        cam = vbcam.vbcam(cid, row, user, password, logLevel=logging.INFO)
+        if row["is_vapix"]:
+            cam = vbcam.VAPIX(cid, row, user, password)
+        else:
+            cam = vbcam.vbcam(cid, row, user, password, logLevel=logging.INFO)
         cam.retries = 2
 
         # Get Still

@@ -50,6 +50,84 @@ def drct2dirTxt(dir):
     return "NNW"
 
 
+class VAPIX:
+    """ Class representing access to a VAPIX webcam """
+    
+    def __init__(self, cid, row, user, password):
+        self.cid = cid
+        self.pan0 = row["pan0"]
+        self.ip = row["ip"]
+        self.settings = {}
+        
+        pm = urllib2.HTTPPasswordMgrWithDefaultRealm()
+        pm.add_password(None, "%s:%s" % (row['ip'], row['port']) ,user, password)
+        self.ah = urllib2.HTTPBasicAuthHandler(pm)
+        opener = urllib2.build_opener(self.ah)
+        urllib2.install_opener(opener)
+
+        self.getSettings()
+        
+    def getSettings(self):
+        """ Get the current PTZ """
+        uri = 'http://%s:80/axis-cgi/com/ptz.cgi?query=position' % (
+                            self.ip,)
+        r = urllib2.urlopen(uri, timeout=30 )
+        data = r.read()
+        for line in data.split("\n"):
+            tokens = line.split("=")
+            if len(tokens) == 2:
+                self.settings[ tokens[0] ] = tokens[1].strip()
+
+    def getOneShot(self):
+        """ Get a still image """
+        r = urllib2.urlopen('http://%s:80/axis-cgi/jpg/image.cgi?resolution=640x480' % (
+                            self.ip,), timeout=30 )
+        return r.read()
+
+    def getDirection(self):
+        """ Get the direction of the current pan """
+        deg_pan = float(self.settings['pan']) # in deg
+        off = self.pan0 + deg_pan
+        if (off < 0):
+            off = 360 + off
+        if (off >= 360):
+            off = off - 360
+        return off
+
+    def drct2txt(self, dir):
+        dir = int(dir)
+        if (dir >= 350 or dir < 13):
+            return "N"
+        elif (dir >= 13 and dir < 35):
+            return "NNE"
+        elif (dir >= 35 and dir < 57):
+            return "NE"
+        elif (dir >= 57 and dir < 80):
+            return "ENE"
+        elif (dir >= 80 and dir < 102):
+            return "E"
+        elif (dir >= 102 and dir < 127):
+            return "ESE"
+        elif (dir >= 127 and dir < 143):
+            return "SE"
+        elif (dir >= 143 and dir < 166):
+            return "SSE"
+        elif (dir >= 166 and dir < 190):
+            return "S"
+        elif (dir >= 190 and dir < 215):
+            return "SSW"
+        elif (dir >= 215 and dir < 237):
+            return "SW"
+        elif (dir >= 237 and dir < 260):
+            return "WSW"
+        elif (dir >= 260 and dir < 281):
+            return "W"
+        elif (dir >= 281 and dir < 304):
+            return "WNW"
+        elif (dir >= 304 and dir < 324):
+            return "NW"
+        elif (dir >= 324 and dir < 350):
+            return "NNW"
 
 class vbcam:
 
