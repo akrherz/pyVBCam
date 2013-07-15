@@ -57,8 +57,10 @@ def bootstrap(job):
         if config.has_section(job.site):
             password = config.get(job.site, 'password')
             user = config.get(job.site, 'user')
-        
-        job.camera = vbcam.vbcam(job.site, row, user, password)
+        if row['is_vapix']:
+            job.camera = vbcam.VAPIX(job.site, row, user, password)
+        else:
+            job.camera = vbcam.vbcam(job.site, row, user, password)
 
     
         if job.camera.settings == {}:
