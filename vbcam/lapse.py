@@ -151,19 +151,28 @@ class Lapse(object):
         
         # Create something for website
         os.system("%s -s 320x240 -vcodec wmv1 out.wmv %s" % (ffmpeg, devnull))
-        shutil.copyfile("out.wmv", "/mesonet/share/lapses/auto/%s.wmv" % (
+        try:
+            shutil.copyfile("out.wmv", "/mesonet/share/lapses/auto/%s.wmv" % (
                                                             self.filename,) )
-        
+        except Exception, exp:
+            print exp
+
         # Create Flash Video in full res!
         os.system("%s -b 1000k out.flv %s" % (ffmpeg, devnull))
-        shutil.copyfile("out.flv", "/mesonet/share/lapses/auto/%s.flv" % (
+        try:
+            shutil.copyfile("out.flv", "/mesonet/share/lapses/auto/%s.flv" % (
                                                             self.filename,) )
+        except Exception, exp:
+            print exp
         
         # Create tar file of images
         os.system("tar -cf %s_frames.tar *.jpg" % (self.filename,) )
-        shutil.copyfile("%s_frames.tar" % (self.filename,), 
+        try:
+            shutil.copyfile("%s_frames.tar" % (self.filename,), 
                         "/mesonet/share/lapses/auto/%s_frames.tar" % (
                                                             self.filename,))
+        except Exception, exp:
+            print exp
         
         # KCCI wanted no lapses between 5 and 6:30, OK....
         if self.network == 'KCCI':
