@@ -1,7 +1,11 @@
-#!/usr/bin/env python
+'''
+Simple utility to print out the camera settings 
+'''
 
 import secret
-import sys, logging, os
+import sys
+import logging
+import os
 import pg
 logging.basicConfig(level=logging.DEBUG)
 
@@ -19,7 +23,10 @@ user = secret.vbcam_user[network]
 if secret.vbcam_user.has_key(cid):
     password = secret.vbcam_pass[cid]
     user = secret.vbcam_user[cid]
-cam = vbcam.vbcam(cid, row, user, password, logLevel=logging.INFO)
+if row['is_vapix']:
+    cam = vbcam.VAPIX(cid, row, user, password)
+else:
+    cam = vbcam.vbcam(cid, row, user, password, logLevel=logging.INFO)
 
 keys = cam.settings.keys()
 keys.sort()

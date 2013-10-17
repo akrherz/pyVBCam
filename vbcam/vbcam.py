@@ -57,6 +57,7 @@ class VAPIX:
         self.cid = cid
         self.pan0 = row["pan0"]
         self.ip = row["ip"]
+        self.port = row['port']
         self.settings = {}
         
         pm = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -64,15 +65,13 @@ class VAPIX:
         self.ah = urllib2.HTTPBasicAuthHandler(pm)
         opener = urllib2.build_opener(self.ah)
         urllib2.install_opener(opener)
-
+        self.retries = 6
         self.getSettings()
+        self.retries = 60
         
     def getSettings(self):
         """ Get the current PTZ """
-        uri = 'http://%s:80/axis-cgi/com/ptz.cgi?query=position' % (
-                            self.ip,)
-        r = urllib2.urlopen(uri, timeout=30 )
-        data = r.read()
+        data = self.http('com/ptz.cgi?query=position')
         for line in data.split("\n"):
             tokens = line.split("=")
             if len(tokens) == 2:
@@ -80,9 +79,7 @@ class VAPIX:
 
     def getOneShot(self):
         """ Get a still image """
-        r = urllib2.urlopen('http://%s:80/axis-cgi/jpg/image.cgi?resolution=640x480' % (
-                            self.ip,), timeout=30 )
-        return r.read()
+        return self.http('jpg/image.cgi?resolution=640x480')
 
     def getDirection(self):
         """ Get the direction of the current pan """
@@ -128,6 +125,43 @@ class VAPIX:
             return "NW"
         elif (dir >= 324 and dir < 350):
             return "NNW"
+
+    def realhttp(self, s):
+        r = urllib2.urlopen('http://%s:%s/axis-cgi/%s' % (self.ip, self.port, s), 
+                            timeout=30 )
+        logging.debug("HTTP request => %s, status = %s" % (s, r.code))
+        if (r.headers.status != ""):
+            logging.debug("HTTP Request Failed: reason %s" % ( r.info() ) )
+            data = None
+        else:
+            data = r.read()
+        r.close()
+        del r
+        return data
+
+    def http(self, s):
+        ''' http helper '''
+        c = 0
+        data = None
+        while c < self.retries:
+            try:
+                data = self.realhttp(s)
+                if data is not None:
+                    break
+            except socket.timeout:
+                logging.debug('urllib2 timout!')
+            except urllib2.URLError, e:
+                logging.debug('urllib2 cmd: %s error: %r retries: %s' % ( s, e, 
+                                                    self.retries - c) )
+            except httplib.BadStatusLine:
+                logging.info('httplib.BadStatusLine from IP: %s (%s)' % (self.ip, 
+                                                                    self.name))
+            except KeyboardInterrupt:
+                sys.exit(0)
+            except:
+                traceback.print_exc(logging)
+            c += 1
+        return data
 
 class vbcam:
 
