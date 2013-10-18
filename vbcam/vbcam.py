@@ -72,6 +72,9 @@ class VAPIX:
     def getSettings(self):
         """ Get the current PTZ """
         data = self.http('com/ptz.cgi?query=position')
+        if data is None:
+            logging.debug("Failed to get settings for ip: %s" % (self.ip,))
+            return
         for line in data.split("\n"):
             tokens = line.split("=")
             if len(tokens) == 2:
