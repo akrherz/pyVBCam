@@ -30,7 +30,7 @@ def mydate(d):
 
 sun = ephem.Sun()
 
-cursor.execute("""SELECT id, x(geom) as lon, y(geom) as lat from webcams WHERE 
+cursor.execute("""SELECT id, ST_x(geom) as lon, ST_y(geom) as lat from webcams WHERE 
     online = 't' and network in ('KELO','KCCI','KCRG','KCWI') """)
 
 for row in cursor:
