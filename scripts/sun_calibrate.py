@@ -40,7 +40,11 @@ newpan0 = row['pan0'] + int(sys.argv[2])
 print 'Webcam %s initial pan0: %s attempting: %s' % (cid, row['pan0'], newpan0 )
 print "UPDATE webcams SET pan0 = %s WHERE id = '%s';" % (newpan0, cid)
 row['pan0'] = newpan0
-camera = vbcam.vbcam(cid, row, secret.vbcam_user[network], 
+if row["is_vapix"]:
+    camera = vbcam.VAPIX(cid, row, secret.vbcam_user[network], 
+                     secret.vbcam_pass[network])
+else:
+    camera = vbcam.vbcam(cid, row, secret.vbcam_user[network], 
                      secret.vbcam_pass[network])
 
 # Figure out solar location
@@ -55,7 +59,7 @@ azimuth = float(sun.az) * 360.0/(2*math.pi)
 # Point at the sun!
 camera.zoom(40)
 camera.tilt(0)
-camera.panDrct(azimuth)
+print camera.panDrct(azimuth)
 time.sleep(5)
 
 # Get still image
@@ -66,6 +70,9 @@ i0 = Image.open( buf )
 
 # Draw crosshairs and other info
 draw = ImageDraw.Draw(i0)
+# x y
+draw.rectangle( [316,218,324,262], fill="#FFFFFF" )
+draw.rectangle( [298,244,342,236], fill="#FFFFFF" )
 draw.rectangle( [318,220,322,260], fill="#000000" )
 draw.rectangle( [300,242,340,238], fill="#000000" )
 

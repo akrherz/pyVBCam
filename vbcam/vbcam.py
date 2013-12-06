@@ -80,6 +80,38 @@ class VAPIX:
             if len(tokens) == 2:
                 self.settings[ tokens[0] ] = tokens[1].strip()
 
+    def dir2pan(self, drct):
+        """  Compute a pan based on a given direction, yikes? """
+        offset = drct - self.pan0
+        if (offset < -180): # We need to go the other way
+            offset = (360 + drct) - self.pan0
+        elif (offset > 180): # We need to go the other way
+            offset = (drct - 360) - self.pan0
+
+        if offset < -179.9:
+            offset = -179.9
+        if offset > 179.9:
+            offset = 179.9
+        #print "pan0: %s drct: %s offset: %s" % (self.pan0, drct, offset)
+        return offset
+
+    def panDrct(self, drct):
+        ''' Turn the webcam to the provided North relative direction '''
+        return self.pan( self.dir2pan(drct) )
+
+    def pan(self, deg):
+        ''' Pan to the relative to webcam direction '''
+        print 'Panning to camera relative: %s deg' % (deg,)
+        return self.http('com/ptz.cgi?pan=%.2f' % (deg,))
+
+    def zoom(self, val):
+        ''' Zoom to the given zoom '''
+        return self.http('com/ptz.cgi?zoom=%s' % (val,))
+
+    def tilt(self, val):
+        ''' Tilt '''
+        return self.http('com/ptz.cgi?tilt=%s' % (val,))
+
     def getOneShot(self):
         """ Get a still image """
         return self.http('jpg/image.cgi?resolution=640x480')
@@ -165,6 +197,10 @@ class VAPIX:
                 traceback.print_exc(logging)
             c += 1
         return data
+
+    def closeConnection(self):
+        #noop
+        pass
 
 class vbcam:
 
