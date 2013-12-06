@@ -11,9 +11,11 @@ import ephem
 import mx.DateTime
 import Image
 import ImageDraw
-import pg
-mesosite = pg.connect('mesosite', host=secret.DBHOST, user='nobody')
+import psycopg2
+import psycopg2.extras
 
+mesosite = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
+cursor = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 os.chdir(secret.BASE)
 sys.path = [secret.BASE+"/vbcam"] + sys.path
@@ -26,15 +28,19 @@ cid = sys.argv[1]
 network = cid[:4]
 
 # Get db info
-rs = mesosite.query(""" SELECT x(geom) as lon, y(geom) as lat, *
- from webcams where id = '%s'
-""" % (cid,)).dictresult()
+cursor.execute("""
+ SELECT ST_x(geom) as lon, ST_y(geom) as lat, * from webcams where id = %s
+""", (cid,))
 
-
-clat = rs[0]['lat']
-clon = rs[0]['lon']
-rs[0]['pan0'] = int(rs[0]['pan0']) + int(sys.argv[2])
-camera = vbcam.vbcam(cid, rs[0], secret.vbcam_user[network], 
+row = cursor.fetchone()
+row = dict(row)
+clat = row['lat']
+clon = row['lon']
+newpan0 = row['pan0'] + int(sys.argv[2])
+print 'Webcam %s initial pan0: %s attempting: %s' % (cid, row['pan0'], newpan0 )
+print "UPDATE webcams SET pan0 = %s WHERE id = '%s';" % (newpan0, cid)
+row['pan0'] = newpan0
+camera = vbcam.vbcam(cid, row, secret.vbcam_user[network], 
                      secret.vbcam_pass[network])
 
 # Figure out solar location
