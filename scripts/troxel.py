@@ -1,6 +1,6 @@
-'''
+"""
 Create frames for our big troxel webcam lapse
-'''
+"""
 import urllib2
 import datetime
 

@@ -1,26 +1,21 @@
 """
   Drives the production of auto timed webcam lapses
 """
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read('settings.ini')
+import common
 
 import datetime
 import time
-import psycopg2
+import psycopg2.extras
 import random
 import logging
-from psycopg2.extras import DictCursor
-dbconn = psycopg2.connect("host=%s user=%s dbname=%s" % (config.get('database', 'host'),
-                                              config.get('database', 'user'),
-                                              config.get('database', 'name')))
-cursor = dbconn.cursor(cursor_factory=DictCursor)
+dbconn = common.get_dbconn()
+cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 import sys
 import os
 
 sys.path.insert(0, '../vbcam/')
-import vbcam, lapse
+import lapse
 
 def setup_job(job):
     """
@@ -51,17 +46,7 @@ def bootstrap(job):
     cursor.execute("""SELECT * from webcams where id = %s""", (job.site,) )
     row = cursor.fetchone()
     if row['scrape_url'] is None:
-        network = row['network']
-        password = config.get(network, 'password')
-        user = config.get(network, 'user')
-        if config.has_section(job.site):
-            password = config.get(job.site, 'password')
-            user = config.get(job.site, 'user')
-        if row['is_vapix']:
-            job.camera = vbcam.VAPIX(job.site, row, user, password)
-        else:
-            job.camera = vbcam.vbcam(job.site, row, user, password)
-
+        job.camera = common.get_vbcam( row["id"] )
     
         if job.camera.settings == {}:
             logging.info("Failed to reach camera, aborting...")

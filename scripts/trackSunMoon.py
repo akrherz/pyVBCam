@@ -1,5 +1,6 @@
+""" Track either the sun or the moon with a webcam """
 
-import secret
+import common
 
 import sys, os
 import ephem
@@ -9,25 +10,20 @@ import mx.DateTime
 from PIL import Image, ImageDraw, ImageFont
 import StringIO
 import logging
-import pg
-mesosite = pg.connect('mesosite', host=secret.DBHOST, user='nobody')
-
-os.chdir(secret.BASE)
-sys.path = [secret.BASE+"/vbcam"] + sys.path
-import vbcam
-os.chdir("tmp/")
 
 mydirs = [0,23,45,67,90,112,135,157,180,202,225,247,270,292,315,337]
 
-font = ImageFont.truetype(secret.BASE+'lib/LTe50874.ttf', 22)
+fontsize = 22
+font = ImageFont.truetype('../lib/LTe50874.ttf', fontsize)
+
 cid = sys.argv[1]
-network = cid[:4]
 body = sys.argv[2]
 delay = float(sys.argv[3])
 
-dir = "tracker.%s.%s" % (cid, mx.DateTime.now().strftime("%Y%m%d%H%M%S"))
-os.makedirs(dir)
-os.chdir(dir)
+os.chdir("../tmp")
+mydir = "tracker.%s.%s" % (cid, mx.DateTime.now().strftime("%Y%m%d%H%M%S"))
+os.makedirs(mydir)
+os.chdir(mydir)
 logging.basicConfig(filename="%s.log"%(cid,),filemode='w', level=logging.DEBUG)
 
 if (body.lower() == "sun"):
@@ -37,13 +33,10 @@ else:
     body = ephem.Moon()
     logging.debug("Tracking the moon!")
 
-rs = mesosite.query("""SELECT *, x(geom) as lon, y(geom) as lat from webcams where id = '%s'""" % (cid,)).dictresult()
-row = rs[0]
-
-cam = vbcam.vbcam(cid, row, secret.vbcam_user[network], secret.vbcam_pass[network] )
+cam = common.get_vbcam(cid)
 
 here = ephem.Observer()
-here.long, here.lat = str(row['lon']), str(row['lat'])
+here.long, here.lat = str(cam.d['lon']), str(cam.d['lat'])
 
 cam.zoom(30.0)
 cam.getSettings()
@@ -80,10 +73,10 @@ while (1):
 
     # Drct and Time 
     now = mx.DateTime.now()
-    str = "%s   %s" % (cam.drct2txt(drct), now.strftime("%-I:%M %p") )
-    (w, h) = font.getsize(str)
-    draw.rectangle( [75,370,205,370+h], fill="#000000" )
-    draw.text((200-w,370), str, font=font)
+    s = "%s   %s" % (cam.drct2txt(drct), now.strftime("%-I:%M %p") )
+    (w, h) = font.getsize(s)
+    draw.rectangle( [75,370,205,370+fontsize], fill="#000000" )
+    draw.text((200-w,370), s, font=font)
 
     # Center Dot
     draw.rectangle( [318,238,322,242], fill="#000000" )
@@ -100,19 +93,19 @@ while (1):
     rightside = drct + (zoom/2.0)
     dx = zoom / 640.0
     for d in mydirs:
-      if (leftside > d or d > rightside):
-        continue
+        if (leftside > d or d > rightside):
+            continue
 
-      x = ( d - leftside ) / dx
-      print "stepi=%s, d=%s, x=%s, left=%s, zoom=%s" % (stepi, d, x, leftside, zoom)
-      if (x < 10 or x > 630):
-        continue
-      draw.rectangle( [x-2,230,x+3,260], fill="#ffffff" )
-      draw.rectangle( [x-1,231,x+2,259], fill="#000000" )
-      ms = cam.drct2txt(d)
-      (w, h) = font.getsize(ms)
-      draw.rectangle( [x-(w/2)-1,260,x+(w/2)+1,260+h], fill="#000000" )
-      draw.text((x-(w/2),260), ms, font=font)
+        x = ( d - leftside ) / dx
+        print "stepi=%s, d=%s, x=%s, left=%s, zoom=%s" % (stepi, d, x, leftside, zoom)
+        if (x < 10 or x > 630):
+            continue
+        draw.rectangle( [x-2,230,x+3,260], fill="#ffffff" )
+        draw.rectangle( [x-1,231,x+2,259], fill="#000000" )
+        ms = cam.drct2txt(d)
+        (w, h) = font.getsize(ms)
+        draw.rectangle( [x-(w/2)-1,260,x+(w/2)+1,260+fontsize], fill="#000000" )
+        draw.text((x-(w/2),260), ms, font=font)
 
     del draw
 

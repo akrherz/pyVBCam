@@ -1,19 +1,13 @@
 """
  Drive build script!
 """
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read('settings.ini')
+import common
 
 import datetime
 import time
 import subprocess
-import psycopg2
-import psycopg2.extras
-dbconn = psycopg2.connect("host=%s user=%s dbname=%s" % (config.get('database', 'host'),
-                                              config.get('database', 'user'),
-                                              config.get('database', 'name')))
-cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+dbconn = common.get_dbconn()
+cursor = dbconn.cursor()
 
 lookingfor = datetime.datetime.now().strftime("%Y%m%d%H")
 

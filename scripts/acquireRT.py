@@ -1,15 +1,8 @@
 """
 Fire off the aquistion of RT webcam images
 """
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read('settings.ini')
-
-import psycopg2
-dbconn = psycopg2.connect("host=%s user=%s dbname=%s" % (config.get('database', 'host'),
-                                              config.get('database', 'user'),
-                                              config.get('database', 'name')))
-cursor = dbconn.cursor()
+import common
+cursor = common.get_dbconn().cursor()
 
 import datetime
 import sys

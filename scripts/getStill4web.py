@@ -1,9 +1,7 @@
 """
  Get still image for the website mostly
 """
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read('settings.ini')
+import common
 
 from twisted.internet import reactor
 import StringIO
@@ -15,11 +13,8 @@ import urllib2
 import logging
 from PIL import Image, ImageDraw, ImageFont
 import pytz
-import psycopg2
 import psycopg2.extras
-dbconn = psycopg2.connect("host=%s user=%s dbname=%s" % (config.get('database', 'host'),
-                                              config.get('database', 'user'),
-                                              config.get('database', 'name')))
+dbconn = common.get_dbconn()
 cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 sys.path.insert(0, "../vbcam")
@@ -32,21 +27,8 @@ def camRunner( cid ):
     now = datetime.datetime.now()
     now = now.replace(tzinfo=pytz.timezone("America/Chicago"))
     gmt = datetime.datetime.utcnow()
-    network = row['network']
     if row['scrape_url'] is None:
-        password = config.get(network, 'password')
-        user = config.get(network, 'user')
-        if config.has_section(cid):
-            password = config.get(cid, 'password')
-            user = config.get(cid, 'user')
-        if row["is_vapix"]:
-            try:
-                cam = vbcam.VAPIX(cid, row, user, password)
-            except:
-                slaughter()
-                return
-        else:
-            cam = vbcam.vbcam(cid, row, user, password, logLevel=logging.INFO)
+        cam = common.get_vbcam(cid)
         cam.retries = 2
 
         # Get Still

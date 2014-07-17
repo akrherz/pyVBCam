@@ -1,7 +1,6 @@
 """
  Something to calibrate the location of the webcam and direction!
 """
-import secret
 import time
 import sys
 import math
@@ -9,43 +8,28 @@ import StringIO
 import os
 import ephem
 import mx.DateTime
-import Image
-import ImageDraw
-import psycopg2
+from PIL import Image
+from PIL import ImageDraw
 import psycopg2.extras
+import common
 
-mesosite = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
+mesosite = common.get_dbconn()
 cursor = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-os.chdir(secret.BASE)
-sys.path = [secret.BASE+"/vbcam"] + sys.path
-import vbcam
-os.chdir("tmp/")
+os.chdir("../tmp")
 
 
 # Which webcam, establish existing lat/lon and pan0
 cid = sys.argv[1]
-network = cid[:4]
 
-# Get db info
-cursor.execute("""
- SELECT ST_x(geom) as lon, ST_y(geom) as lat, * from webcams where id = %s
-""", (cid,))
-
-row = cursor.fetchone()
-row = dict(row)
-clat = row['lat']
-clon = row['lon']
-newpan0 = row['pan0'] + int(sys.argv[2])
-print 'Webcam %s initial pan0: %s attempting: %s' % (cid, row['pan0'], newpan0 )
+camera = common.get_vbcam(cid)
+clat = camera.d['lat']
+clon = camera.d['lon']
+newpan0 = camera.d['pan0'] + int(sys.argv[2])
+print 'Webcam %s initial pan0: %s attempting: %s' % (cid, 
+                                                camera.d['pan0'], newpan0 )
 print "UPDATE webcams SET pan0 = %s WHERE id = '%s';" % (newpan0, cid)
-row['pan0'] = newpan0
-if row["is_vapix"]:
-    camera = vbcam.VAPIX(cid, row, secret.vbcam_user[network], 
-                     secret.vbcam_pass[network])
-else:
-    camera = vbcam.vbcam(cid, row, secret.vbcam_user[network], 
-                     secret.vbcam_pass[network])
+camera.d['pan0'] = newpan0
 
 # Figure out solar location
 sun = ephem.Sun()

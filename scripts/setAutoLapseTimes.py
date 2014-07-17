@@ -1,23 +1,17 @@
 # 
-from pyiem import iemtz
+import pytz
 import ephem
-import os
 import datetime
-import pg
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read('settings.ini')
-
-import psycopg2
+import common
 import psycopg2.extras
-dbconn = psycopg2.connect("host=%s user=%s dbname=%s" % (config.get('database', 'host'),
-                                              config.get('database', 'user'),
-                                              config.get('database', 'name')))
+
+dbconn = common.get_dbconn()
 cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 cursor2 = dbconn.cursor()
 
-now = datetime.datetime.now()
-now = now.replace(tzinfo=iemtz.Central)
+now = datetime.datetime.utcnow()
+now = now.replace(tzinfo=pytz.timezone("UTC"))
+now = now.astimezone(pytz.timezone("America/Chicago"))
 
 def mydate(d):
     if d is None:

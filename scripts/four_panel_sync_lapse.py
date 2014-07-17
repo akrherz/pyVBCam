@@ -1,30 +1,25 @@
-#!/usr/bin/env python
-
-import secret
+""" Sync four webcams in time generating a timelapse """
+import common
 
 from PIL import Image, ImageDraw, ImageFont
-from pyIEM import cameras
 import mx.DateTime, sys, time, os, logging
 
-os.chdir(BASE)
-sys.path = [BASE+"/vbcam"] + sys.path
-import vbcam
-os.chdir("tmp/")
+os.chdir("../tmp")
 
 cams = []
-for id in sys.argv[1:5]:
-    network = id[:4]
-    print network, id
-    cams.append( vbcam.vbcam(id, cameras.cams[id], vbcam_user[network], vbcam_pass[network]) )
+for camid in sys.argv[1:5]:
+    print 'Adding %s webcam' % (camid,)
+    cams.append( common.get_vbcam(camid))
 
 x = [0,320,0,320]
 y = [0,0,240,240]
 
-font = ImageFont.truetype(secret.BASE+'lib/veramono.ttf', 22)
+fontsize = 22
+font = ImageFont.truetype('../lib/veramono.ttf', fontsize)
 
-dir = "iemsync.%s" % (mx.DateTime.now().strftime("%Y%m%d%H%M%S"),)
-os.makedirs(dir)
-os.chdir(dir)
+mydir = "iemsync.%s" % (mx.DateTime.now().strftime("%Y%m%d%H%M%S"),)
+os.makedirs(mydir)
+os.chdir(mydir)
 
 logging.basicConfig(filename="iemsync.log",filemode='w' )
 
@@ -56,8 +51,8 @@ for i in range(100000):
     draw = ImageDraw.Draw(out)
     draw.rectangle( [280,220,360,260], fill="#000000" )
     now = mx.DateTime.now()
-    str = now.strftime("%I:%M")
-    draw.text((290,229), str, font=font)
+    s = now.strftime("%I:%M")
+    draw.text((290,229), s, font=font)
     del draw 
 
     out.save('%05i.jpg' % (i,))

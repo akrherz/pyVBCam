@@ -1,43 +1,27 @@
-import secret
+""" Drive the generation of a long time lapse """
+import common
 
-import httplib, re, time, logging
+import time
+import logging
 import StringIO, mx.DateTime
 from PIL import Image, ImageDraw, ImageFont
 import sys, os
-import pg
 
-db = pg.connect('mesosite', host=secret.DBHOST)
-
-
-sys.path = [secret.BASE+"/vbcam"] + sys.path
-import vbcam
-os.chdir("%s/tmp/" % (secret.BASE,))
+os.chdir("../tmp/")
 
 site = sys.argv[1]
-network = site[:4]
 
-dir = "longterm.%s.%s" % (site, mx.DateTime.now().strftime("%Y%m%d%H%M%S"))
-os.makedirs(dir)
-os.chdir(dir)
+mydir = "longterm.%s.%s" % (site, mx.DateTime.now().strftime("%Y%m%d%H%M%S"))
+os.makedirs(mydir)
+os.chdir(mydir)
 
 logging.basicConfig(filename="%s.log"%(site,),filemode='w' )
 
-password = secret.vbcam_pass[network]
-user = secret.vbcam_user[network]
-if secret.vbcam_user.has_key(site):
-    password = secret.vbcam_pass[site]
-    user = secret.vbcam_user[site]
-
-rs = db.query("""SELECT * from webcams where id = '%s'""" % (site,)).dictresult()
-db.close()
-
-c = vbcam.vbcam(site, rs[0], user, password)
+c = common.get_vbcam(site)
 logging.info("Camera Settings: %s" % ( c.settings, ) )
 
-font = ImageFont.truetype(secret.BASE+'lib/veramono.ttf', 22)
-#c.panDrct(335)
-
-#dirs = [0, 45, 90, 135, 180, 225, 270, 315, 360, 45, 90]
+fontsize = 22
+font = ImageFont.truetype('../../lib/veramono.ttf', fontsize)
 i = 0
 while i < 100000:
     logging.info("i = %s" % (i,) )
@@ -53,12 +37,12 @@ while i < 100000:
     i0 = Image.open( buf )
 
     now = mx.DateTime.now()
-    str = "%3s %8s" % (vbcam.drct2dirTxt(drct), now.strftime("%-I:%M %p") )
-    (w, h) = font.getsize(str)
+    s = "%3s %8s" % (c.drct2txt(drct), now.strftime("%-I:%M %p") )
+    (w, h) = font.getsize(s)
 
     draw = ImageDraw.Draw(i0)
-    draw.rectangle( [215-w-10,370,215,370+h], fill="#000000" )
-    draw.text((210-w,370), str, font=font)
+    draw.rectangle( [215-w-10,370,215,370+fontsize], fill="#000000" )
+    draw.text((210-w,370), s, font=font)
     del draw
 
 
