@@ -6,8 +6,9 @@ import common
 import datetime
 import time
 import subprocess
+import psycopg2.extras
 dbconn = common.get_dbconn()
-cursor = dbconn.cursor()
+cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 lookingfor = datetime.datetime.now().strftime("%Y%m%d%H")
 
