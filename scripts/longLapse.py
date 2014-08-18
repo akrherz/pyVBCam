@@ -7,6 +7,9 @@ import StringIO, mx.DateTime
 from PIL import Image, ImageDraw, ImageFont
 import sys, os
 
+fontsize = 22
+font = ImageFont.truetype('../lib/veramono.ttf', fontsize)
+
 os.chdir("../tmp/")
 
 site = sys.argv[1]
@@ -20,8 +23,6 @@ logging.basicConfig(filename="%s.log"%(site,),filemode='w' )
 c = common.get_vbcam(site)
 logging.info("Camera Settings: %s" % ( c.settings, ) )
 
-fontsize = 22
-font = ImageFont.truetype('../../lib/veramono.ttf', fontsize)
 i = 0
 while i < 100000:
     logging.info("i = %s" % (i,) )
