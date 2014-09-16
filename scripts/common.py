@@ -12,7 +12,8 @@ def get_dbconn():
     return psycopg2.connect(database=settings['database']['name'],
                               user=settings['database']['user'],
                               host=settings['database']['host'])
-def get_vbcam(camid):
+
+def get_vbcam(camid, loglevel=logging.INFO):
     """ Return a vbcam object for this camera ID """
     PGCONN = get_dbconn()
     cursor = PGCONN.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -24,7 +25,7 @@ def get_vbcam(camid):
         return vbcam.VAPIX(camid, row, get_user(camid), get_password(camid))
     else:
         return vbcam.vbcam(camid, row, get_user(camid), get_password(camid), 
-                           logLevel=logging.INFO)
+                           loglevel=loglevel)
 
 def get_password(camid):
     """ Return the password for a given camera ID """
