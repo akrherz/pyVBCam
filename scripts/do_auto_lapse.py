@@ -13,9 +13,28 @@ cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 import sys
 import os
+import subprocess
 
 sys.path.insert(0, '../vbcam/')
 import lapse
+
+def check_resume(job):
+    """ Perhaps we are resuming an old job or re-running post processing? """
+    if os.path.isfile("do_auto_lapse.pid"):
+        subprocess.call("kill -9 `cat do_auto_lapse.pid`", shell=True)
+    if os.path.isfile("%s.log" % (job.site, )):
+        os.rename("%s.log" % (job.site, ), "%s.log-OLD" % (job.site, ))
+        
+    # Figure out where we left off
+    for i in range(job.frames):
+        if not os.path.isfile("%05d.jpg" % (i,)):
+            break
+    job.i = i
+        
+        
+    o = open('do_auto_lapse.pid', 'w')
+    o.write("%s" % (os.getpid(),) )
+    o.close()
 
 def setup_job(job):
     """
@@ -29,11 +48,11 @@ def setup_job(job):
     job.movie_duration = int(float(sys.argv[5]))
     job.frames = job.movie_duration * 30
 
-    outdir = "../tmp/autoframes.%s_%s" % (job.filename, 
-                                   datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
-    os.makedirs(outdir)
+    outdir = "../tmp/autoframes.%s" % (job.filename, )
+    if not os.path.isdir(outdir):
+        os.makedirs(outdir)
     os.chdir(outdir)
-
+    check_resume(job)
     logging.basicConfig(filename="%s.log" % (job.site, ), filemode='w',
                     format='%(levelname)s: %(asctime)-15s %(message)s', 
                     level=logging.DEBUG )
@@ -74,4 +93,6 @@ if __name__ == '__main__':
     bootstrap(JOB)
     JOB.create_lapse()
     JOB.postprocess()
+    if os.path.isfile("do_auto_lapse.pid"):
+        os.unlink("do_auto_lapse.pid")
     logging.info("Done!")
