@@ -8,6 +8,7 @@ import logging
 import sys
 import shutil
 import random
+import subprocess
 
 from PIL import Image, ImageDraw, ImageFont
 import pytz
@@ -56,18 +57,18 @@ class Lapse(object):
         self.filename = None
         self.network = None
         self.site = None
+        self.i = 0
         
     
     def create_lapse(self):
         """
         Create the timelapse frames, please
         """
-        i = 0
         fails = 0
         # Assume 30fps
         
-        while i < self.frames :
-            logging.info("i = %s, fails = %s" % (i, fails) )
+        while self.i < self.frames :
+            logging.info("i = %s, fails = %s" % (self.i, fails) )
             if fails > 5:
                 logging.info("failed too many times")
                 sys.exit(0)
@@ -114,11 +115,11 @@ class Lapse(object):
             draw.text((0, 480-height), stamp, font=self.sfont)
             del draw
         
-            imgdata.save('%05i.jpg' % ( i,))
-            self.wait_for_next_frame(i)
+            imgdata.save('%05i.jpg' % ( self.i,))
+            self.wait_for_next_frame(self.i)
             del imgdata
             del buf
-            i += 1
+            self.i += 1
 
     def wait_for_next_frame(self, i):
         """
@@ -138,10 +139,13 @@ class Lapse(object):
 
     def postprocess(self):
         """
-        Postprocess our frames!
+        Postprocess our individual frames into products
+        1. .flv for web clients that only can do flash
+        2. .mp4 for html5 web clients
+        3. .tar file of the frames
+        4. .mov for TV stations video system
         """
         ffmpeg = 'ffmpeg -i %05d.jpg'
-        devnull = '< /dev/null >& /dev/null'
         # Lets sleep for around 6 minutes, 
         # so that we don't have 27 ffmpegs going 
         randsleep = 360. * random.random()
@@ -149,30 +153,39 @@ class Lapse(object):
                      randsleep)
         time.sleep( randsleep )
         
-        # Create something for website
-        os.system("%s -s 320x240 -vcodec wmv1 out.wmv %s" % (ffmpeg, devnull))
-        try:
-            shutil.copyfile("out.wmv", "/mesonet/share/lapses/auto/%s.wmv" % (
-                                                            self.filename,) )
-        except Exception, exp:
-            print exp
-
-        # Create Flash Video in full res!
-        os.system("%s -b 1000k out.flv %s" % (ffmpeg, devnull))
-        try:
-            shutil.copyfile("out.flv", "/mesonet/share/lapses/auto/%s.flv" % (
-                                                            self.filename,) )
-        except Exception, exp:
-            print exp
+        def safe_copy(src, dest):
+            """ Copy file, safely """
+            try:
+                shutil.copyfile(src, "/mesonet/share/lapses/auto/%s" % (dest,))
+            except Exception, exp:
+                logging.error(exp)
         
-        # Create tar file of images
-        os.system("tar -cf %s_frames.tar *.jpg" % (self.filename,) )
-        try:
-            shutil.copyfile("%s_frames.tar" % (self.filename,), 
-                        "/mesonet/share/lapses/auto/%s_frames.tar" % (
-                                                            self.filename,))
-        except Exception, exp:
-            print exp
+        # 1. Create Flash Video in full res!
+        if os.path.isfile("out.flv"):
+            os.unlink("out.flv")
+        proc = subprocess.Popen("%s -b 1000k out.flv" % (ffmpeg,), shell=True,
+                                stdout=subprocess.PIPE, 
+                                stderr=subprocess.PIPE)
+        logging.info( proc.stdout.read() )
+        logging.error( proc.stderr.read() )
+        safe_copy("out.flv", "%s.flv" % (self.filename,) )
+
+        # 2. MP4
+        if os.path.isfile("out.mp4"):
+            os.unlink("out.mp4")
+        proc = subprocess.Popen("%s out.mp4" % (ffmpeg,),
+                        shell=True, stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE)
+        logging.info( proc.stdout.read() )
+        logging.error( proc.stderr.read() )
+        safe_copy("out.mp4", "%s.mp4" % (self.filename,) )
+
+        
+        # 3. Create tar file of images
+        subprocess.call("tar -cf %s_frames.tar *.jpg" % (self.filename,),
+                  shell=True )
+        safe_copy("%s_frames.tar" % (self.filename,), 
+                  "%s_frames.tar" % (self.filename,))
         
         # KCCI wanted no lapses between 5 and 6:30, OK....
         if self.network == 'KCCI':
@@ -185,8 +198,16 @@ class Lapse(object):
                 # so that we don't have 27 ffmpegs going 
                 time.sleep( 360. * random.random() )
                 
-        # Create something for KCCI
-        os.system("%s -b 2000k out.mov %s" % (ffmpeg, devnull))
-        pqinsert = '/home/ldm/bin/pqinsert'
-        os.system("%s -p 'lapse c 000000000000 %s/%s.qt BOGUS qt' out.mov" % (
-                            pqinsert, self.network, self.filename) )
+        # 4. mov files
+        if os.path.isfile("out.mov"):
+            os.unlink("out.mov")
+        proc = subprocess.Popen("%s -b 2000k out.mov" % (ffmpeg,),
+                        shell=True, stderr=subprocess.PIPE,
+                        stdout=subprocess.PIPE)
+        logging.info( proc.stdout.read() )
+        logging.error( proc.stderr.read() )
+        subprocess.call(("/home/ldm/bin/pqinsert -p 'lapse c "
+                         +"000000000000 %s/%s.qt BOGUS qt' out.mov") % (
+                        self.network, self.filename), shell=True)
+
+# END
