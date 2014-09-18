@@ -5,7 +5,8 @@ import datetime
 import common
 import psycopg2.extras
 
-dbconn = common.get_dbconn()
+dbconn = psycopg2.connect(database = common.settings['database']['name'],
+                          host     = common.settings['database']['host'])
 cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 cursor2 = dbconn.cursor()
 
