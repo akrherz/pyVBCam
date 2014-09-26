@@ -28,6 +28,8 @@ camera = common.get_vbcam(cid, loglevel=logging.DEBUG)
 clat = camera.d['lat']
 clon = camera.d['lon']
 newpan0 = camera.d['pan0'] + int(sys.argv[2])
+if newpan0 < 0:
+    newpan0 += 360.
 logging.info('Webcam %s initial pan0: %s attempting: %s' % (cid, 
                                                 camera.d['pan0'], newpan0 ))
 logging.info("\n  UPDATE webcams SET pan0 = %s WHERE id = '%s'; \n" % (
