@@ -146,9 +146,9 @@ class Lapse(object):
         4. .mov for TV stations video system
         """
         ffmpeg = 'ffmpeg -i %05d.jpg'
-        # Lets sleep for around 6 minutes, 
+        # Lets sleep for around 12 minutes, 
         # so that we don't have 27 ffmpegs going 
-        randsleep = 360. * random.random()
+        randsleep = 720. * random.random()
         logging.info("Sleeping %.2f seconds before launching ffmpeg", 
                      randsleep)
         time.sleep( randsleep )
