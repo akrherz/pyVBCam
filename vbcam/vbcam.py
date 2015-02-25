@@ -296,6 +296,14 @@ class vbcam:
             self.settings[ tokens[i][0] ] = tokens[i][1]
 
     def http(self, s):
+        """Do a HTTP request
+
+        Args:
+          s (str): string URL to request
+
+        Returns:
+          data (str): data returned from the HTTP request, could be None
+        """
         c = 0
         data = None
         while c < self.retries:
@@ -306,15 +314,15 @@ class vbcam:
             except socket.timeout:
                 logging.debug('urllib2 timout!')
             except urllib2.URLError, e:
-                logging.debug('urllib2 cmd: %s error: %r retries: %s' % ( s, e, 
-                                                    self.retries - c) )
+                logging.debug(('urllib2 cmd: %s error: %r retries: %s'
+                               '') % (s, e, self.retries - c))
             except httplib.BadStatusLine:
-                logging.info('httplib.BadStatusLine from IP: %s (%s)' % (self.ip, 
-                                                                    self.name))
+                logging.info(('httplib.BadStatusLine from IP: %s (%s)'
+                              '') % (self.ip, self.name))
             except KeyboardInterrupt:
                 sys.exit(0)
             except:
-                traceback.print_exc(logging)
+                traceback.print_exc(file=logging)
             c += 1
         return data
 
