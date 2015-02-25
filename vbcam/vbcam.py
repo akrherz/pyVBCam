@@ -322,7 +322,7 @@ class vbcam:
             except KeyboardInterrupt:
                 sys.exit(0)
             except:
-                traceback.print_exc(file=logging)
+                logging.info("Exception has occured", exc_info=1)
             c += 1
         return data
 
