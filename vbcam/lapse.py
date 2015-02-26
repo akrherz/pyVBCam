@@ -16,14 +16,14 @@ import pytz
 import vbcam
 
 class scrape(object):
-    
+
     def __init__(self, cid, row):
         self.cid = cid
         self.row = row
-        
+
     def getDirection(self):
         return self.row['pan0']
-    
+
     def getOneShot(self):
         now = datetime.datetime.now()
         now = now.replace(tzinfo=pytz.timezone("America/Chicago"))
@@ -37,6 +37,7 @@ class scrape(object):
             now = gmt + datetime.timedelta(seconds=now.utcoffset().seconds)
         return req2.read() 
 
+
 class Lapse(object):
     """
     Represents a timelapse!
@@ -44,7 +45,7 @@ class Lapse(object):
     font = ImageFont.truetype('../lib/veramono.ttf', 22)
     sfont = ImageFont.truetype('../lib/veramono.ttf', 14)
     date_height = 370
-    
+
     def __init__(self):
         """
         Constructor
@@ -58,21 +59,21 @@ class Lapse(object):
         self.network = None
         self.site = None
         self.i = 0
-        
-    
+
+
     def create_lapse(self):
         """
         Create the timelapse frames, please
         """
         fails = 0
         # Assume 30fps
-        
+
         while self.i < self.frames :
             logging.info("i = %s, fails = %s" % (self.i, fails) )
             if fails > 5:
                 logging.info("failed too many times")
                 sys.exit(0)
-        
+
             # Set up buffer for image to go to
             buf = StringIO.StringIO()
 
@@ -136,7 +137,6 @@ class Lapse(object):
         if delay > 0: 
             time.sleep(delay)
 
-
     def postprocess(self):
         """
         Postprocess our individual frames into products
@@ -159,55 +159,60 @@ class Lapse(object):
                 shutil.copyfile(src, "/mesonet/share/lapses/auto/%s" % (dest,))
             except Exception, exp:
                 logging.error(exp)
-        
+
         # 1. Create Flash Video in full res!
         if os.path.isfile("out.flv"):
             os.unlink("out.flv")
         proc = subprocess.Popen("%s -b 1000k out.flv" % (ffmpeg,), shell=True,
-                                stdout=subprocess.PIPE, 
+                                stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
-        logging.info( proc.stdout.read() )
-        logging.error( proc.stderr.read() )
-        safe_copy("out.flv", "%s.flv" % (self.filename,) )
+        logging.info(proc.stdout.read())
+        logging.error(proc.stderr.read())
+        safe_copy("out.flv", "%s.flv" % (self.filename,))
+        # Cleanup after ourself
+        os.unlink("out.flv")
 
         # 2. MP4
         if os.path.isfile("out.mp4"):
             os.unlink("out.mp4")
         proc = subprocess.Popen("%s out.mp4" % (ffmpeg,),
-                        shell=True, stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE)
-        logging.info( proc.stdout.read() )
-        logging.error( proc.stderr.read() )
-        safe_copy("out.mp4", "%s.mp4" % (self.filename,) )
+                                shell=True, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        logging.info(proc.stdout.read())
+        logging.error(proc.stderr.read())
+        safe_copy("out.mp4", "%s.mp4" % (self.filename,))
+        # Cleanup after ourself
+        os.unlink("out.mp4")
 
-        
         # 3. Create tar file of images
         subprocess.call("tar -cf %s_frames.tar *.jpg" % (self.filename,),
-                  shell=True )
-        safe_copy("%s_frames.tar" % (self.filename,), 
+                        shell=True)
+        safe_copy("%s_frames.tar" % (self.filename,),
                   "%s_frames.tar" % (self.filename,))
-        
+        # Cleanup after ourselfs
+        os.unlink("%s_frames.tar" % (self.filename,))
+
         # KCCI wanted no lapses between 5 and 6:30, OK....
         if self.network == 'KCCI':
             now = datetime.datetime.now()
             if now.hour == 17 or (now.hour == 18 and now.minute < 30):
                 endts = now.replace(hour=18, minute=30)
-                time.sleep( (endts - now).seconds )
-            
-                # Lets sleep for around 6 minutes, 
-                # so that we don't have 27 ffmpegs going 
-                time.sleep( 360. * random.random() )
-                
+                time.sleep((endts - now).seconds)
+
+                # Lets sleep for around 6 minutes,
+                # so that we don't have 27 ffmpegs going
+                time.sleep(360. * random.random())
+
         # 4. mov files
         if os.path.isfile("out.mov"):
             os.unlink("out.mov")
         proc = subprocess.Popen("%s -b 2000k out.mov" % (ffmpeg,),
-                        shell=True, stderr=subprocess.PIPE,
-                        stdout=subprocess.PIPE)
-        logging.info( proc.stdout.read() )
-        logging.error( proc.stderr.read() )
+                                shell=True, stderr=subprocess.PIPE,
+                                stdout=subprocess.PIPE)
+        logging.info(proc.stdout.read())
+        logging.error(proc.stderr.read())
         subprocess.call(("/home/ldm/bin/pqinsert -p 'lapse c "
-                         +"000000000000 %s/%s.qt BOGUS qt' out.mov") % (
+                         "000000000000 %s/%s.qt BOGUS qt' out.mov") % (
                         self.network, self.filename), shell=True)
-
-# END
+        # Cleanup after ourself
+        os.unlink("out.mov")
