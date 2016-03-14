@@ -22,6 +22,9 @@ def get_vbcam(camid, loglevel=logging.INFO):
     row = cursor.fetchone()
     PGCONN.close()
     if row["is_vapix"]:
+        if camid == 'ISUC-002':
+            return vbcam.VAPIX(camid, row, get_user(camid),
+                               get_password(camid), '704x480')
         return vbcam.VAPIX(camid, row, get_user(camid), get_password(camid))
     else:
         return vbcam.vbcam(camid, row, get_user(camid), get_password(camid), 

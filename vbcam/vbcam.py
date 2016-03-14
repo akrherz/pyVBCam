@@ -53,12 +53,13 @@ def drct2dirTxt(dir):
 class VAPIX:
     """ Class representing access to a VAPIX webcam """
     
-    def __init__(self, cid, row, user, password):
+    def __init__(self, cid, row, user, password, res='640x480'):
         self.cid = cid
         self.pan0 = row["pan0"]
         self.ip = row["ip"]
         self.port = row['port']
         self.settings = {}
+        self.res = res
         
         pm = urllib2.HTTPPasswordMgrWithDefaultRealm()
         pm.add_password(None, "%s:%s" % (row['ip'], row['port']) ,user, password)
@@ -114,7 +115,7 @@ class VAPIX:
 
     def getOneShot(self):
         """ Get a still image """
-        return self.http('jpg/image.cgi?resolution=640x480')
+        return self.http('jpg/image.cgi?resolution=%s' % (self.res, ))
 
     def getDirection(self):
         """ Get the direction of the current pan """
