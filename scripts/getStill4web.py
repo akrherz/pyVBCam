@@ -56,9 +56,8 @@ def camRunner(cid):
         buf.seek(0)
     if buf.len == 0:
         return
-    i0 = Image.open(buf)
-    # 320x240 variant
     try:
+        i0 = Image.open(buf)
         i320 = i0.resize((320, 240), Image.ANTIALIAS)
     except:
         slaughter()
