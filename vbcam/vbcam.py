@@ -60,10 +60,10 @@ class VAPIX:
         self.port = row['port']
         self.settings = {}
         self.res = res
-        
+
         pm = urllib2.HTTPPasswordMgrWithDefaultRealm()
         pm.add_password(None, "%s:%s" % (row['ip'], row['port']) ,user, password)
-        self.ah = urllib2.HTTPBasicAuthHandler(pm)
+        self.ah = urllib2.HTTPDigestAuthHandler(pm)
         opener = urllib2.build_opener(self.ah)
         urllib2.install_opener(opener)
         self.retries = 6
