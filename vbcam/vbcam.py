@@ -52,24 +52,26 @@ def drct2dirTxt(dir):
 
 class VAPIX:
     """ Class representing access to a VAPIX webcam """
-    
+
     def __init__(self, cid, row, user, password, res='640x480'):
         self.cid = cid
         self.pan0 = row["pan0"]
         self.ip = row["ip"]
         self.port = row['port']
+        self.name = row['name']
         self.settings = {}
         self.res = res
 
         pm = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        pm.add_password(None, "%s:%s" % (row['ip'], row['port']) ,user, password)
+        pm.add_password(None, "%s:%s" % (row['ip'], row['port']), user,
+                        password)
         self.ah = urllib2.HTTPDigestAuthHandler(pm)
         opener = urllib2.build_opener(self.ah)
         urllib2.install_opener(opener)
         self.retries = 6
         self.getSettings()
         self.retries = 60
-        
+
     def getSettings(self):
         """ Get the current PTZ """
         data = self.http('com/ptz.cgi?query=position')
