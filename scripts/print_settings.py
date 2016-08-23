@@ -1,6 +1,4 @@
-'''
-Simple utility to print out the camera settings 
-'''
+"""Simple utility to print out the camera settings"""
 import common
 import sys
 import logging
@@ -13,4 +11,3 @@ keys.sort()
 
 for k in keys:
     print "[%s] %s" % (k, cam.settings[k])
-

@@ -9,6 +9,7 @@ cams = ['KCRG-001', 'KCRG-002', 'KCRG-003', 'KCRG-005',
         'KCRG-010', 'KCRG-011', 'KCRG-012', 'KCRG-016',
         'KCRG-018', 'KCRG-020', 'KCRG-022', 'KCRG-023']
 
+
 def compute_timestamps():
     """ Build a dictionary of timestamps """
     res = {}
@@ -22,11 +23,12 @@ def compute_timestamps():
         os.chdir("..")
     return res
 
+
 def get_timeline():
     """ Get the timeline we want to lapse for """
     frames = 600
-    sts = datetime.datetime(2014,9,4,18,38)
-    ets = datetime.datetime(2014,9,4,19,50)
+    sts = datetime.datetime(2014, 9, 4, 18, 38)
+    ets = datetime.datetime(2014, 9, 4, 19, 50)
     interval = (ets - sts).seconds / float(frames)
     now = sts
     timeline = []
@@ -36,11 +38,13 @@ def get_timeline():
 
     return timeline
 
+
 def get_delta(t1, t2):
     """ Compute difference """
     d = (t1 - t2)
     delta = d.days * 86400. + d.seconds + d.microseconds / 1000000.
-    return abs( delta )
+    return abs(delta)
+
 
 def get_files(timestamps, valid):
     """ Figure out our closest file """
@@ -53,7 +57,7 @@ def get_files(timestamps, valid):
             if delta < mindelta:
                 mindelta = delta
                 minfn = fn
-        res.append( minfn ) 
+        res.append(minfn)
     return res
 
 if __name__ == '__main__':
@@ -64,15 +68,15 @@ if __name__ == '__main__':
     mydir = "panel16.%s" % (datetime.datetime.now().strftime("%Y%m%d%H%M%S"),)
     os.makedirs(mydir)
     for t, valid in enumerate(timeline):
-        frame = Image.new('RGB', (1280, 960) )
+        frame = Image.new('RGB', (1280, 960))
         files = get_files(timestamps, valid)
         for i, imgfn in enumerate(files):
             row = i / 4
             col = i % 4
             x = col * 320
             y = row * 240
-            i0 = Image.open( imgfn )
-            i0 = i0.resize( (320,240) )
-            frame.paste(i0, (x,y))
-        
+            i0 = Image.open(imgfn)
+            i0 = i0.resize((320, 240))
+            frame.paste(i0, (x, y))
+
         frame.save("%s/%05i.jpg" % (mydir, t))

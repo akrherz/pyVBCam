@@ -19,6 +19,7 @@ cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 sys.path.insert(0, "../vbcam")
 import vbcam
 
+
 def camRunner(cid):
     # Who am I running for
     cursor.execute("""SELECT * from webcams where id = %s """, (cid,))
