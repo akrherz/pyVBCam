@@ -187,8 +187,8 @@ class vbcam:
         self.settings = {}
         self.cid = None
         self.haveControl = False
-    
-    
+        self.log = logging.getLogger(__name__)
+
         pm = urllib2.HTTPPasswordMgrWithDefaultRealm()
         pm.add_password(None, "%s:%s" % (d['ip'], d['port']) ,user, passwd)
         self.ah = urllib2.HTTPBasicAuthHandler(pm)
@@ -211,7 +211,7 @@ class vbcam:
     def pan(self, pan):
         """ pan the camera to this explicit camera relative direction """ 
         self.getControl()
-        logging.debug(' Attempting to pan webcam %.2f degrees' % (pan,))
+        self.log.debug(' Attempting to pan webcam %.2f degrees' % (pan,))
         return self.http("OperateCamera?connection_id=%s&pan=%i" % (self.cid, 
                                                                  pan *100))
 
@@ -315,26 +315,29 @@ class vbcam:
                 if data is not None:
                     break
             except socket.timeout:
-                logging.debug('urllib2 timout!')
+                self.log.debug('urllib2 timout!')
             except urllib2.URLError, e:
-                logging.debug(('urllib2 cmd: %s error: %r retries: %s'
-                               '') % (s, e, self.retries - c))
+                self.log.debug(('urllib2 cmd: %s error: %r retries: %s'
+                                '') % (s, e, self.retries - c),
+                               exc_info=1)
             except httplib.BadStatusLine:
-                logging.info(('httplib.BadStatusLine from IP: %s (%s)'
-                              '') % (self.ip, self.name))
+                self.log.info(('httplib.BadStatusLine from IP: %s (%s)'
+                               '') % (self.ip, self.name))
             except KeyboardInterrupt:
                 sys.exit(0)
             except:
-                logging.info("Exception has occured", exc_info=1)
+                self.log.info("Exception has occured", exc_info=1)
+            time.sleep(10)  # wait 10 seconds
             c += 1
         return data
 
     def realhttp(self, s):
-        r = urllib2.urlopen('http://%s:%s/-wvhttp-01-/%s' % (self.ip, self.port, s), 
-                            timeout=30 )
-        logging.debug("HTTP request => %s, status = %s" % (s, r.code))
+        r = urllib2.urlopen('http://%s:%s/-wvhttp-01-/%s' % (self.ip,
+                                                             self.port, s),
+                            timeout=30)
+        self.log.debug("HTTP request => %s, status = %s" % (s, r.code))
         if (r.headers.status != ""):
-            logging.debug("HTTP Request Failed: reason %s" % ( r.info() ) )
+            self.log.debug("HTTP Request Failed: reason %s" % (r.info()))
             data = None
         else:
             data = r.read()
@@ -342,5 +345,5 @@ class vbcam:
         del r
         return data
 
-    def drct2txt(self, dir):
-        return drct2dirTxt(dir)
+    def drct2txt(self, mydir):
+        return drct2dirTxt(mydir)

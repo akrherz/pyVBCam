@@ -20,14 +20,16 @@ mydir = "longterm.%s.%s" % (site, mx.DateTime.now().strftime("%Y%m%d%H%M%S"))
 os.makedirs(mydir)
 os.chdir(mydir)
 
-logging.basicConfig(filename="%s.log" % (site,), filemode='w')
+logging.basicConfig(filename="%s.log" % (site,), filemode='w',
+                    level=logging.INFO)
+logger = logging.getLogger()
 
 c = common.get_vbcam(site)
-logging.info("Camera Settings: %s" % (c.settings, ))
+logger.info("Camera Settings: %s" % (c.settings, ))
 
-i = 0
-while i < 100000:
-    logging.info("i = %s" % (i,))
+
+def do(i):
+    logging.debug("i = %s" % (i,))
 
     # Set up buffer for image to go to
     buf = StringIO.StringIO()
@@ -49,5 +51,19 @@ while i < 100000:
     i0.save('%05i.jpg' % (i, ))
     del i0
     del buf
-    time.sleep(int(sys.argv[2]))
     i += 1
+
+i = 0
+errors = 0
+while i < 100000:
+    time.sleep(int(sys.argv[2]))
+    if errors > 100:
+        logger.info("Too many errors, abort!")
+        break
+    try:
+        do(i)
+    except Exception as exp:
+        logger.exception(exp)
+        errors += 1
+    finally:
+        i += 1
