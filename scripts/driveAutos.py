@@ -1,6 +1,4 @@
-"""
- Drive build script!
-"""
+"""proctor the exec of daily auto lapse scripts"""
 import common
 
 import datetime
@@ -13,9 +11,10 @@ cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 lookingfor = datetime.datetime.now().strftime("%Y%m%d%H")
 
 sql = """
-    SELECT *, oid from webcam_scheduler WHERE
-    to_char(begints, 'YYYYMMDDHH24') = '%s' or (to_char(begints, 'HH24') = '%s'
-    and is_daily IS TRUE)
+    SELECT s.*, s.oid from webcam_scheduler s JOIN webcams c
+    on (s.cid = c.id) WHERE c.online is TRUE and
+    (to_char(begints, 'YYYYMMDDHH24') = '%s' or
+    (to_char(begints, 'HH24') = '%s' and is_daily IS TRUE))
 """ % (lookingfor, lookingfor[8:])
 cursor.execute(sql)
 
