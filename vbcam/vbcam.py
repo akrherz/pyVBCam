@@ -82,7 +82,7 @@ class VAPIX:
         for line in data.split("\n"):
             tokens = line.split("=")
             if len(tokens) == 2:
-                self.settings[ tokens[0] ] = tokens[1].strip()
+                self.settings[tokens[0]] = tokens[1].strip()
 
     def dir2pan(self, drct):
         """  Compute a pan based on a given direction, yikes? """
@@ -123,7 +123,8 @@ class VAPIX:
     def getDirection(self):
         """ Get the direction of the current pan """
         if 'pan' not in self.settings:
-            self.log.warn("pan was missing from settings, using zero")
+            self.log.debug(("%s %s pan was missing from settings, using zero"
+                            ) % (self.cid, self.name))
             return 0
         deg_pan = float(self.settings['pan'])  # in deg
         off = self.pan0 + deg_pan
