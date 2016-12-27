@@ -61,6 +61,7 @@ class VAPIX:
         self.name = row['name']
         self.settings = {}
         self.res = res
+        self.log = logging.getLogger(__name__)
 
         pm = urllib2.HTTPPasswordMgrWithDefaultRealm()
         pm.add_password(None, "%s:%s" % (row['ip'], row['port']), user,
