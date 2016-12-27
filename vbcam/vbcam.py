@@ -121,17 +121,20 @@ class VAPIX:
 
     def getDirection(self):
         """ Get the direction of the current pan """
-        deg_pan = float(self.settings['pan']) # in deg
+        if 'pan' not in self.settings:
+            self.log.warn("pan was missing from settings, using zero")
+            return 0
+        deg_pan = float(self.settings['pan'])  # in deg
         off = self.pan0 + deg_pan
-        if (off < 0):
+        if off < 0:
             off = 360 + off
-        if (off >= 360):
+        if off >= 360:
             off = off - 360
         return off
 
-    def drct2txt(self, dir):
-        
-        return drct2dirTxt(dir)
+    def drct2txt(self, mydir):
+
+        return drct2dirTxt(mydir)
 
     def realhttp(self, s):
         r = urllib2.urlopen('http://%s:%s/axis-cgi/%s' % (self.ip, self.port, s), 
@@ -231,16 +234,16 @@ class vbcam:
     def dir2pan(self, drct):
         """  Compute a pan based on a given direction, yikes? """
         offset = drct - self.pan0
-        if (offset < -180): # We need to go the other way
+        if (offset < -180):  # We need to go the other way
             offset = (360 + drct) - self.pan0
-        elif (offset > 180): # We need to go the other way
+        elif (offset > 180):  # We need to go the other way
             offset = (drct - 360) - self.pan0
-    
+
         if (offset < -170):
             offset = -170
         if (offset > 170):
             offset = 170
-        #print "pan0: %s drct: %s offset: %s" % (self.pan0, drct, offset)
+        # print "pan0: %s drct: %s offset: %s" % (self.pan0, drct, offset)
         return offset
 
     def getTilt(self):
@@ -251,9 +254,9 @@ class vbcam:
 
     def pan2dir(self, pan=None):
         """ Figure out the direction based on a given pan, yikes? """
-        if (pan is None and self.settings.has_key('pan_current_value')):
+        if pan is None and 'pan_current_value' in self.settings:
             pan = self.settings['pan_current_value']
-        elif (pan is None):
+        elif pan is None:
             logging.debug("Don't have pan_current_value set, asumming 0")
             pan = 0
         deg_pan = float(int(pan)) / float(100)
@@ -265,7 +268,7 @@ class vbcam:
         return off
 
     def getDirectionText(self):
-        return self.drct2txt( self.getDirection() )
+        return self.drct2txt(self.getDirection())
 
     def getDirection(self):
         self.getSettings()
@@ -273,17 +276,16 @@ class vbcam:
 
     def getControl(self):
         self.haveControl = False
-        if (self.cid == None):
+        if self.cid is None:
             self.startSession()
-    
+
         for attempt in range(10):
-            d = self.http("GetCameraControl?connection_id=%s" % (self.cid,) )
+            d = self.http("GetCameraControl?connection_id=%s" % (self.cid,))
             if (d.strip() == "OK."):
                 self.haveControl = True
                 break
             self.startSession()
-            print "Couldn't get Control. Attempt? %s Answer? %s" % (attempt,d)
-      
+            print "Couldn't get Control. Attempt? %s Answer? %s" % (attempt, d)
 
     def startSession(self):
         d = self.http("OpenCameraServer")
@@ -291,12 +293,12 @@ class vbcam:
 
     def getSettings(self):
         d = self.http("GetCameraInfo")
-        if (type(d) is not type("a")):
+        if not isinstance(d, str):
             logging.debug("Failed Get on Settings")
             return
         tokens = re.findall("([^=]*)=([^=]*)\n", d)
         for i in range(len(tokens)):
-            self.settings[ tokens[i][0] ] = tokens[i][1]
+            self.settings[tokens[i][0]] = tokens[i][1]
 
     def http(self, s):
         """Do a HTTP request
