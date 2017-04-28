@@ -21,14 +21,16 @@ def doimage(cam, i, font):
     buf.write(cam.get_one_shot())
     buf.seek(0)
     i0 = Image.open(buf)
+    imgheight = i0.size[1]
 
     now = datetime.datetime.now()
     label = "%3s %8s" % (cam.drct2txt(drct), now.strftime("%-I:%M %p"))
     (width, height) = font.getsize(label)
 
     draw = ImageDraw.Draw(i0)
-    draw.rectangle([205 - width - 10, 370, 205, 370 + height], fill="#000000")
-    draw.text((200 - width, 370), label, font=font)
+    draw.rectangle([205 - width - 10, imgheight - 110,
+                    205, imgheight - 110 + height], fill="#000000")
+    draw.text((200 - width, imgheight - 110), label, font=font)
     del draw
 
     i0.save('%05i.jpg' % (i, ))
