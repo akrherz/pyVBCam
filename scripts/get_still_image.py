@@ -132,7 +132,7 @@ def workflow(cid):
     else:
         fnfull = draw_save(cid, i0, dirtext, row)
         fn640 = fnfull
-    cmd = ("/home/ldm/bin/pqinsert "
+    cmd = ("/home/ldm/bin/pqinsert -i "
            "-p 'webcam c %s camera/640x480/%s.jpg camera/%s/%s_%s.jpg jpg'"
            " %s") % (gmt.strftime("%Y%m%d%H%M"), cid, cid,
                      cid, gmt.strftime("%Y%m%d%H%M"), fn640)
@@ -140,7 +140,7 @@ def workflow(cid):
                             stderr=subprocess.PIPE)
     proc.stderr.read()
 
-    cmd = ("/home/ldm/bin/pqinsert "
+    cmd = ("/home/ldm/bin/pqinsert -i "
            "-p 'webcam ac %s camera/stills/%s.jpg camera/%s/%s_%s.jpg jpg'"
            " %s") % (gmt.strftime("%Y%m%d%H%M"), cid, cid,
                      cid, gmt.strftime("%Y%m%d%H%M"), fnfull)
