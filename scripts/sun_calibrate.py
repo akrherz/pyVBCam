@@ -54,7 +54,7 @@ time.sleep(5)
 
 # Get still image
 buf = StringIO.StringIO()
-buf.write( camera.getOneShot() )
+buf.write( camera.get_one_shot() )
 buf.seek(0)
 i0 = Image.open( buf )
 

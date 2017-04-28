@@ -5,4 +5,7 @@ Python Scripts and Library to interface with
  * Canon VBC60
  * Some Axis webcams
  
-Unsure of how useful these are to folks...
+Usage
+=====
+
+Set your `PYTHONPATH` to include this folder and then run the various `scripts/` to your hearts content.

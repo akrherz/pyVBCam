@@ -38,7 +38,7 @@ for i in range(100000):
         cnt = 0
         while (cnt < 10):
             try:
-                o.write(cams[j].getOneShot())
+                o.write(cams[j].get_one_shot())
                 cnt = 100
             except:
                 cnt += 1

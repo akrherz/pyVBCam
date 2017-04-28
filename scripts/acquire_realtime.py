@@ -1,26 +1,25 @@
 """
 Fire off the aquistion of RT webcam images
 """
-import common
 import datetime
 import sys
 import subprocess
+
+import pywebcam.utils as camutils
 
 
 def main():
     """Run Main"""
     now = datetime.datetime.now()
-    try:
-        cursor = common.get_dbconn().cursor()
-    except:
-        # This is a NOOP at the moment, alerting will come from other
-        # places when the webcams are stale
+    pgconn = camutils.get_dbconn()
+    if pgconn is None:
         return
+    cursor = pgconn.cursor()
 
     # Figure out how frequently we are to update
     cursor.execute("""
         SELECT propvalue from properties WHERE propname = 'webcam.interval'
-        """)
+    """)
     row = cursor.fetchone()
     # assumption is either 60 or 300 is set
     if row[0] == "300" and now.minute % 5 != 0:
@@ -33,7 +32,12 @@ def main():
 
     for row in cursor:
         # async
-        subprocess.call("python getStill4web.py %s &" % (row[0],), shell=True)
+        subprocess.Popen(("timeout 55 python get_still_image.py %s"
+                          ) % (row[0], ), shell=True,
+                         stderr=subprocess.PIPE,
+                         stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE)
+
 
 if __name__ == '__main__':
     main()

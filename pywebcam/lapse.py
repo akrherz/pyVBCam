@@ -1,4 +1,4 @@
-
+"""A lapse"""
 import os
 import time
 import StringIO
@@ -13,7 +13,8 @@ import subprocess
 from PIL import Image, ImageDraw, ImageFont
 import pytz
 
-import vbcam
+import pywebcam.utils as camutils
+
 
 class scrape(object):
 
@@ -24,7 +25,7 @@ class scrape(object):
     def getDirection(self):
         return self.row['pan0']
 
-    def getOneShot(self):
+    def get_one_shot(self):
         now = datetime.datetime.now()
         now = now.replace(tzinfo=pytz.timezone("America/Chicago"))
 
@@ -33,9 +34,10 @@ class scrape(object):
         req2 = urllib2.urlopen(req)
         modified = req2.info().getheader('Last-Modified')
         if modified:
-            gmt = datetime.datetime.strptime(modified, "%a, %d %b %Y %H:%M:%S %Z")
+            gmt = datetime.datetime.strptime(modified,
+                                             "%a, %d %b %Y %H:%M:%S %Z")
             now = gmt + datetime.timedelta(seconds=now.utcoffset().seconds)
-        return req2.read() 
+        return req2.read()
 
 
 class Lapse(object):
@@ -44,7 +46,6 @@ class Lapse(object):
     """
     font = ImageFont.truetype('../lib/veramono.ttf', 22)
     sfont = ImageFont.truetype('../lib/veramono.ttf', 14)
-    date_height = 370
 
     def __init__(self):
         """
@@ -60,7 +61,6 @@ class Lapse(object):
         self.site = None
         self.i = 0
 
-
     def create_lapse(self):
         """
         Create the timelapse frames, please
@@ -68,8 +68,8 @@ class Lapse(object):
         fails = 0
         # Assume 30fps
 
-        while self.i < self.frames :
-            logging.info("i = %s, fails = %s" % (self.i, fails) )
+        while self.i < self.frames:
+            logging.info("i = %s, fails = %s", self.i, fails)
             if fails > 5:
                 logging.info("failed too many times")
                 sys.exit(0)
@@ -79,62 +79,59 @@ class Lapse(object):
 
             try:
                 drct = self.camera.getDirection()
-                buf.write( self.camera.getOneShot() )
+                buf.write(self.camera.get_one_shot())
                 buf.seek(0)
-                imgdata = Image.open( buf )
-                draw = ImageDraw.Draw(imgdata)
+                img = Image.open(buf)
+                draw = ImageDraw.Draw(img)
                 fails = 0
-            except IOError, exp:
-                logging.exception( exp )
+            except IOError as exp:
+                logging.exception(exp)
                 time.sleep(10)
                 fails += 1
                 continue
-        
             now = datetime.datetime.now()
-            
+            (_, imgheight) = img.size
+
             if self.network != 'KELO':
-                stamp = "%s   %s" % (vbcam.drct2dirTxt(drct), 
-                                   now.strftime("%-I:%M %p") )
-                (width, height) = self.font.getsize(stamp)
-                if self.network == 'KCRG2':
-                    draw.rectangle( [545-width-10, self.date_height, 545, 
-                                     self.date_height+height], fill="#000000" )
-                    draw.text((540-width, self.date_height), stamp, 
-                              font=self.font)
-                else:
-                    draw.rectangle( [205-width-10, self.date_height, 205, 
-                                     self.date_height+height], fill="#000000" )
-                    draw.text((200-width, self.date_height), stamp, 
-                              font=self.font)
-        
+                # Place timestamp on the image
+                stamp = "%s   %s" % (camutils.dir2text(drct),
+                                     now.strftime("%-I:%M %p"))
+                (width, height) = draw.textsize(stamp, self.font)
+                font_y_offset = self.font.getoffset(stamp)[1]
+                draw.rectangle([205 - width - 10, imgheight - 110 - 5, 205,
+                               imgheight - 110 + height], fill="#000000")
+                draw.text((200 - width, imgheight - 110 - font_y_offset),
+                          stamp, font=self.font)
                 stamp = "%s" % (now.strftime("%d %b %Y"), )
             else:
-                stamp = "%s  %s" % (now.strftime("%d %b %Y %-I:%M %p"), 
-                                  vbcam.drct2dirTxt(drct))
-            (width, height) = self.sfont.getsize(stamp)
-            draw.rectangle( [0, 480-height, 0+width, 480], fill="#000000" )
-            draw.text((0, 480-height), stamp, font=self.sfont)
+                stamp = "%s  %s" % (now.strftime("%d %b %Y %-I:%M %p"),
+                                    camutils.dir2text(drct))
+            (width, height) = draw.textsize(stamp, self.sfont)
+            font_y_offset = self.sfont.getoffset(stamp)[1]
+            draw.rectangle([0, imgheight - height - 5, 0 + width,
+                            imgheight],
+                           fill="#000000")
+            draw.text((0, imgheight - height - font_y_offset),
+                      stamp, font=self.sfont)
             del draw
-        
-            imgdata.save('%05i.jpg' % ( self.i,))
+
+            img.save('%05i.jpg' % (self.i, ))
             self.wait_for_next_frame(self.i)
-            del imgdata
+            del img
             del buf
             self.i += 1
 
     def wait_for_next_frame(self, i):
-        """
-        Sleep logic between frames
-        """
+        """Sleep logic between frames"""
         delta = self.ets - datetime.datetime.now()
         if delta.days < 0:
             secs_left = 0
         else:
             secs_left = delta.seconds
-        delay = (secs_left -((self.frames - i) * 2)) / (self.frames - i) 
-        logging.info("secs_left = %.2f, frames_left = %d, delay = %.2f", 
+        delay = (secs_left - ((self.frames - i) * 2)) / (self.frames - i)
+        logging.info("secs_left = %.2f, frames_left = %d, delay = %.2f",
                      secs_left,  self.frames - i, delay)
-        if delay > 0: 
+        if delay > 0:
             time.sleep(delay)
 
     def postprocess(self):
@@ -146,18 +143,19 @@ class Lapse(object):
         4. .mov for TV stations video system
         """
         ffmpeg = 'ffmpeg -i %05d.jpg'
-        # Lets sleep for around 12 minutes, 
-        # so that we don't have 27 ffmpegs going 
-        randsleep = 720. * random.random()
-        logging.info("Sleeping %.2f seconds before launching ffmpeg", 
-                     randsleep)
-        time.sleep( randsleep )
-        
+        if self.filename != 'test':
+            # Lets sleep for around 12 minutes,
+            # so that we don't have 27 ffmpegs going
+            randsleep = 720. * random.random()
+            logging.info("Sleeping %.2f seconds before launching ffmpeg",
+                         randsleep)
+            time.sleep(randsleep)
+
         def safe_copy(src, dest):
             """ Copy file, safely """
             try:
                 shutil.copyfile(src, "/mesonet/share/lapses/auto/%s" % (dest,))
-            except Exception, exp:
+            except IOError as exp:
                 logging.error(exp)
 
         # 1. Create Flash Video in full res!

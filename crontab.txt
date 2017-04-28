@@ -1,8 +1,9 @@
-PYTHONPATH=/mesonet/www/apps/iemwebsite/scripts/lib
+CRON_TZ="UTC"
+PYTHONPATH=/mesonet/scripts/pyVBCam/
 ###
 # Webcam stuff
-* * * * * cd /mesonet/scripts/pyVBCam/scripts; python acquireRT.py
-0 * * * * cd /mesonet/scripts/pyVBCam/scripts;  python driveAutos.py
-1 3 * * * cd /mesonet/scripts/pyVBCam/scripts; python setAutoLapseTimes.py
+* * * * * cd /mesonet/scripts/pyVBCam/scripts; python acquire_realtime.py
+0 * * * * cd /mesonet/scripts/pyVBCam/scripts;  python drive_autos.py
+1 8 * * * cd /mesonet/scripts/pyVBCam/scripts; python set_autolapse_times.py
 # careful not to run this during 2 AM over CDT->CST
-10 1 * * * cd /mesonet/scripts/pyVBCam/scripts; sh daily_cleanup.sh
+10 6 * * * cd /mesonet/scripts/pyVBCam/scripts; sh daily_cleanup.sh

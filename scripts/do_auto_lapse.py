@@ -1,23 +1,19 @@
 """
   Drives the production of auto timed webcam lapses
 """
-import common
-
-import datetime
-import time
-import psycopg2.extras
-import random
-import logging
-
+from __future__ import print_function
 import sys
 import os
 import subprocess
+import datetime
+import time
+import random
+import logging
 
-sys.path.insert(0, '../vbcam/')
-import lapse
+import psycopg2.extras
 
-dbconn = common.get_dbconn()
-cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+from pywebcam import lapse, vbcam
+from pywebcam import utils as camutils
 
 
 def check_resume(job):
@@ -33,9 +29,9 @@ def check_resume(job):
             break
     job.i = i
 
-    o = open('do_auto_lapse.pid', 'w')
-    o.write("%s" % (os.getpid(),))
-    o.close()
+    output = open('do_auto_lapse.pid', 'w')
+    output.write("%s" % (os.getpid(),))
+    output.close()
 
 
 def setup_job(job):
@@ -65,10 +61,12 @@ def bootstrap(job):
     """
     Get us off and running!
     """
+    dbconn = camutils.get_dbconn()
+    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cursor.execute("""SELECT * from webcams where id = %s""", (job.site,))
     row = cursor.fetchone()
     if row['scrape_url'] is None:
-        job.camera = common.get_vbcam(row["id"])
+        job.camera = vbcam.get_vbcam(row["id"])
 
         if job.camera.settings == {}:
             logging.info("Failed to reach camera, aborting...")
@@ -87,16 +85,22 @@ def bootstrap(job):
     sts = datetime.datetime.now()
     job.ets = sts + datetime.timedelta(seconds=job.secs)
 
-if __name__ == '__main__':
+
+def main():
+    """Do Something"""
     if len(sys.argv) != 6:
         print(("USAGE: python do_auto_lapse.py init_delay_sec camid "
                "realtime_secs filename movie_secs"))
         sys.exit()
-    JOB = lapse.Lapse()
-    setup_job(JOB)
-    bootstrap(JOB)
-    JOB.create_lapse()
-    JOB.postprocess()
+    job = lapse.Lapse()
+    setup_job(job)
+    bootstrap(job)
+    job.create_lapse()
+    job.postprocess()
     if os.path.isfile("do_auto_lapse.pid"):
         os.unlink("do_auto_lapse.pid")
     logging.info("Done!")
+
+
+if __name__ == '__main__':
+    main()

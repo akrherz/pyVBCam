@@ -5,62 +5,43 @@
 import urllib2
 import httplib
 import re
-import string
 import traceback
 import time
 import sys
 import logging
 import socket
-
-def drct2dirTxt(dir):
-  if (dir == None):
-    return "N"
-  dir = int(dir)
-  if (dir >= 350 or dir < 13):
-    return "N"
-  elif (dir >= 13 and dir < 35):
-    return "NNE"
-  elif (dir >= 35 and dir < 57):
-    return "NE"
-  elif (dir >= 57 and dir < 80):
-    return "ENE"
-  elif (dir >= 80 and dir < 102):
-    return "E"
-  elif (dir >= 102 and dir < 127):
-    return "ESE"
-  elif (dir >= 127 and dir < 143):
-    return "SE"
-  elif (dir >= 143 and dir < 166):
-    return "SSE"
-  elif (dir >= 166 and dir < 190):
-    return "S"
-  elif (dir >= 190 and dir < 215):
-    return "SSW"
-  elif (dir >= 215 and dir < 237):
-    return "SW"
-  elif (dir >= 237 and dir < 260):
-    return "WSW"
-  elif (dir >= 260 and dir < 281):
-    return "W"
-  elif (dir >= 281 and dir < 304):
-    return "WNW"
-  elif (dir >= 304 and dir < 324):
-    return "NW"
-  elif (dir >= 324 and dir < 350):
-    return "NNW"
+from psycopg2.extras import DictCursor
+import pywebcam.utils as camutils
+from pywebcam.webcam import BasicWebcam
 
 
-class VAPIX(object):
+def get_vbcam(camid):
+    """ Return a vbcam object for this camera ID """
+    pgconn = camutils.get_dbconn()
+    cursor = pgconn.cursor(cursor_factory=DictCursor)
+    cursor.execute("""SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
+        from webcams where id = %s """, (camid,))
+    row = cursor.fetchone()
+    pgconn.close()
+    if row["is_vapix"]:
+        return VAPIX(camid, row, camutils.get_user(camid),
+                     camutils.get_password(camid))
+    else:
+        return vbcam(camid, row, camutils.get_user(camid),
+                     camutils.get_password(camid))
+
+
+class VAPIX(BasicWebcam):
     """ Class representing access to a VAPIX webcam """
 
-    def __init__(self, cid, row, user, password, res='640x480'):
+    def __init__(self, cid, row, user, password):
         self.cid = cid
         self.pan0 = row["pan0"]
         self.ip = row["ip"]
         self.port = row['port']
         self.name = row['name']
         self.settings = {}
-        self.res = res
+        self.res = row['fullres']
         self.log = logging.getLogger(__name__)
 
         pm = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -116,10 +97,12 @@ class VAPIX(object):
         ''' Tilt '''
         return self.http('com/ptz.cgi?tilt=%s' % (val,))
 
-    def getOneShot(self):
+    def get_one_shot(self, res=None):
         """ Get a still image """
+        if res is None:
+            res = self.res
         return self.http(("jpg/image.cgi?clock=0&date=0&text=0&resolution=%s"
-                          ) % (self.res, ))
+                          ) % (res, ))
 
     def getDirection(self):
         """ Get the direction of the current pan """
@@ -134,10 +117,6 @@ class VAPIX(object):
         if off >= 360:
             off = off - 360
         return off
-
-    def drct2txt(self, mydir):
-
-        return drct2dirTxt(mydir)
 
     def realhttp(self, s):
         r = urllib2.urlopen('http://%s:%s/axis-cgi/%s' % (self.ip, self.port, s), 
@@ -180,27 +159,29 @@ class VAPIX(object):
         #noop
         pass
 
-class vbcam:
 
-    def __init__(self, id, d, user, passwd, loglevel=logging.WARNING):
+class vbcam(BasicWebcam):
+
+    def __init__(self, id, row, user, passwd):
         self.error = 0
         self.id = id
-        self.d = d
-        self.ip = d['ip']
-        self.port = d['port']
-        self.pan0 = d['pan0']
-        self.name = d['name']
+        self.d = row
+        self.ip = row['ip']
+        self.port = row['port']
+        self.pan0 = row['pan0']
+        self.name = row['name']
+        self.res = row['fullres']
         self.settings = {}
         self.cid = None
         self.haveControl = False
         self.log = logging.getLogger(__name__)
 
         pm = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        pm.add_password(None, "%s:%s" % (d['ip'], d['port']) ,user, passwd)
+        pm.add_password(None, "%s:%s" % (row['ip'], row['port']), user, passwd)
         self.ah = urllib2.HTTPBasicAuthHandler(pm)
         opener = urllib2.build_opener(self.ah)
         urllib2.install_opener(opener)
-    
+
         # Make the initial attempt take less time!
         self.retries = 6
         self.getSettings()
@@ -229,7 +210,7 @@ class vbcam:
         self.getControl()
         d = self.http("OperateCamera?connection_id=%s&tilt=%i" % (self.cid, tilt *100))
 
-    def getOneShot(self):
+    def get_one_shot(self):
         return self.http("GetOneShot")
     def getStillImage(self):
         return self.http("GetStillImage")
@@ -349,6 +330,3 @@ class vbcam:
         r.close()
         del r
         return data
-
-    def drct2txt(self, mydir):
-        return drct2dirTxt(mydir)
