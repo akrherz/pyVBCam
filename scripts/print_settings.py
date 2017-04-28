@@ -2,7 +2,7 @@
 from __future__ import print_function
 import sys
 import logging
-import common
+import pywebcam.vbcam as vbcam
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.DEBUG)
 def main(argv):
     """Run for this given argument"""
     cid = argv[1]
-    cam = common.get_vbcam(cid)
+    cam = vbcam.get_vbcam(cid)
     keys = cam.settings.keys()
     keys.sort()
 
