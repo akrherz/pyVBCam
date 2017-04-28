@@ -50,7 +50,7 @@ def drct2dirTxt(dir):
     return "NNW"
 
 
-class VAPIX:
+class VAPIX(object):
     """ Class representing access to a VAPIX webcam """
 
     def __init__(self, cid, row, user, password, res='640x480'):
@@ -118,7 +118,8 @@ class VAPIX:
 
     def getOneShot(self):
         """ Get a still image """
-        return self.http('jpg/image.cgi?resolution=%s' % (self.res, ))
+        return self.http(("jpg/image.cgi?clock=0&date=0&text=0&resolution=%s"
+                          ) % (self.res, ))
 
     def getDirection(self):
         """ Get the direction of the current pan """
