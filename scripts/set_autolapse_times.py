@@ -7,7 +7,7 @@ import psycopg2.extras
 import pywebcam.utils as camutils
 
 NOW = datetime.datetime.utcnow()
-NOW = NOW.replace(tzinfo=pytz.timezone("UTC"))
+NOW = NOW.replace(tzinfo=pytz.utc)
 NOW = NOW.astimezone(pytz.timezone("America/Chicago"))
 
 
@@ -31,7 +31,7 @@ def main():
 
     cursor.execute("""
         SELECT id, ST_x(geom) as lon, ST_y(geom) as lat from webcams WHERE
-        online = 't' and network in ('KELO','KCCI','KCRG','KCWI')
+        online = 't' and network in ('KELO','KCCI','KCRG','ISUC')
         """)
 
     for row in cursor:
