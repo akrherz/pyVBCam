@@ -1,15 +1,15 @@
 """A lapse"""
 import os
 import time
-import StringIO
+from io import BytesIO
 import datetime
-import urllib2
 import logging
 import sys
 import shutil
 import random
 import subprocess
 
+import requests
 from PIL import Image, ImageDraw, ImageFont
 import pytz
 
@@ -30,14 +30,13 @@ class scrape(object):
         now = now.replace(tzinfo=pytz.timezone("America/Chicago"))
 
         url = self.row['scrape_url']
-        req = urllib2.Request(url)
-        req2 = urllib2.urlopen(req)
-        modified = req2.info().getheader('Last-Modified')
+        req = requests.get(url)
+        modified = req.headers.get('Last-Modified')
         if modified:
             gmt = datetime.datetime.strptime(modified,
                                              "%a, %d %b %Y %H:%M:%S %Z")
             now = gmt + datetime.timedelta(seconds=now.utcoffset().seconds)
-        return req2.read()
+        return req.content
 
 
 class Lapse(object):
@@ -75,7 +74,7 @@ class Lapse(object):
                 sys.exit(0)
 
             # Set up buffer for image to go to
-            buf = StringIO.StringIO()
+            buf = BytesIO()
 
             try:
                 drct = self.camera.getDirection()
@@ -189,17 +188,6 @@ class Lapse(object):
                   "%s_frames.tar" % (self.filename,))
         # Cleanup after ourselfs
         os.unlink("%s_frames.tar" % (self.filename,))
-
-        # KCCI wanted no lapses between 5 and 6:30, OK....
-        if self.network == 'KCCI':
-            now = datetime.datetime.now()
-            if now.hour == 17 or (now.hour == 18 and now.minute < 30):
-                endts = now.replace(hour=18, minute=30)
-                time.sleep((endts - now).seconds)
-
-                # Lets sleep for around 6 minutes,
-                # so that we don't have 27 ffmpegs going
-                time.sleep(360. * random.random())
 
         # 4. mov files
         if os.path.isfile("out.mov"):

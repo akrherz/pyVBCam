@@ -45,26 +45,29 @@ def main():
         r2 = mydate(ob.next_rising(sun))
         s2 = mydate(ob.next_setting(sun))
 
-        sql = """UPDATE webcam_scheduler SET
-             begints = '%s'::timestamp - '45 minutes'::interval,
-             endts = '%s'::timestamp + '45 minutes'::interval WHERE
-             cid = '%s' and filename ~* '_eve' """ % (
-             s2.strftime("%Y-%m-%d %H:%M"), s2.strftime("%Y-%m-%d %H:%M"),
-             row['id'])
+        sql = """
+            UPDATE webcam_scheduler SET
+            begints = '%s'::timestamp - '45 minutes'::interval,
+            endts = '%s'::timestamp + '45 minutes'::interval WHERE
+            cid = '%s' and filename ~* '_eve'
+        """ % (s2.strftime("%Y-%m-%d %H:%M"), s2.strftime("%Y-%m-%d %H:%M"),
+               row['id'])
         cursor2.execute(sql)
-        sql = """UPDATE webcam_scheduler SET
-             begints = '%s'::timestamp - '30 minutes'::interval,
-             endts = '%s'::timestamp + '45 minutes'::interval WHERE
-             cid = '%s' and filename ~* '_sunrise' """ % (
-             r2.strftime("%Y-%m-%d %H:%M"), r2.strftime("%Y-%m-%d %H:%M"),
-             row['id'])
+        sql = """
+            UPDATE webcam_scheduler SET
+            begints = '%s'::timestamp - '30 minutes'::interval,
+            endts = '%s'::timestamp + '45 minutes'::interval WHERE
+            cid = '%s' and filename ~* '_sunrise'
+        """ % (r2.strftime("%Y-%m-%d %H:%M"), r2.strftime("%Y-%m-%d %H:%M"),
+               row['id'])
         cursor2.execute(sql)
-        sql = """UPDATE webcam_scheduler SET
-             begints = '%s'::timestamp - '30 minutes'::interval,
-             endts = '%s'::timestamp + '30 minutes'::interval WHERE
-             cid = '%s' and filename ~* '_day' """ % (
-             r2.strftime("%Y-%m-%d %H:%M"), s2.strftime("%Y-%m-%d %H:%M"),
-             row['id'])
+        sql = """
+            UPDATE webcam_scheduler SET
+            begints = '%s'::timestamp - '30 minutes'::interval,
+            endts = '%s'::timestamp + '30 minutes'::interval WHERE
+            cid = '%s' and filename ~* '_day'
+        """ % (r2.strftime("%Y-%m-%d %H:%M"), s2.strftime("%Y-%m-%d %H:%M"),
+               row['id'])
         cursor2.execute(sql)
 
     cursor2.close()

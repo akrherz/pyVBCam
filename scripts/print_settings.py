@@ -11,7 +11,7 @@ def main(argv):
     """Run for this given argument"""
     cid = argv[1]
     cam = vbcam.get_vbcam(cid)
-    keys = cam.settings.keys()
+    keys = list(cam.settings.keys())
     keys.sort()
 
     for k in keys:

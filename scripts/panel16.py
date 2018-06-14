@@ -2,6 +2,7 @@
 import os
 import glob
 import datetime
+
 from PIL import Image
 
 cams = ['KCRG-001', 'KCRG-002', 'KCRG-003', 'KCRG-005',
@@ -60,8 +61,9 @@ def get_files(timestamps, valid):
         res.append(minfn)
     return res
 
-if __name__ == '__main__':
-    # Go Main Go
+
+def main():
+    """Go Main Go"""
     os.chdir("../tmp")
     timestamps = compute_timestamps()
     timeline = get_timeline()
@@ -80,3 +82,8 @@ if __name__ == '__main__':
             frame.paste(i0, (x, y))
 
         frame.save("%s/%05i.jpg" % (mydir, t))
+
+
+if __name__ == '__main__':
+    # Go Main Go
+    main()

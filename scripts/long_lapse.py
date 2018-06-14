@@ -3,7 +3,7 @@ import time
 import sys
 import os
 import logging
-import StringIO
+from io import BytesIO
 import datetime
 
 from PIL import Image, ImageDraw, ImageFont
@@ -15,7 +15,7 @@ def doimage(cam, i, font):
     logging.debug("i = %s", i)
 
     # Set up buffer for image to go to
-    buf = StringIO.StringIO()
+    buf = BytesIO()
 
     drct = cam.getDirection()
     buf.write(cam.get_one_shot())

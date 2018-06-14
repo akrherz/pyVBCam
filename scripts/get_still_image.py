@@ -1,11 +1,10 @@
 """
  Get still image for the website mostly
 """
-import StringIO
+from io import BytesIO
 import subprocess
 import sys
 import datetime
-import urllib2
 
 from PIL import Image, ImageDraw, ImageFont
 import pytz
@@ -26,7 +25,7 @@ def get_buffer_and_cam(row, cid, gmt):
         cam.retries = 2
 
         # Get Still
-        buf = StringIO.StringIO()
+        buf = BytesIO()
         buf.write(cam.get_one_shot())
         buf.seek(0)
 
@@ -37,7 +36,7 @@ def get_buffer_and_cam(row, cid, gmt):
             req2 = urllib2.urlopen(req)
         except Exception as exp:
             if NOW.minute == 0:
-                print 'Exception for %s: %s' % (cid, exp)
+                print('Exception for %s: %s' % (cid, exp))
             return
         modified = req2.info().getheader('Last-Modified')
         if modified:
@@ -109,8 +108,6 @@ def workflow(cid):
     row = get_row(cid)
     gmt = datetime.datetime.utcnow()
     buf, cam, gmt = get_buffer_and_cam(row, cid, gmt)
-    if buf.len == 0:
-        return
     try:
         i0 = Image.open(buf)
     except IOError:
