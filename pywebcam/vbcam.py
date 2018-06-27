@@ -131,6 +131,7 @@ class vbcam(BasicWebcam):
 
     def get_one_shot(self):
         return self.http("GetOneShot")
+
     def getStillImage(self):
         return self.http("GetStillImage")
 
@@ -193,7 +194,8 @@ class vbcam(BasicWebcam):
                 self.haveControl = True
                 break
             self.startSession()
-            print("Couldn't get Control. Attempt? %s Answer? %s" % (attempt, d))
+            print(("Couldn't get Control. Attempt? %s Answer? %s"
+                   ) % (attempt, d))
 
     def startSession(self):
         """Start a control session"""

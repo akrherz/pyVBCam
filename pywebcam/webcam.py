@@ -46,6 +46,17 @@ class BasicWebcam(object):
             'http://%s:%s/%s/%s' % (self.ip, self.port, self.PREFIX, s),
             auth=self.httpauth, timeout=30)
         logging.debug("HTTP request => %s, status = %s", s, req.status_code)
+        if (req.status_code == 401 and
+                isinstance(self.httpauth, requests.auth.HTTPDigestAuth)):
+            logging.debug("downgrading HTTPAuth to Basic")
+            self.httpauth = requests.auth.HTTPBasicAuth(
+                self.httpauth.username, self.httpauth.password
+            )
+            req = requests.get(
+                'http://%s:%s/%s/%s' % (self.ip, self.port, self.PREFIX, s),
+                auth=self.httpauth, timeout=30)
+            logging.debug("HTTP request => %s, status = %s", s,
+                          req.status_code)
         if req.status_code != 200:
             return None
         return req.content
