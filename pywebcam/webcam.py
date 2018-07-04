@@ -1,7 +1,5 @@
 """A basic definition of a webcam object"""
-import socket
 import sys
-import traceback
 import logging
 
 import requests
@@ -70,11 +68,11 @@ class BasicWebcam(object):
                 data = self.realhttp(s)
                 if data is not None:
                     break
-            except socket.timeout:
-                logging.debug('urllib2 timout!')
+            except requests.exceptions.ConnectTimeout:
+                logging.debug('requests timout!')
             except KeyboardInterrupt:
                 sys.exit(0)
-            except Exception as _exp:
-                traceback.print_exc(logging)
+            except Exception as exp:
+                logging.debug(repr(exp))
             c += 1
         return data
