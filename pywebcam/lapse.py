@@ -17,15 +17,19 @@ import pywebcam.utils as camutils
 
 
 class scrape(object):
+    """This is a vanilla scrapper"""
 
     def __init__(self, cid, row):
+        """Constructor"""
         self.cid = cid
         self.row = row
 
     def getDirection(self):
+        """We have no options to get camera metadata"""
         return self.row['pan0']
 
     def get_one_shot(self):
+        """Our primary means to get data"""
         now = datetime.datetime.now()
         now = now.replace(tzinfo=pytz.timezone("America/Chicago"))
 
@@ -40,9 +44,7 @@ class scrape(object):
 
 
 class Lapse(object):
-    """
-    Represents a timelapse!
-    """
+    """Represents a timelapse"""
     font = ImageFont.truetype('../lib/veramono.ttf', 22)
     sfont = ImageFont.truetype('../lib/veramono.ttf', 14)
 
@@ -78,7 +80,12 @@ class Lapse(object):
 
             try:
                 drct = self.camera.getDirection()
-                buf.write(self.camera.get_one_shot())
+                imgdata = self.camera.get_one_shot()
+                if imgdata is None:
+                    time.sleep(10)
+                    fails += 1
+                    continue
+                buf.write(imgdata)
                 buf.seek(0)
                 img = Image.open(buf)
                 draw = ImageDraw.Draw(img)
@@ -129,7 +136,7 @@ class Lapse(object):
             secs_left = delta.seconds
         delay = (secs_left - ((self.frames - i) * 2)) / (self.frames - i)
         logging.info("secs_left = %.2f, frames_left = %d, delay = %.2f",
-                     secs_left,  self.frames - i, delay)
+                     secs_left, self.frames - i, delay)
         if delay > 0:
             time.sleep(delay)
 
