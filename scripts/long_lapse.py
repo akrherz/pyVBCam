@@ -72,8 +72,8 @@ def main(argv):
         except Exception as exp:
             logger.exception(exp)
             errors += 1
-        finally:
-            i += 1
+            continue
+        i += 1
 
 
 if __name__ == '__main__':
