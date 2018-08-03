@@ -27,7 +27,7 @@ def run(argv):
     """ Start a long term lapse for this network """
     network = argv[1]
     if network == 'ALL':
-        for _network in ['KCCI', 'KCRG', 'ISUC', 'KELO']:
+        for _network in ['KCCI', 'KCRG', 'ISUC', 'KELO', 'MCFC']:
             go(_network)
     else:
         go(network)

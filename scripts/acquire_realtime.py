@@ -27,7 +27,8 @@ def main():
 
     cursor.execute("""
         SELECT id from webcams WHERE
-        online = 't' and network in ('KELO','KCCI','KCRG','ISUC', 'KCWI')
+        online = 't'
+        and network in ('KELO','KCCI','KCRG','ISUC', 'MCFC')
     """)
 
     for row in cursor:
