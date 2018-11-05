@@ -5,6 +5,7 @@ from io import BytesIO
 import subprocess
 import sys
 import datetime
+import logging
 
 from PIL import Image, ImageDraw, ImageFont
 import pytz
@@ -16,6 +17,8 @@ from pywebcam import vbcam
 UTCNOW = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
 NOW = UTCNOW.astimezone(pytz.timezone('America/Chicago'))
 FONT = ImageFont.truetype('../lib/veramono.ttf', 10)
+log = logging.getLogger()
+log.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.WARNING)
 
 
 def get_buffer_and_cam(row, cid, gmt):
@@ -30,6 +33,8 @@ def get_buffer_and_cam(row, cid, gmt):
         buf.seek(0)
 
     else:
+        buf, cam = None, None
+        """
         url = row['scrape_url']
         req = urllib2.Request(url)
         try:
@@ -48,6 +53,7 @@ def get_buffer_and_cam(row, cid, gmt):
             gmt += datetime.timedelta(minutes=roundup)
         buf = StringIO.StringIO(req2.read())
         buf.seek(0)
+        """
     return buf, cam, gmt
 
 
