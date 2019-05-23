@@ -15,6 +15,7 @@ class BasicWebcam(object):
         self.cid = cid
         self.pan0 = row["pan0"]
         self.ip = row["ip"]
+        self.fqdn = row['fqdn']
         self.port = row['port']
         self.name = row['name']
         self.settings = {}
@@ -41,7 +42,9 @@ class BasicWebcam(object):
     def realhttp(self, s):
         """Make a real connection"""
         req = requests.get(
-            'http://%s:%s/%s/%s' % (self.ip, self.port, self.PREFIX, s),
+            'http://%s:%s/%s/%s' % (
+                self.ip if self.ip is not None else self.fqdn, self.port,
+                self.PREFIX, s),
             auth=self.httpauth, timeout=30)
         logging.debug("HTTP request => %s, status = %s", s, req.status_code)
         if (req.status_code == 401 and
@@ -51,7 +54,9 @@ class BasicWebcam(object):
                 self.httpauth.username, self.httpauth.password
             )
             req = requests.get(
-                'http://%s:%s/%s/%s' % (self.ip, self.port, self.PREFIX, s),
+                'http://%s:%s/%s/%s' % (
+                    self.ip if self.ip is not None else self.fqdn, self.port,
+                    self.PREFIX, s),
                 auth=self.httpauth, timeout=30)
             logging.debug("HTTP request => %s, status = %s", s,
                           req.status_code)

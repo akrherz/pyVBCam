@@ -96,10 +96,11 @@ class VAPIX(BasicWebcam):
 
     def closeConnection(self):
         """nothing to do here as we are stateless with VAPIX"""
-        pass
+        return
 
 
 class vbcam(BasicWebcam):
+    """Canon VB-Webcam"""
     PREFIX = "-wvhttp-01-"
 
     def closeConnection(self):
@@ -118,21 +119,25 @@ class vbcam(BasicWebcam):
             "OperateCamera?connection_id=%s&pan=%i" % (self.connid, pan * 100))
 
     def zoom(self, zoom):
+        """Zoom the webcam!"""
         self.getControl()
         self.http(
             ("OperateCamera?connection_id=%s&zoom=%i"
              ) % (self.connid, zoom * 100))
 
     def tilt(self, tilt):
+        """Tilt the webcam!"""
         self.getControl()
         self.http(
             ("OperateCamera?connection_id=%s&tilt=%i"
              ) % (self.connid, tilt * 100))
 
     def get_one_shot(self):
+        """Get one shot which is more forgiving that GetStillImage"""
         return self.http("GetOneShot")
 
     def getStillImage(self):
+        """Requires more control on the webcam."""
         return self.http("GetStillImage")
 
     def dir2pan(self, drct):
@@ -151,9 +156,11 @@ class vbcam(BasicWebcam):
         return offset
 
     def getTilt(self):
+        """Get the current tilt."""
         return float(self.settings['tilt_current_value']) / 100.0
 
     def getZoom(self):
+        """Get the current zoom."""
         return float(self.settings['zoom_current_value']) / 100.0
 
     def pan2dir(self, pan=None):
@@ -172,13 +179,16 @@ class vbcam(BasicWebcam):
         return off
 
     def getDirectionText(self):
+        """Get the current webcam pointing direction."""
         return self.drct2txt(self.getDirection())
 
     def getDirection(self):
+        """Get the current webcam pointing direction."""
         self.getSettings()
         return self.pan2dir()
 
     def getControl(self):
+        """Grab control of the webcam for this session."""
         self.haveControl = False
 
         for attempt in range(10):
