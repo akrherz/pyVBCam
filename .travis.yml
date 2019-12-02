@@ -13,5 +13,6 @@ install:
   - python -m pip install . --upgrade
 
 script:
+  - echo '{}' > settings.json
   - pytest --cov=./
   - codecov -e TRAVIS_PYTHON_VERSION
