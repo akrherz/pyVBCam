@@ -4,7 +4,7 @@ import time
 import subprocess
 
 import psycopg2.extras
-import pywebcam.utils as camutils
+import pyvbcam.utils as camutils
 
 
 def main():

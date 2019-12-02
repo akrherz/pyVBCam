@@ -5,7 +5,7 @@ import datetime
 import sys
 import subprocess
 
-import pywebcam.utils as camutils
+import pyvbcam.utils as camutils
 
 
 def main():

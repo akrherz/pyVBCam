@@ -9,7 +9,7 @@ from io import BytesIO
 
 import ephem
 from PIL import Image, ImageDraw, ImageFont
-from pywebcam import vbcam
+from pyvbcam import vbcam
 
 
 def main(argv):

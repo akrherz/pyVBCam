@@ -7,7 +7,7 @@ from io import BytesIO
 import datetime
 
 from PIL import Image, ImageDraw, ImageFont
-from pywebcam.vbcam import get_vbcam
+from pyvbcam.vbcam import get_vbcam
 
 
 def doimage(cam, i, font):

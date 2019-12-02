@@ -11,8 +11,8 @@ from PIL import Image, ImageDraw, ImageFont
 import pytz
 import psycopg2.extras
 
-import pywebcam.utils as camutils
-from pywebcam import vbcam
+import pyvbcam.utils as camutils
+from pyvbcam import vbcam
 
 UTCNOW = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
 NOW = UTCNOW.astimezone(pytz.timezone("America/Chicago"))

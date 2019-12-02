@@ -4,7 +4,7 @@ import datetime
 import pytz
 import ephem
 import psycopg2.extras
-import pywebcam.utils as camutils
+import pyvbcam.utils as camutils
 
 NOW = datetime.datetime.utcnow()
 NOW = NOW.replace(tzinfo=pytz.utc)

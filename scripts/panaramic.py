@@ -5,7 +5,7 @@ import os
 import logging
 
 from PIL import Image, ImageDraw
-from pywebcam import vbcam
+from pyvbcam import vbcam
 
 logging.basicConfig(level=logging.DEBUG)
 
