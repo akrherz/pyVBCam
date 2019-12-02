@@ -12,8 +12,8 @@ import logging
 
 import psycopg2.extras
 
-from pywebcam import lapse, vbcam
-from pywebcam import utils as camutils
+from pyvbcam import lapse, vbcam
+from pyvbcam import utils as camutils
 
 
 def check_resume(job):

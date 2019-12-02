@@ -2,7 +2,7 @@
 from __future__ import print_function
 import sys
 import logging
-import pywebcam.vbcam as vbcam
+import pyvbcam.vbcam as vbcam
 
 logging.basicConfig(level=logging.DEBUG)
 

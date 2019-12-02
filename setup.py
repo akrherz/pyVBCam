@@ -1,4 +1,4 @@
 """Disutils"""
-from distutils.core import setup
+from setuptools import setup
 
-setup(name="pyVBCam", version="0.1", packages=["pywebcam"])
+setup(use_scm_version={"version_scheme": "post-release"})
