@@ -20,8 +20,8 @@ def check_resume(job):
     """ Perhaps we are resuming an old job or re-running post processing? """
     if os.path.isfile("do_auto_lapse.pid"):
         subprocess.call("kill -9 `cat do_auto_lapse.pid`", shell=True)
-    if os.path.isfile("%s.log" % (job.site, )):
-        os.rename("%s.log" % (job.site, ), "%s.log-OLD" % (job.site, ))
+    if os.path.isfile("%s.log" % (job.site,)):
+        os.rename("%s.log" % (job.site,), "%s.log-OLD" % (job.site,))
 
     # Figure out where we left off
     for i in range(job.frames):
@@ -29,7 +29,7 @@ def check_resume(job):
             break
     job.i = i
 
-    output = open('do_auto_lapse.pid', 'w')
+    output = open("do_auto_lapse.pid", "w")
     output.write("%s" % (os.getpid(),))
     output.close()
 
@@ -46,14 +46,17 @@ def setup_job(job):
     job.movie_duration = int(float(sys.argv[5]))
     job.frames = job.movie_duration * 30
 
-    outdir = "../tmp/autoframes.%s" % (job.filename, )
+    outdir = "../tmp/autoframes.%s" % (job.filename,)
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
     os.chdir(outdir)
     check_resume(job)
-    logging.basicConfig(filename="%s.log" % (job.site, ), filemode='w',
-                        format='%(levelname)s: %(asctime)-15s %(message)s',
-                        level=logging.DEBUG)
+    logging.basicConfig(
+        filename="%s.log" % (job.site,),
+        filemode="w",
+        format="%(levelname)s: %(asctime)-15s %(message)s",
+        level=logging.DEBUG,
+    )
     logging.info("We are off and running!")
 
 
@@ -65,7 +68,7 @@ def bootstrap(job):
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cursor.execute("""SELECT * from webcams where id = %s""", (job.site,))
     row = cursor.fetchone()
-    if row['scrape_url'] is None:
+    if row["scrape_url"] is None:
         job.camera = vbcam.get_vbcam(row["id"])
 
         if job.camera.settings == {}:
@@ -89,8 +92,12 @@ def bootstrap(job):
 def main():
     """Do Something"""
     if len(sys.argv) != 6:
-        print(("USAGE: python do_auto_lapse.py init_delay_sec camid "
-               "realtime_secs filename movie_secs"))
+        print(
+            (
+                "USAGE: python do_auto_lapse.py init_delay_sec camid "
+                "realtime_secs filename movie_secs"
+            )
+        )
         sys.exit()
     job = lapse.Lapse()
     setup_job(job)
@@ -102,5 +109,5 @@ def main():
     logging.info("Done!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

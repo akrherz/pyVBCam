@@ -28,12 +28,14 @@ def doimage(cam, i, font):
     (width, height) = font.getsize(label)
 
     draw = ImageDraw.Draw(i0)
-    draw.rectangle([205 - width - 10, imgheight - 110,
-                    205, imgheight - 110 + height], fill="#000000")
+    draw.rectangle(
+        [205 - width - 10, imgheight - 110, 205, imgheight - 110 + height],
+        fill="#000000",
+    )
     draw.text((200 - width, imgheight - 110), label, font=font)
     del draw
 
-    i0.save('%05i.jpg' % (i, ))
+    i0.save("%05i.jpg" % (i,))
     del i0
     del buf
     i += 1
@@ -42,19 +44,22 @@ def doimage(cam, i, font):
 def main(argv):
     """Do Main"""
     fontsize = 18
-    font = ImageFont.truetype('../lib/veramono.ttf', fontsize)
+    font = ImageFont.truetype("../lib/veramono.ttf", fontsize)
 
     os.chdir("../tmp/")
 
     site = argv[1]
 
-    mydir = ("longterm.%s.%s"
-             ) % (site, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
+    mydir = ("longterm.%s.%s") % (
+        site,
+        datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+    )
     os.makedirs(mydir)
     os.chdir(mydir)
 
-    logging.basicConfig(filename="%s.log" % (site,), filemode='w',
-                        level=logging.INFO)
+    logging.basicConfig(
+        filename="%s.log" % (site,), filemode="w", level=logging.INFO
+    )
     logger = logging.getLogger()
 
     cam = get_vbcam(site)
@@ -76,5 +81,5 @@ def main(argv):
         i += 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

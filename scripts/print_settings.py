@@ -18,5 +18,5 @@ def main(argv):
         print("[%s] %s" % (k, cam.settings[k]))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

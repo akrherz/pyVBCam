@@ -14,13 +14,15 @@ def main():
     # In UTC
     sts = datetime.datetime(2017, 7, 17, 22, 15)
     ets = datetime.datetime(2017, 7, 18, 0, 40)
-    didx = pd.date_range(start=sts, end=ets, freq='8S')
+    didx = pd.date_range(start=sts, end=ets, freq="8S")
     frames = len(didx)
 
-    dirs = ['longterm.KCCI-013.20170717151447',
-            'longterm.KCCI-016.20170717151447',
-            'longterm.KCCI-027.20170717151447',
-            'longterm.KCCI-028.20170717151447']
+    dirs = [
+        "longterm.KCCI-013.20170717151447",
+        "longterm.KCCI-016.20170717151447",
+        "longterm.KCCI-027.20170717151447",
+        "longterm.KCCI-028.20170717151447",
+    ]
 
     dfs = []
 
@@ -32,20 +34,21 @@ def main():
         files.sort()
         for fn in files:
             ticks = os.stat(fn)[stat.ST_MTIME]
-            valid = (datetime.datetime(1970, 1, 1) +
-                     datetime.timedelta(seconds=ticks))
+            valid = datetime.datetime(1970, 1, 1) + datetime.timedelta(
+                seconds=ticks
+            )
             res.append(dict(fn=fn, valid=valid))
         df = pd.DataFrame(res)
-        df.set_index('valid', inplace=True)
+        df.set_index("valid", inplace=True)
         df = df[(df.index >= sts) & (df.index < ets)]
-        dfs.append(df.reindex(didx, method='nearest'))
+        dfs.append(df.reindex(didx, method="nearest"))
         os.chdir("..")
 
-    if not os.path.isdir('stitch4'):
+    if not os.path.isdir("stitch4"):
         os.mkdir("stitch4")
-    os.chdir('stitch4')
+    os.chdir("stitch4")
     for i in range(frames):
-        out = Image.new('RGB', (1280, 960))
+        out = Image.new("RGB", (1280, 960))
         fn1 = "../%s/%s" % (dirs[0], dfs[0].iat[i, 0])
         i0 = Image.open(fn1)
         out.paste(i0, (0, 0))
@@ -62,9 +65,9 @@ def main():
         i0 = Image.open(fn)
         out.paste(i0, (640, 480))
         del i0
-        out.save('%05i.jpg' % (i,))
+        out.save("%05i.jpg" % (i,))
         del out
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

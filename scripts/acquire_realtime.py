@@ -17,28 +17,34 @@ def main():
     cursor = pgconn.cursor()
 
     # Figure out how frequently we are to update
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT propvalue from properties WHERE propname = 'webcam.interval'
-    """)
+    """
+    )
     row = cursor.fetchone()
     # assumption is either 60 or 300 is set
     if row[0] == "300" and now.minute % 5 != 0:
         sys.exit(0)
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT id from webcams WHERE
         online = 't'
         and network in ('KELO','KCCI','KCRG','ISUC', 'MCFC')
-    """)
+    """
+    )
 
     for row in cursor:
         # async
-        subprocess.Popen(("timeout 55 python get_still_image.py %s"
-                          ) % (row[0], ), shell=True,
-                         stderr=subprocess.PIPE,
-                         stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE)
+        subprocess.Popen(
+            ("timeout 55 python get_still_image.py %s") % (row[0],),
+            shell=True,
+            stderr=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

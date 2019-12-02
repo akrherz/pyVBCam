@@ -26,27 +26,29 @@ class scrape(object):
 
     def getDirection(self):
         """We have no options to get camera metadata"""
-        return self.row['pan0']
+        return self.row["pan0"]
 
     def get_one_shot(self):
         """Our primary means to get data"""
         now = datetime.datetime.now()
         now = now.replace(tzinfo=pytz.timezone("America/Chicago"))
 
-        url = self.row['scrape_url']
+        url = self.row["scrape_url"]
         req = requests.get(url)
-        modified = req.headers.get('Last-Modified')
+        modified = req.headers.get("Last-Modified")
         if modified:
-            gmt = datetime.datetime.strptime(modified,
-                                             "%a, %d %b %Y %H:%M:%S %Z")
+            gmt = datetime.datetime.strptime(
+                modified, "%a, %d %b %Y %H:%M:%S %Z"
+            )
             now = gmt + datetime.timedelta(seconds=now.utcoffset().seconds)
         return req.content
 
 
 class Lapse(object):
     """Represents a timelapse"""
-    font = ImageFont.truetype('../lib/veramono.ttf', 22)
-    sfont = ImageFont.truetype('../lib/veramono.ttf', 14)
+
+    font = ImageFont.truetype("../lib/veramono.ttf", 22)
+    sfont = ImageFont.truetype("../lib/veramono.ttf", 14)
 
     def __init__(self):
         """
@@ -98,30 +100,46 @@ class Lapse(object):
             now = datetime.datetime.now()
             (_, imgheight) = img.size
 
-            if self.network != 'KELO':
+            if self.network != "KELO":
                 # Place timestamp on the image
-                stamp = "%s   %s" % (camutils.dir2text(drct),
-                                     now.strftime("%-I:%M %p"))
+                stamp = "%s   %s" % (
+                    camutils.dir2text(drct),
+                    now.strftime("%-I:%M %p"),
+                )
                 (width, height) = draw.textsize(stamp, self.font)
                 font_y_offset = self.font.getoffset(stamp)[1]
-                draw.rectangle([205 - width - 10, imgheight - 110 - 5, 205,
-                               imgheight - 110 + height], fill="#000000")
-                draw.text((200 - width, imgheight - 110 - font_y_offset),
-                          stamp, font=self.font)
-                stamp = "%s" % (now.strftime("%d %b %Y"), )
+                draw.rectangle(
+                    [
+                        205 - width - 10,
+                        imgheight - 110 - 5,
+                        205,
+                        imgheight - 110 + height,
+                    ],
+                    fill="#000000",
+                )
+                draw.text(
+                    (200 - width, imgheight - 110 - font_y_offset),
+                    stamp,
+                    font=self.font,
+                )
+                stamp = "%s" % (now.strftime("%d %b %Y"),)
             else:
-                stamp = "%s  %s" % (now.strftime("%d %b %Y %-I:%M %p"),
-                                    camutils.dir2text(drct))
+                stamp = "%s  %s" % (
+                    now.strftime("%d %b %Y %-I:%M %p"),
+                    camutils.dir2text(drct),
+                )
             (width, height) = draw.textsize(stamp, self.sfont)
             font_y_offset = self.sfont.getoffset(stamp)[1]
-            draw.rectangle([0, imgheight - height - 5, 0 + width,
-                            imgheight],
-                           fill="#000000")
-            draw.text((0, imgheight - height - font_y_offset),
-                      stamp, font=self.sfont)
+            draw.rectangle(
+                [0, imgheight - height - 5, 0 + width, imgheight],
+                fill="#000000",
+            )
+            draw.text(
+                (0, imgheight - height - font_y_offset), stamp, font=self.sfont
+            )
             del draw
 
-            img.save('%05i.jpg' % (self.i, ))
+            img.save("%05i.jpg" % (self.i,))
             self.wait_for_next_frame(self.i)
             del img
             del buf
@@ -135,8 +153,12 @@ class Lapse(object):
         else:
             secs_left = delta.seconds
         delay = (secs_left - ((self.frames - i) * 2)) / (self.frames - i)
-        logging.info("secs_left = %.2f, frames_left = %d, delay = %.2f",
-                     secs_left, self.frames - i, delay)
+        logging.info(
+            "secs_left = %.2f, frames_left = %d, delay = %.2f",
+            secs_left,
+            self.frames - i,
+            delay,
+        )
         if delay > 0:
             time.sleep(delay)
 
@@ -148,13 +170,14 @@ class Lapse(object):
         3. .tar file of the frames
         4. .mov for TV stations video system
         """
-        ffmpeg = 'ffmpeg -i %05d.jpg'
-        if self.filename != 'test':
+        ffmpeg = "ffmpeg -i %05d.jpg"
+        if self.filename != "test":
             # Lets sleep for around 12 minutes,
             # so that we don't have 27 ffmpegs going
-            randsleep = 720. * random.random()
-            logging.info("Sleeping %.2f seconds before launching ffmpeg",
-                         randsleep)
+            randsleep = 720.0 * random.random()
+            logging.info(
+                "Sleeping %.2f seconds before launching ffmpeg", randsleep
+            )
             time.sleep(randsleep)
 
         def safe_copy(src, dest):
@@ -167,9 +190,12 @@ class Lapse(object):
         # 1. Create Flash Video in full res!
         if os.path.isfile("out.flv"):
             os.unlink("out.flv")
-        proc = subprocess.Popen("%s -b 1000k out.flv" % (ffmpeg,), shell=True,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE)
+        proc = subprocess.Popen(
+            "%s -b 1000k out.flv" % (ffmpeg,),
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
         logging.info(proc.stdout.read())
         logging.error(proc.stderr.read())
         safe_copy("out.flv", "%s.flv" % (self.filename,))
@@ -179,9 +205,12 @@ class Lapse(object):
         # 2. MP4
         if os.path.isfile("out.mp4"):
             os.unlink("out.mp4")
-        proc = subprocess.Popen("%s out.mp4" % (ffmpeg,),
-                                shell=True, stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE)
+        proc = subprocess.Popen(
+            "%s out.mp4" % (ffmpeg,),
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
         logging.info(proc.stdout.read())
         logging.error(proc.stderr.read())
         safe_copy("out.mp4", "%s.mp4" % (self.filename,))
@@ -189,23 +218,34 @@ class Lapse(object):
         os.unlink("out.mp4")
 
         # 3. Create tar file of images
-        subprocess.call("tar -cf %s_frames.tar *.jpg" % (self.filename,),
-                        shell=True)
-        safe_copy("%s_frames.tar" % (self.filename,),
-                  "%s_frames.tar" % (self.filename,))
+        subprocess.call(
+            "tar -cf %s_frames.tar *.jpg" % (self.filename,), shell=True
+        )
+        safe_copy(
+            "%s_frames.tar" % (self.filename,),
+            "%s_frames.tar" % (self.filename,),
+        )
         # Cleanup after ourselfs
         os.unlink("%s_frames.tar" % (self.filename,))
 
         # 4. mov files
         if os.path.isfile("out.mov"):
             os.unlink("out.mov")
-        proc = subprocess.Popen("%s -b 2000k out.mov" % (ffmpeg,),
-                                shell=True, stderr=subprocess.PIPE,
-                                stdout=subprocess.PIPE)
+        proc = subprocess.Popen(
+            "%s -b 2000k out.mov" % (ffmpeg,),
+            shell=True,
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+        )
         logging.info(proc.stdout.read())
         logging.error(proc.stderr.read())
-        subprocess.call(("/home/ldm/bin/pqinsert -p 'lapse c "
-                         "000000000000 %s/%s.qt BOGUS qt' out.mov") % (
-                        self.network, self.filename), shell=True)
+        subprocess.call(
+            (
+                "/home/ldm/bin/pqinsert -p 'lapse c "
+                "000000000000 %s/%s.qt BOGUS qt' out.mov"
+            )
+            % (self.network, self.filename),
+            shell=True,
+        )
         # Cleanup after ourself
         os.unlink("out.mov")

@@ -5,10 +5,24 @@ import datetime
 
 from PIL import Image
 
-cams = ['KCRG-001', 'KCRG-002', 'KCRG-003', 'KCRG-005',
-        'KCRG-006', 'KCRG-007', 'KCRG-008', 'KCRG-009',
-        'KCRG-010', 'KCRG-011', 'KCRG-012', 'KCRG-016',
-        'KCRG-018', 'KCRG-020', 'KCRG-022', 'KCRG-023']
+cams = [
+    "KCRG-001",
+    "KCRG-002",
+    "KCRG-003",
+    "KCRG-005",
+    "KCRG-006",
+    "KCRG-007",
+    "KCRG-008",
+    "KCRG-009",
+    "KCRG-010",
+    "KCRG-011",
+    "KCRG-012",
+    "KCRG-016",
+    "KCRG-018",
+    "KCRG-020",
+    "KCRG-022",
+    "KCRG-023",
+]
 
 
 def compute_timestamps():
@@ -20,7 +34,8 @@ def compute_timestamps():
         os.chdir(mydir)
         for fn in glob.glob("*.jpg"):
             res[cam]["%s/%s" % (mydir, fn)] = datetime.datetime.fromtimestamp(
-                                                    os.path.getmtime(fn))
+                os.path.getmtime(fn)
+            )
         os.chdir("..")
     return res
 
@@ -42,8 +57,8 @@ def get_timeline():
 
 def get_delta(t1, t2):
     """ Compute difference """
-    d = (t1 - t2)
-    delta = d.days * 86400. + d.seconds + d.microseconds / 1000000.
+    d = t1 - t2
+    delta = d.days * 86400.0 + d.seconds + d.microseconds / 1000000.0
     return abs(delta)
 
 
@@ -70,7 +85,7 @@ def main():
     mydir = "panel16.%s" % (datetime.datetime.now().strftime("%Y%m%d%H%M%S"),)
     os.makedirs(mydir)
     for t, valid in enumerate(timeline):
-        frame = Image.new('RGB', (1280, 960))
+        frame = Image.new("RGB", (1280, 960))
         files = get_files(timestamps, valid)
         for i, imgfn in enumerate(files):
             row = i / 4
@@ -84,6 +99,6 @@ def main():
         frame.save("%s/%05i.jpg" % (mydir, t))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Go Main Go
     main()

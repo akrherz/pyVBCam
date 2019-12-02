@@ -16,12 +16,16 @@ def main():
     i = 0
     now = sts
     while now < ets:
-        uri = now.strftime(("http://mesonet.agron.iastate.edu/archive/"
-                            "data/%Y/%m/%d/camera/ISUC-002/"
-                            "ISUC-002_%Y%m%d%H%M.jpg"))
+        uri = now.strftime(
+            (
+                "http://mesonet.agron.iastate.edu/archive/"
+                "data/%Y/%m/%d/camera/ISUC-002/"
+                "ISUC-002_%Y%m%d%H%M.jpg"
+            )
+        )
         req = requests.get(uri)
         if req.status_code == 200:
-            fp = open("/mesonet/tmp/frames/%05d.jpg" % (i,), 'w')
+            fp = open("/mesonet/tmp/frames/%05d.jpg" % (i,), "w")
             fp.write(req.content)
             fp.close()
             i += 1
@@ -33,5 +37,5 @@ def main():
             now += interval
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

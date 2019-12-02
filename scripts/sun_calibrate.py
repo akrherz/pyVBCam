@@ -13,6 +13,7 @@ from PIL import ImageDraw
 import psycopg2.extras
 import common
 import logging
+
 logging.basicConfig(level=logging.DEBUG)
 
 mesosite = common.get_dbconn()
@@ -25,15 +26,18 @@ os.chdir("../tmp")
 cid = sys.argv[1]
 
 camera = common.get_vbcam(cid, loglevel=logging.DEBUG)
-clat = camera.d['lat']
-clon = camera.d['lon']
-newpan0 = camera.d['pan0'] + int(sys.argv[2])
+clat = camera.d["lat"]
+clon = camera.d["lon"]
+newpan0 = camera.d["pan0"] + int(sys.argv[2])
 if newpan0 < 0:
-    newpan0 += 360.
-logging.info('Webcam %s initial pan0: %s attempting: %s' % (cid, 
-                                                camera.d['pan0'], newpan0 ))
-logging.info("\n  UPDATE webcams SET pan0 = %s WHERE id = '%s'; \n" % (
-                                                            newpan0, cid))
+    newpan0 += 360.0
+logging.info(
+    "Webcam %s initial pan0: %s attempting: %s"
+    % (cid, camera.d["pan0"], newpan0)
+)
+logging.info(
+    "\n  UPDATE webcams SET pan0 = %s WHERE id = '%s'; \n" % (newpan0, cid)
+)
 camera.pan0 = newpan0
 
 # Figure out solar location
@@ -41,9 +45,9 @@ sun = ephem.Sun()
 here = ephem.Observer()
 here.long, here.lat = str(clon), str(clat)
 gmt = datetime.datetime.utcnow()
-here.date = gmt.strftime('%Y/%m/%d %H:%M:%S')
-sun.compute( here )
-azimuth = float(sun.az) * 360.0/(2*math.pi)
+here.date = gmt.strftime("%Y/%m/%d %H:%M:%S")
+sun.compute(here)
+azimuth = float(sun.az) * 360.0 / (2 * math.pi)
 
 # Point at the sun!
 camera.zoom(40)
@@ -54,20 +58,20 @@ time.sleep(5)
 
 # Get still image
 buf = StringIO.StringIO()
-buf.write( camera.get_one_shot() )
+buf.write(camera.get_one_shot())
 buf.seek(0)
-i0 = Image.open( buf )
+i0 = Image.open(buf)
 
 # Draw crosshairs and other info
 draw = ImageDraw.Draw(i0)
 # x y
-draw.rectangle( [316,218,324,262], fill="#FFFFFF" )
-draw.rectangle( [298,244,342,236], fill="#FFFFFF" )
-draw.rectangle( [318,220,322,260], fill="#000000" )
-draw.rectangle( [300,242,340,238], fill="#000000" )
+draw.rectangle([316, 218, 324, 262], fill="#FFFFFF")
+draw.rectangle([298, 244, 342, 236], fill="#FFFFFF")
+draw.rectangle([318, 220, 322, 260], fill="#000000")
+draw.rectangle([300, 242, 340, 238], fill="#000000")
 
 # Save image!
-i0.save('cal.jpg')
+i0.save("cal.jpg")
 del i0
 del buf
 camera.closeConnection()

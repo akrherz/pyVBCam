@@ -15,15 +15,15 @@ import pywebcam.utils as camutils
 from pywebcam import vbcam
 
 UTCNOW = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-NOW = UTCNOW.astimezone(pytz.timezone('America/Chicago'))
-FONT = ImageFont.truetype('../lib/veramono.ttf', 10)
+NOW = UTCNOW.astimezone(pytz.timezone("America/Chicago"))
+FONT = ImageFont.truetype("../lib/veramono.ttf", 10)
 log = logging.getLogger()
 log.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.WARNING)
 
 
 def get_buffer_and_cam(row, cid, gmt):
     """Get things"""
-    if row['scrape_url'] is None:
+    if row["scrape_url"] is None:
         cam = vbcam.get_vbcam(cid)
         cam.retries = 2
 
@@ -61,12 +61,16 @@ def draw_save(cid, img, dirtext, row):
     """Draw and Save Image"""
     (imgwidth, imgheight) = img.size
     draw = ImageDraw.Draw(img)
-    text = "(%s) %s %s" % (dirtext, row['name'],
-                           NOW.strftime("%-2I:%M:%S %p - %d %b %Y"))
+    text = "(%s) %s %s" % (
+        dirtext,
+        row["name"],
+        NOW.strftime("%-2I:%M:%S %p - %d %b %Y"),
+    )
     (width, height) = FONT.getsize(text)
 
-    draw.rectangle([5, imgheight - 5 - height, 5 + width, imgheight - 5],
-                   fill="#000000")
+    draw.rectangle(
+        [5, imgheight - 5 - height, 5 + width, imgheight - 5], fill="#000000"
+    )
     draw.text((5, imgheight - 5 - height), text, font=FONT)
 
     fn = "../tmp/%s-%.0fx%.0f.jpg" % (cid, imgwidth, imgheight)
@@ -79,7 +83,7 @@ def do_db(cid, drct):
     dbconn = camutils.get_dbconn()
     cursor = dbconn.cursor()
     sql = "INSERT into camera_log(cam, valid, drct) values (%s,%s,%s)"
-    args = (cid, NOW.strftime('%Y-%m-%d %H:%M'), drct)
+    args = (cid, NOW.strftime("%Y-%m-%d %H:%M"), drct)
     cursor.execute(sql, args)
 
     sql = "DELETE from camera_current WHERE cam = %s"
@@ -87,7 +91,7 @@ def do_db(cid, drct):
     cursor.execute(sql, args)
 
     sql = "INSERT into camera_current(cam, valid, drct) values (%s,%s,%s)"
-    args = (cid, NOW.strftime('%Y-%m-%d %H:%M'), drct)
+    args = (cid, NOW.strftime("%Y-%m-%d %H:%M"), drct)
     cursor.execute(sql, args)
     cursor.close()
     dbconn.commit()
@@ -120,12 +124,12 @@ def workflow(cid):
         return
 
     # Get direction cam is looking
-    if row['scrape_url'] is None:
+    if row["scrape_url"] is None:
         drct = cam.getDirection()
         dirtext = cam.drct2txt(drct)
     else:
-        drct = row['pan0']
-        dirtext = camutils.dir2text(row['pan0'])
+        drct = row["pan0"]
+        dirtext = camutils.dir2text(row["pan0"])
 
     (imgwidth, imgheight) = i0.size
     if imgwidth != 640 or imgheight != 480:
@@ -135,20 +139,38 @@ def workflow(cid):
     else:
         fnfull = draw_save(cid, i0, dirtext, row)
         fn640 = fnfull
-    cmd = ("/home/ldm/bin/pqinsert -i "
-           "-p 'webcam c %s camera/640x480/%s.jpg camera/%s/%s_%s.jpg jpg'"
-           " %s") % (gmt.strftime("%Y%m%d%H%M"), cid, cid,
-                     cid, gmt.strftime("%Y%m%d%H%M"), fn640)
-    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE)
+    cmd = (
+        "/home/ldm/bin/pqinsert -i "
+        "-p 'webcam c %s camera/640x480/%s.jpg camera/%s/%s_%s.jpg jpg'"
+        " %s"
+    ) % (
+        gmt.strftime("%Y%m%d%H%M"),
+        cid,
+        cid,
+        cid,
+        gmt.strftime("%Y%m%d%H%M"),
+        fn640,
+    )
+    proc = subprocess.Popen(
+        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
     proc.stderr.read()
 
-    cmd = ("/home/ldm/bin/pqinsert -i "
-           "-p 'webcam ac %s camera/stills/%s.jpg camera/%s/%s_%s.jpg jpg'"
-           " %s") % (gmt.strftime("%Y%m%d%H%M"), cid, cid,
-                     cid, gmt.strftime("%Y%m%d%H%M"), fnfull)
-    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE)
+    cmd = (
+        "/home/ldm/bin/pqinsert -i "
+        "-p 'webcam ac %s camera/stills/%s.jpg camera/%s/%s_%s.jpg jpg'"
+        " %s"
+    ) % (
+        gmt.strftime("%Y%m%d%H%M"),
+        cid,
+        cid,
+        cid,
+        gmt.strftime("%Y%m%d%H%M"),
+        fnfull,
+    )
+    proc = subprocess.Popen(
+        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
     proc.stderr.read()
 
     do_db(cid, drct)
@@ -160,5 +182,5 @@ def main(argv):
     workflow(cid)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

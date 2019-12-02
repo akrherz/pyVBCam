@@ -12,31 +12,31 @@ os.chdir("../tmp")
 
 cams = []
 for camid in sys.argv[1:5]:
-    print 'Adding %s webcam' % (camid,)
+    print "Adding %s webcam" % (camid,)
     cams.append(common.get_vbcam(camid))
 
 x = [0, 320, 0, 320]
 y = [0, 0, 240, 240]
 
 fontsize = 22
-font = ImageFont.truetype('../lib/veramono.ttf', fontsize)
+font = ImageFont.truetype("../lib/veramono.ttf", fontsize)
 
 mydir = "iemsync.%s" % (mx.DateTime.now().strftime("%Y%m%d%H%M%S"),)
 os.makedirs(mydir)
 os.chdir(mydir)
 
-logging.basicConfig(filename="iemsync.log", filemode='w')
+logging.basicConfig(filename="iemsync.log", filemode="w")
 
 
 for i in range(100000):
     # Output
-    out = Image.new('RGB', (640, 480))
+    out = Image.new("RGB", (640, 480))
 
     for j in range(4):
         # print cams[j].getDirection()
-        o = open("%s_%s.jpg" % (i, j), 'w')
+        o = open("%s_%s.jpg" % (i, j), "w")
         cnt = 0
-        while (cnt < 10):
+        while cnt < 10:
             try:
                 o.write(cams[j].get_one_shot())
                 cnt = 100
@@ -59,6 +59,6 @@ for i in range(100000):
     draw.text((290, 229), s, font=font)
     del draw
 
-    out.save('%05i.jpg' % (i,))
+    out.save("%05i.jpg" % (i,))
     del out
     time.sleep(int(sys.argv[5]))

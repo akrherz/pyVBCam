@@ -6,6 +6,7 @@ import logging
 
 from PIL import Image, ImageDraw
 from pywebcam import vbcam
+
 logging.basicConfig(level=logging.DEBUG)
 
 
@@ -18,14 +19,14 @@ def main(argv):
     camera = vbcam.get_vbcam(cid)
     camera.zoom(40.0)
     camera.tilt(0.0)
-    out = Image.new('RGB', (720, 480))
+    out = Image.new("RGB", (720, 480))
 
     i = 0
     for ang in range(-160, 180, 40):
         print("Working on Angle: %s" % (ang,))
         camera.pan(ang)
         time.sleep(2)  # Settle down the cam
-        o = open("tmp.jpg", 'wb')
+        o = open("tmp.jpg", "wb")
         o.write(camera.getStillImage())
         o.close()
 
@@ -34,14 +35,14 @@ def main(argv):
         draw = ImageDraw.Draw(i02)
         draw.rectangle([0, 119, 144, 121], fill="#000000")
 
-        row = int(i/5)
+        row = int(i / 5)
         col = i % 5
-        out.paste(i02, (144*col, row*240))
+        out.paste(i02, (144 * col, row * 240))
         if i == 4:
             i = 5
-            row = int(i/5)
+            row = int(i / 5)
             col = i % 5
-            out.paste(i02, (124*col, row*240))
+            out.paste(i02, (124 * col, row * 240))
         del i0, i02
         i += 1
 
@@ -49,5 +50,5 @@ def main(argv):
     del out
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)
