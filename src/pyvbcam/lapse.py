@@ -13,7 +13,7 @@ import requests
 from PIL import Image, ImageDraw, ImageFont
 import pytz
 
-import pywebcam.utils as camutils
+import pyvbcam.utils as camutils
 
 
 class scrape(object):

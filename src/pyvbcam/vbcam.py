@@ -6,8 +6,8 @@ import time
 import logging
 
 from psycopg2.extras import DictCursor
-import pywebcam.utils as camutils
-from pywebcam.webcam import BasicWebcam
+import pyvbcam.utils as camutils
+from pyvbcam.webcam import BasicWebcam
 
 
 def get_vbcam(camid):
