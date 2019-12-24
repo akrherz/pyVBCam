@@ -1,3 +1,7 @@
+ephem
+pillow
 psycopg2
 pytest-cov
 pytest
+pytz
+requests
