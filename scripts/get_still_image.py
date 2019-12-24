@@ -16,7 +16,7 @@ from pyvbcam import vbcam
 
 UTCNOW = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
 NOW = UTCNOW.astimezone(pytz.timezone("America/Chicago"))
-FONT = ImageFont.truetype("../lib/veramono.ttf", 10)
+FONT = ImageFont.truetype(camutils.DATADIR + "/veramono.ttf", 10)
 log = logging.getLogger()
 log.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.WARNING)
 

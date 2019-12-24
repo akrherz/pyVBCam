@@ -3,7 +3,7 @@ import sys
 import logging
 
 import requests
-from pywebcam.utils import dir2text
+from pyvbcam.utils import dir2text
 
 
 class BasicWebcam(object):

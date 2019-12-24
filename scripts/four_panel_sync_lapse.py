@@ -7,19 +7,20 @@ import sys
 import time
 import os
 import logging
+from pyvbcam.utils import DATADIR
 
 os.chdir("../tmp")
 
 cams = []
 for camid in sys.argv[1:5]:
-    print "Adding %s webcam" % (camid,)
+    print("Adding %s webcam" % (camid,))
     cams.append(common.get_vbcam(camid))
 
 x = [0, 320, 0, 320]
 y = [0, 0, 240, 240]
 
 fontsize = 22
-font = ImageFont.truetype("../lib/veramono.ttf", fontsize)
+font = ImageFont.truetype(DATADIR + "/veramono.ttf", fontsize)
 
 mydir = "iemsync.%s" % (mx.DateTime.now().strftime("%Y%m%d%H%M%S"),)
 os.makedirs(mydir)
@@ -40,7 +41,7 @@ for i in range(100000):
             try:
                 o.write(cams[j].get_one_shot())
                 cnt = 100
-            except:
+            except Exception:
                 cnt += 1
         o.close()
 

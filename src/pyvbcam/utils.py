@@ -2,12 +2,13 @@
 
     Note: It is important that this module not import other parts of this code
 """
+import os
 import json
 import logging
 
 import psycopg2
 
-
+DATADIR = os.sep.join([os.path.dirname(__file__), "data"])
 SETTINGS = json.load(open("settings.json"))
 
 

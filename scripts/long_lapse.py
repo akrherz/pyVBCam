@@ -8,6 +8,7 @@ import datetime
 
 from PIL import Image, ImageDraw, ImageFont
 from pyvbcam.vbcam import get_vbcam
+from pyvbcam.utils import DATADIR
 
 
 def doimage(cam, i, font):
@@ -44,7 +45,7 @@ def doimage(cam, i, font):
 def main(argv):
     """Do Main"""
     fontsize = 18
-    font = ImageFont.truetype("../lib/veramono.ttf", fontsize)
+    font = ImageFont.truetype(DATADIR + "/veramono.ttf", fontsize)
 
     os.chdir("../tmp/")
 
