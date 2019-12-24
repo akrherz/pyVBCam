@@ -47,8 +47,8 @@ class scrape(object):
 class Lapse(object):
     """Represents a timelapse"""
 
-    font = ImageFont.truetype("../lib/veramono.ttf", 22)
-    sfont = ImageFont.truetype("../lib/veramono.ttf", 14)
+    font = ImageFont.truetype(camutils.DATADIR + "/veramono.ttf", 22)
+    sfont = ImageFont.truetype(camutils.DATADIR + "/veramono.ttf", 14)
 
     def __init__(self):
         """
