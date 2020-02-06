@@ -65,6 +65,10 @@ def bootstrap(job):
     Get us off and running!
     """
     dbconn = camutils.get_dbconn()
+    if dbconn is None:
+        print("No database connection? huh")
+        print(job)
+        return
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cursor.execute("""SELECT * from webcams where id = %s""", (job.site,))
     row = cursor.fetchone()
