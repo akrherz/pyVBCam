@@ -4,7 +4,6 @@
 """
 import os
 import json
-import logging
 
 import psycopg2
 
@@ -14,17 +13,13 @@ SETTINGS = json.load(open("settings.json"))
 
 def get_dbconn():
     """ Return a database cursor """
-    pgconn = None
-    try:
-        pgconn = psycopg2.connect(
-            database=SETTINGS["database"]["name"],
-            user=SETTINGS["database"]["user"],
-            host=SETTINGS["database"]["host"],
-            connect_timeout=5,
-        )
-    except psycopg2.OperationalError as exp:
-        logging.debug(exp)
-    return pgconn
+    return psycopg2.connect(
+        database=SETTINGS["database"]["name"],
+        user=SETTINGS["database"]["user"],
+        host=SETTINGS["database"]["host"],
+        connect_timeout=60,
+        gssencmode="disable",
+    )
 
 
 def get_password(camid):
