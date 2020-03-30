@@ -68,9 +68,11 @@ def main(argv):
 
     i = 0
     errors = 0
+    # hack around flakey webcam issue for now
+    errors_limit = 100 if site != "KCRG-031" else 1000
     while i < 100000:
         time.sleep(int(argv[2]))
-        if errors > 100:
+        if errors > errors_limit:
             logger.info("Too many errors, abort!")
             break
         try:
