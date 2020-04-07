@@ -6,6 +6,7 @@ import subprocess
 import sys
 import datetime
 import logging
+import time
 
 from PIL import Image, ImageDraw, ImageFont
 import pytz
@@ -34,26 +35,24 @@ def get_buffer_and_cam(row, cid, gmt):
 
     else:
         buf, cam = None, None
-        """
-        url = row['scrape_url']
-        req = urllib2.Request(url)
-        try:
-            req2 = urllib2.urlopen(req)
-        except Exception as exp:
-            if NOW.minute == 0:
-                print('Exception for %s: %s' % (cid, exp))
-            return
-        modified = req2.info().getheader('Last-Modified')
-        if modified:
-            gmt = datetime.datetime.strptime(modified,
-                                             "%a, %d %b %Y %H:%M:%S %Z")
-            now = gmt + datetime.timedelta(seconds=NOW.utcoffset().seconds)
-            # Round up to nearest 5 minute bin
-            roundup = 5 - now.minute % 5
-            gmt += datetime.timedelta(minutes=roundup)
-        buf = StringIO.StringIO(req2.read())
-        buf.seek(0)
-        """
+        # url = row['scrape_url']
+        # req = urllib2.Request(url)
+        # try:
+        #    req2 = urllib2.urlopen(req)
+        # except Exception as exp:
+        #    if NOW.minute == 0:
+        #        print('Exception for %s: %s' % (cid, exp))
+        #    return
+        # modified = req2.info().getheader('Last-Modified')
+        # if modified:
+        #    gmt = datetime.datetime.strptime(modified,
+        #                                     "%a, %d %b %Y %H:%M:%S %Z")
+        #    now = gmt + datetime.timedelta(seconds=NOW.utcoffset().seconds)
+        # Round up to nearest 5 minute bin
+        #    roundup = 5 - now.minute % 5
+        #    gmt += datetime.timedelta(minutes=roundup)
+        # buf = StringIO.StringIO(req2.read())
+        # buf.seek(0)
     return buf, cam, gmt
 
 
@@ -172,7 +171,10 @@ def workflow(cid):
         cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
     proc.stderr.read()
-
+    # Allow a bit of time for LDM to route the product before the database
+    # thinks that it is available
+    # TODO: use some more advanced caching
+    time.sleep(5)
     do_db(cid, drct)
 
 
