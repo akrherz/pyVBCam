@@ -1,0 +1,25 @@
+name: Install and Test
+on: [push]
+jobs:
+  build-linux:
+    name: Python (${{ matrix.PYTHON_VERSION }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        PYTHON_VERSION: ["3.6", "3.8", "3.9"]
+    env:
+      PYTHON_VERSION: ${{ matrix.PYTHON_VERSION }}
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup CI from ci-tooling
+      run: |
+        git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
+        . .ci_tooling/miniconda.sh
+        pip install codecov
+        python -m pip install . --upgrade
+        echo '{}' > settings.json
+        pytest --cov=./
+        if [[ ${{ matrix.PYTHON_VERSION }} == "3.8" ]]; then
+          codecov
+        fi
