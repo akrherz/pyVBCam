@@ -2,5 +2,5 @@
 # Daily cleanup of files
 # Run from ../crontab.txt
 
-cd /mesonet/scripts/pyVBCam/tmp
+cd /mesonet/tmp/pyVBCam
 rm -rf autoframes.*
