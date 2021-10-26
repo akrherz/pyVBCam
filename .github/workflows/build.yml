@@ -19,7 +19,7 @@ jobs:
         pip install codecov
         python -m pip install . --upgrade
         echo '{}' > settings.json
-        pytest --cov=./
+        coverage run --source=pyvbcam setup.py test
         if [[ ${{ matrix.PYTHON_VERSION }} == "3.8" ]]; then
           codecov
         fi
