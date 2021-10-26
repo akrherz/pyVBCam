@@ -2,5 +2,6 @@ ephem
 pillow
 psycopg2
 pytest-cov
+pytest-runner
 pytest
 requests
