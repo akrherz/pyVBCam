@@ -8,15 +8,18 @@ import datetime
 import logging
 import time
 
+try:
+    from zoneinfo import ZoneInfo  # type: ignore
+except ImportError:
+    from backports.zoneinfo import ZoneInfo
+
 from PIL import Image, ImageDraw, ImageFont
-import pytz
 import psycopg2.extras
 
 import pyvbcam.utils as camutils
 from pyvbcam import vbcam
 
-UTCNOW = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-NOW = UTCNOW.astimezone(pytz.timezone("America/Chicago"))
+NOW = datetime.datetime.now().replace(tzinfo=ZoneInfo("America/Chicago"))
 FONT = ImageFont.truetype(camutils.DATADIR + "/veramono.ttf", 10)
 log = logging.getLogger()
 log.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.WARNING)
@@ -78,7 +81,7 @@ def draw_save(cid, img, dirtext, row):
 
 
 def do_db(cid, drct):
-    """ Save direction to database"""
+    """Save direction to database"""
     dbconn = camutils.get_dbconn()
     cursor = dbconn.cursor()
     sql = "INSERT into camera_log(cam, valid, drct) values (%s,%s,%s)"

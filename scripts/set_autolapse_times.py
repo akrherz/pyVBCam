@@ -1,14 +1,16 @@
 """Update the database to set proper sunrise and sunset times"""
 import datetime
 
-import pytz
+try:
+    from zoneinfo import ZoneInfo  # type: ignore
+except ImportError:
+    from backports.zoneinfo import ZoneInfo
+
 import ephem
 import psycopg2.extras
 import pyvbcam.utils as camutils
 
-NOW = datetime.datetime.utcnow()
-NOW = NOW.replace(tzinfo=pytz.utc)
-NOW = NOW.astimezone(pytz.timezone("America/Chicago"))
+NOW = datetime.datetime.now().replace(tzinfo=ZoneInfo("America/Chicago"))
 
 
 def mydate(tstamp):

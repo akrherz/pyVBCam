@@ -9,9 +9,13 @@ import shutil
 import random
 import subprocess
 
+try:
+    from zoneinfo import ZoneInfo  # type: ignore
+except ImportError:
+    from backports.zoneinfo import ZoneInfo
+
 import requests
 from PIL import Image, ImageDraw, ImageFont
-import pytz
 
 import pyvbcam.utils as camutils
 
@@ -31,7 +35,7 @@ class scrape(object):
     def get_one_shot(self):
         """Our primary means to get data"""
         now = datetime.datetime.now()
-        now = now.replace(tzinfo=pytz.timezone("America/Chicago"))
+        now = now.replace(tzinfo=ZoneInfo("America/Chicago"))
 
         url = self.row["scrape_url"]
         req = requests.get(url)
@@ -181,7 +185,7 @@ class Lapse(object):
             time.sleep(randsleep)
 
         def safe_copy(src, dest):
-            """ Copy file, safely """
+            """Copy file, safely"""
             try:
                 shutil.copyfile(src, "/mesonet/share/lapses/auto/%s" % (dest,))
             except IOError as exp:
