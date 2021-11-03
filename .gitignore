@@ -6,3 +6,5 @@
 /scripts/settings.ini
 /scripts/secret.py
 /scripts/settings.json
+/.coverage
+/settings.json
