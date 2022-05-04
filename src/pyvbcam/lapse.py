@@ -244,10 +244,7 @@ class Lapse(object):
         logging.info(proc.stdout.read())
         logging.error(proc.stderr.read())
         subprocess.call(
-            (
-                "/home/ldm/bin/pqinsert -p 'lapse c "
-                "000000000000 %s/%s.qt BOGUS qt' out.mov"
-            )
+            ("pqinsert -p 'lapse c " "000000000000 %s/%s.qt BOGUS qt' out.mov")
             % (self.network, self.filename),
             shell=True,
         )
