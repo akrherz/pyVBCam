@@ -1,3 +1,5 @@
+/build
+**/*.egg-info/
 /tmp
 /vbc10_firmware
 /vbc50_firmware
