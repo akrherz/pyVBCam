@@ -142,7 +142,7 @@ def workflow(cid):
         fnfull = draw_save(cid, i0, dirtext, row)
         fn640 = fnfull
     cmd = (
-        "/home/ldm/bin/pqinsert -i "
+        "pqinsert -i "
         "-p 'webcam c %s camera/640x480/%s.jpg camera/%s/%s_%s.jpg jpg'"
         " %s"
     ) % (
@@ -159,7 +159,7 @@ def workflow(cid):
     proc.stderr.read()
 
     cmd = (
-        "/home/ldm/bin/pqinsert -i "
+        "pqinsert -i "
         "-p 'webcam ac %s camera/stills/%s.jpg camera/%s/%s_%s.jpg jpg'"
         " %s"
     ) % (
