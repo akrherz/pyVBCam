@@ -17,7 +17,7 @@ from pyvbcam import utils as camutils
 
 
 def check_resume(job):
-    """ Perhaps we are resuming an old job or re-running post processing? """
+    """Perhaps we are resuming an old job or re-running post processing?"""
     if os.path.isfile("do_auto_lapse.pid"):
         subprocess.call("kill -9 `cat do_auto_lapse.pid`", shell=True)
     if os.path.isfile("%s.log" % (job.site,)):

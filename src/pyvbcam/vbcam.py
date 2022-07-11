@@ -11,7 +11,7 @@ from pyvbcam.webcam import BasicWebcam
 
 
 def get_vbcam(camid):
-    """ Return a vbcam object for this camera ID """
+    """Return a vbcam object for this camera ID"""
     pgconn = camutils.get_dbconn()
     cursor = pgconn.cursor(cursor_factory=DictCursor)
     cursor.execute(
@@ -33,12 +33,12 @@ def get_vbcam(camid):
 
 
 class VAPIX(BasicWebcam):
-    """ Class representing access to a VAPIX webcam """
+    """Class representing access to a VAPIX webcam"""
 
     PREFIX = "axis-cgi"
 
     def getSettings(self):
-        """ Get the current PTZ """
+        """Get the current PTZ"""
         data = self.http("com/ptz.cgi?query=position")
         if data is None:
             logging.debug("Failed to get settings for ip: %s", self.ip)
@@ -49,7 +49,7 @@ class VAPIX(BasicWebcam):
                 self.settings[tokens[0]] = tokens[1].strip()
 
     def dir2pan(self, drct):
-        """  Compute a pan based on a given direction, yikes? """
+        """Compute a pan based on a given direction, yikes?"""
         offset = drct - self.pan0
         if offset < -180:  # We need to go the other way
             offset = (360 + drct) - self.pan0
@@ -63,24 +63,24 @@ class VAPIX(BasicWebcam):
         return offset
 
     def panDrct(self, drct):
-        """ Turn the webcam to the provided North relative direction """
+        """Turn the webcam to the provided North relative direction"""
         return self.pan(self.dir2pan(drct))
 
     def pan(self, deg):
-        """ Pan to the relative to webcam direction """
+        """Pan to the relative to webcam direction"""
         print("Panning to camera relative: %s deg" % (deg,))
         return self.http("com/ptz.cgi?pan=%.2f" % (deg,))
 
     def zoom(self, val):
-        """ Zoom to the given zoom """
+        """Zoom to the given zoom"""
         return self.http("com/ptz.cgi?zoom=%s" % (val,))
 
     def tilt(self, val):
-        """ Tilt """
+        """Tilt"""
         return self.http("com/ptz.cgi?tilt=%s" % (val,))
 
     def get_one_shot(self, res=None):
-        """ Get a still image """
+        """Get a still image"""
         if res is None:
             res = self.res
         return self.http(
@@ -88,7 +88,7 @@ class VAPIX(BasicWebcam):
         )
 
     def getDirection(self):
-        """ Get the direction of the current pan """
+        """Get the direction of the current pan"""
         if "pan" not in self.settings:
             self.log.debug(
                 ("%s %s pan was missing from settings, using zero"),
@@ -119,11 +119,11 @@ class vbcam(BasicWebcam):
         self.http("CloseCameraServer?connection_id=%s" % (self.connid,))
 
     def panDrct(self, drct):
-        """ Pan the webcam to this absolute direction """
+        """Pan the webcam to this absolute direction"""
         return self.pan(self.dir2pan(drct))
 
     def pan(self, pan):
-        """ pan the camera to this explicit camera relative direction """
+        """pan the camera to this explicit camera relative direction"""
         self.getControl()
         self.log.debug(" Attempting to pan webcam %.2f degrees", pan)
         return self.http(
@@ -155,7 +155,7 @@ class vbcam(BasicWebcam):
         return self.http("GetStillImage")
 
     def dir2pan(self, drct):
-        """  Compute a pan based on a given direction, yikes? """
+        """Compute a pan based on a given direction, yikes?"""
         offset = drct - self.pan0
         if offset < -180:  # We need to go the other way
             offset = (360 + drct) - self.pan0
@@ -178,7 +178,7 @@ class vbcam(BasicWebcam):
         return float(self.settings["zoom_current_value"]) / 100.0
 
     def pan2dir(self, pan=None):
-        """ Figure out the direction based on a given pan, yikes? """
+        """Figure out the direction based on a given pan, yikes?"""
         if pan is None and "pan_current_value" in self.settings:
             pan = self.settings["pan_current_value"]
         elif pan is None:

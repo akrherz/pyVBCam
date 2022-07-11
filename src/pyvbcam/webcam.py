@@ -80,7 +80,7 @@ class BasicWebcam(object):
         return req.content
 
     def http(self, s):
-        """ http helper """
+        """http helper"""
         c = 0
         data = None
         while c < 6:

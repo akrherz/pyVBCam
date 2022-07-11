@@ -29,7 +29,7 @@ def go(network):
 
 
 def run(argv):
-    """ Start a long term lapse for this network """
+    """Start a long term lapse for this network"""
     network = argv[1]
     if network == "ALL":
         for _network in ["KCCI", "KCRG", "ISUC", "KELO", "MCFC"]:

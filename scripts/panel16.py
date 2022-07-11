@@ -26,7 +26,7 @@ cams = [
 
 
 def compute_timestamps():
-    """ Build a dictionary of timestamps """
+    """Build a dictionary of timestamps"""
     res = {}
     for cam in cams:
         res[cam] = {}
@@ -41,7 +41,7 @@ def compute_timestamps():
 
 
 def get_timeline():
-    """ Get the timeline we want to lapse for """
+    """Get the timeline we want to lapse for"""
     frames = 600
     sts = datetime.datetime(2014, 9, 4, 18, 38)
     ets = datetime.datetime(2014, 9, 4, 19, 50)
@@ -56,14 +56,14 @@ def get_timeline():
 
 
 def get_delta(t1, t2):
-    """ Compute difference """
+    """Compute difference"""
     d = t1 - t2
     delta = d.days * 86400.0 + d.seconds + d.microseconds / 1000000.0
     return abs(delta)
 
 
 def get_files(timestamps, valid):
-    """ Figure out our closest file """
+    """Figure out our closest file"""
     res = []
     for cam in cams:
         mindelta = 999999

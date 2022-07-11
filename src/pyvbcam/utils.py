@@ -12,7 +12,7 @@ SETTINGS = json.load(open("settings.json"))
 
 
 def get_dbconn():
-    """ Return a database cursor """
+    """Return a database cursor"""
     return psycopg2.connect(
         database=SETTINGS["database"]["name"],
         user=SETTINGS["database"]["user"],
@@ -23,14 +23,14 @@ def get_dbconn():
 
 
 def get_password(camid):
-    """ Return the password for a given camera ID """
+    """Return the password for a given camera ID"""
     if SETTINGS["auth"].get(camid):
         return SETTINGS["auth"][camid][1]
     return SETTINGS["auth"][camid[:4]][1]
 
 
 def get_user(camid):
-    """ Return the password for a given camera ID """
+    """Return the password for a given camera ID"""
     if SETTINGS["auth"].get(camid):
         return SETTINGS["auth"][camid][0]
     return SETTINGS["auth"][camid[:4]][0]
