@@ -1,13 +1,13 @@
 """A lapse"""
-import os
-import time
-from io import BytesIO
 import datetime
 import logging
-import sys
-import shutil
+import os
 import random
+import shutil
 import subprocess
+import sys
+import time
+from io import BytesIO
 
 try:
     from zoneinfo import ZoneInfo  # type: ignore

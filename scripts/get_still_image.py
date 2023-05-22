@@ -1,22 +1,21 @@
 """
  Get still image for the website mostly
 """
-from io import BytesIO
-import subprocess
-import sys
 import datetime
 import logging
+import subprocess
+import sys
 import time
+from io import BytesIO
 
 try:
     from zoneinfo import ZoneInfo  # type: ignore
 except ImportError:
     from backports.zoneinfo import ZoneInfo
 
-from PIL import Image, ImageDraw, ImageFont
 import psycopg2.extras
-
 import pyvbcam.utils as camutils
+from PIL import Image, ImageDraw, ImageFont
 from pyvbcam import vbcam
 
 NOW = datetime.datetime.now().replace(tzinfo=ZoneInfo("America/Chicago"))

@@ -1,11 +1,12 @@
 """
  Python Library for Messing with the Canon VB-C10, VB-C50i, VB-C60
 """
+import logging
 import re
 import time
-import logging
 
 from psycopg2.extras import DictCursor
+
 import pyvbcam.utils as camutils
 from pyvbcam.webcam import BasicWebcam
 

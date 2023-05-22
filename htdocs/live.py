@@ -4,15 +4,15 @@ URIs look like so:
     /live.py?id=KCRG-006
     /live/KCRG-006.jpg
 """
-from io import BytesIO
 import datetime
+from io import BytesIO
 
-from pymemcache.client import Client
-from PIL import Image, ImageDraw
 import requests
-from requests.auth import HTTPDigestAuth
 from paste.request import parse_formvars
-from pyiem.util import get_properties, get_dbconn
+from PIL import Image, ImageDraw
+from pyiem.util import get_dbconn, get_properties
+from pymemcache.client import Client
+from requests.auth import HTTPDigestAuth
 
 
 def fetch(cid):

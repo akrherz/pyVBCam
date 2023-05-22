@@ -1,18 +1,18 @@
 """
  Something to calibrate the location of the webcam and direction!
 """
-import time
-import sys
-import math
-import StringIO
-import os
-import ephem
 import datetime
-from PIL import Image
-from PIL import ImageDraw
-import psycopg2.extras
-import common
 import logging
+import math
+import os
+import sys
+import time
+
+import common
+import ephem
+import psycopg2.extras
+import StringIO
+from PIL import Image, ImageDraw
 
 logging.basicConfig(level=logging.DEBUG)
 

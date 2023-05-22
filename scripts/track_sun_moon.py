@@ -1,10 +1,10 @@
 """ Track either the sun or the moon with a webcam """
-import sys
-import os
-import math
-import time
 import datetime
 import logging
+import math
+import os
+import sys
+import time
 from io import BytesIO
 
 import ephem

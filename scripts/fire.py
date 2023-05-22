@@ -1,7 +1,8 @@
 """ Fire off long term lapses for a given network """
 from __future__ import print_function
-import sys
+
 import subprocess
+import sys
 
 import psycopg2.extras
 import pyvbcam.utils as camutils

@@ -1,14 +1,14 @@
 """ Drive the generation of a long time lapse """
-import time
-import sys
-import os
-import logging
-from io import BytesIO
 import datetime
+import logging
+import os
+import sys
+import time
+from io import BytesIO
 
 from PIL import Image, ImageDraw, ImageFont
-from pyvbcam.vbcam import get_vbcam
 from pyvbcam.utils import DATADIR
+from pyvbcam.vbcam import get_vbcam
 
 
 def doimage(cam, i, font):

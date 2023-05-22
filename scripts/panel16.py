@@ -1,7 +1,7 @@
 """ Create a 16 panel lapse, after the fact :) """
-import os
-import glob
 import datetime
+import glob
+import os
 
 from PIL import Image
 

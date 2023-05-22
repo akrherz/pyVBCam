@@ -2,8 +2,8 @@
 
     Note: It is important that this module not import other parts of this code
 """
-import os
 import json
+import os
 
 import psycopg2
 

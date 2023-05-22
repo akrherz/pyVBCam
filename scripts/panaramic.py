@@ -1,8 +1,8 @@
 """ Create a panoramic image for a given site """
+import logging
+import os
 import sys
 import time
-import os
-import logging
 
 from PIL import Image, ImageDraw
 from pyvbcam import vbcam

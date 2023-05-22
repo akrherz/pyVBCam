@@ -1,12 +1,12 @@
 """ Sync four webcams in time generating a timelapse """
-import common
-
-from PIL import Image, ImageDraw, ImageFont
-import mx.DateTime
+import logging
+import os
 import sys
 import time
-import os
-import logging
+
+import common
+import mx.DateTime
+from PIL import Image, ImageDraw, ImageFont
 from pyvbcam.utils import DATADIR
 
 os.chdir("../tmp")

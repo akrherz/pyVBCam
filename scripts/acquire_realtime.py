@@ -2,8 +2,8 @@
 Fire off the aquistion of RT webcam images
 """
 import datetime
-import sys
 import subprocess
+import sys
 
 import pyvbcam.utils as camutils
 
