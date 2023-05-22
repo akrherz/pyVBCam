@@ -140,39 +140,37 @@ def workflow(cid):
     else:
         fnfull = draw_save(cid, i0, dirtext, row)
         fn640 = fnfull
-    cmd = (
-        "pqinsert -i "
-        "-p 'webcam c %s camera/640x480/%s.jpg camera/%s/%s_%s.jpg jpg'"
-        " %s"
-    ) % (
-        gmt.strftime("%Y%m%d%H%M"),
-        cid,
-        cid,
-        cid,
-        gmt.strftime("%Y%m%d%H%M"),
+    cmd = [
+        "pqinsert",
+        "-i" "-p",
+        (
+            f"webcam c {gmt:%Y%m%d%H%M} camera/640x480/{cid}.jpg "
+            f"camera/{cid}/{cid}_{gmt:%Y%m%d%H%M}.jpg jpg"
+        ),
         fn640,
-    )
+    ]
     proc = subprocess.Popen(
-        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
-    proc.stderr.read()
+    stderr = proc.stderr.read()
+    if stderr != b"":
+        log.warning("cmd: %s stderr:%s", " ".join(cmd), stderr.decode("utf-8"))
 
-    cmd = (
-        "pqinsert -i "
-        "-p 'webcam ac %s camera/stills/%s.jpg camera/%s/%s_%s.jpg jpg'"
-        " %s"
-    ) % (
-        gmt.strftime("%Y%m%d%H%M"),
-        cid,
-        cid,
-        cid,
-        gmt.strftime("%Y%m%d%H%M"),
+    cmd = [
+        "pqinsert",
+        "-i" "-p",
+        (
+            f"webcam c {gmt:%Y%m%d%H%M} camera/stills/{cid}.jpg "
+            f"camera/{cid}/{cid}_{gmt:%Y%m%d%H%M}.jpg jpg"
+        ),
         fnfull,
-    )
+    ]
     proc = subprocess.Popen(
         cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
-    proc.stderr.read()
+    stderr = proc.stderr.read()
+    if stderr != b"":
+        log.warning("cmd: %s stderr:%s", " ".join(cmd), stderr.decode("utf-8"))
     # Allow a bit of time for LDM to route the product before the database
     # thinks that it is available
     # TODO: use some more advanced caching
