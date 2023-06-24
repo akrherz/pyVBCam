@@ -137,7 +137,7 @@ def workflow(cid):
         "-i",
         "-p",
         (
-            f"webcam c {gmt:%Y%m%d%H%M} camera/stills/{cid}.jpg "
+            f"webcam ac {gmt:%Y%m%d%H%M} camera/stills/{cid}.jpg "
             f"camera/{cid}/{cid}_{gmt:%Y%m%d%H%M}.jpg jpg"
         ),
         fnfull,
