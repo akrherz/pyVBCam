@@ -7,11 +7,7 @@ import subprocess
 import sys
 import time
 from io import BytesIO
-
-try:
-    from zoneinfo import ZoneInfo  # type: ignore
-except ImportError:
-    from backports.zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo
 
 import psycopg2.extras
 import pyvbcam.utils as camutils
@@ -26,35 +22,13 @@ log.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.WARNING)
 
 def get_buffer_and_cam(row, cid, gmt):
     """Get things"""
-    if row["scrape_url"] is None:
-        cam = vbcam.get_vbcam(cid)
-        cam.retries = 2
+    cam = vbcam.get_vbcam(cid)
+    cam.retries = 2
 
-        # Get Still
-        buf = BytesIO()
-        buf.write(cam.get_one_shot())
-        buf.seek(0)
-
-    else:
-        buf, cam = None, None
-        # url = row['scrape_url']
-        # req = urllib2.Request(url)
-        # try:
-        #    req2 = urllib2.urlopen(req)
-        # except Exception as exp:
-        #    if NOW.minute == 0:
-        #        print('Exception for %s: %s' % (cid, exp))
-        #    return
-        # modified = req2.info().getheader('Last-Modified')
-        # if modified:
-        #    gmt = datetime.datetime.strptime(modified,
-        #                                     "%a, %d %b %Y %H:%M:%S %Z")
-        #    now = gmt + datetime.timedelta(seconds=NOW.utcoffset().seconds)
-        # Round up to nearest 5 minute bin
-        #    roundup = 5 - now.minute % 5
-        #    gmt += datetime.timedelta(minutes=roundup)
-        # buf = StringIO.StringIO(req2.read())
-        # buf.seek(0)
+    # Get Still
+    buf = BytesIO()
+    buf.write(cam.get_one_shot())
+    buf.seek(0)
     return buf, cam, gmt
 
 
@@ -67,14 +41,15 @@ def draw_save(cid, img, dirtext, row):
         row["name"],
         NOW.strftime("%-2I:%M:%S %p - %d %b %Y"),
     )
-    (width, height) = FONT.getsize(text)
-
+    (left, top, right, bottom) = FONT.getbbox(text)
+    height = bottom - top
+    width = right - left
     draw.rectangle(
         [5, imgheight - 5 - height, 5 + width, imgheight - 5], fill="#000000"
     )
     draw.text((5, imgheight - 5 - height), text, font=FONT)
 
-    fn = "../tmp/%s-%.0fx%.0f.jpg" % (cid, imgwidth, imgheight)
+    fn = f"../tmp/{cid}-{imgwidth:.0f}x{imgheight:.0f}.jpg"
     img.save(fn)
     return fn
 
@@ -134,7 +109,7 @@ def workflow(cid):
 
     (imgwidth, imgheight) = i0.size
     if imgwidth != 640 or imgheight != 480:
-        i640 = i0.resize((640, 480), Image.ANTIALIAS)
+        i640 = i0.resize((640, 480), Image.LANCZOS)
         fn640 = draw_save(cid, i640, dirtext, row)
         fnfull = draw_save(cid, i0, dirtext, row)
     else:
@@ -142,7 +117,8 @@ def workflow(cid):
         fn640 = fnfull
     cmd = [
         "pqinsert",
-        "-i" "-p",
+        "-i",
+        "-p",
         (
             f"webcam c {gmt:%Y%m%d%H%M} camera/640x480/{cid}.jpg "
             f"camera/{cid}/{cid}_{gmt:%Y%m%d%H%M}.jpg jpg"
@@ -158,7 +134,8 @@ def workflow(cid):
 
     cmd = [
         "pqinsert",
-        "-i" "-p",
+        "-i",
+        "-p",
         (
             f"webcam c {gmt:%Y%m%d%H%M} camera/stills/{cid}.jpg "
             f"camera/{cid}/{cid}_{gmt:%Y%m%d%H%M}.jpg jpg"
@@ -166,7 +143,7 @@ def workflow(cid):
         fnfull,
     ]
     proc = subprocess.Popen(
-        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
     stderr = proc.stderr.read()
     if stderr != b"":
