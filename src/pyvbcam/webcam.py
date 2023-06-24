@@ -1,8 +1,9 @@
 """A basic definition of a webcam object"""
-import sys
 import logging
+import sys
 
 import requests
+
 from pyvbcam.utils import dir2text
 
 

@@ -1,8 +1,5 @@
 """Walk before we crawl."""
-from pyvbcam import utils
-from pyvbcam import lapse
-from pyvbcam import webcam
-from pyvbcam import vbcam
+from pyvbcam import lapse, utils, vbcam, webcam
 
 
 def test_import():

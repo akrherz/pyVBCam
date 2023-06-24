@@ -2,16 +2,16 @@
   Drives the production of auto timed webcam lapses
 """
 from __future__ import print_function
-import sys
-import os
-import subprocess
+
 import datetime
-import time
-import random
 import logging
+import os
+import random
+import subprocess
+import sys
+import time
 
 import psycopg2.extras
-
 from pyvbcam import lapse, vbcam
 from pyvbcam import utils as camutils
 

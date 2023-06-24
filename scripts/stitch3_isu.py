@@ -1,12 +1,12 @@
 """Create a stiched and synced 4-panel, after the fact"""
 import datetime
+import glob
 import os
 import stat
-import glob
 
 import pandas as pd
-from tqdm import tqdm
 from PIL import Image
+from tqdm import tqdm
 
 
 def main():

@@ -1,7 +1,7 @@
 """proctor the exec of daily auto lapse scripts"""
 import datetime
-import time
 import subprocess
+import time
 
 import psycopg2.extras
 import pyvbcam.utils as camutils
