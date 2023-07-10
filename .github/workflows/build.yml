@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        PYTHON_VERSION: ["3.7", "3.8", "3.9"]
+        PYTHON_VERSION: ["3.9", "3.10", "3.11"]
     env:
       PYTHON_VERSION: ${{ matrix.PYTHON_VERSION }}
     steps:
@@ -20,6 +20,6 @@ jobs:
         python -m pip install . --upgrade
         echo '{}' > settings.json
         coverage run --source=pyvbcam setup.py test
-        if [[ ${{ matrix.PYTHON_VERSION }} == "3.8" ]]; then
+        if [[ ${{ matrix.PYTHON_VERSION }} == "3.11" ]]; then
           codecov
         fi
