@@ -7,12 +7,12 @@ import subprocess
 import sys
 import time
 from io import BytesIO
+from zoneinfo import ZoneInfo
 
 import psycopg2.extras
 import pyvbcam.utils as camutils
 from PIL import Image, ImageDraw, ImageFont
 from pyvbcam import vbcam
-from zoneinfo import ZoneInfo
 
 NOW = datetime.datetime.now().replace(tzinfo=ZoneInfo("America/Chicago"))
 FONT = ImageFont.truetype(camutils.DATADIR + "/veramono.ttf", 10)
