@@ -58,7 +58,7 @@ def do_db(cid, drct):
     """Save direction to database"""
     dbconn, cursor = get_dbconnc("mesosite")
     sql = "INSERT into camera_log(cam, valid, drct) values (%s,%s,%s)"
-    args = (cid, NOW.strftime("%Y-%m-%d %H:%M"), drct)
+    args = (cid, NOW.strftime("%Y-%m-%d %H:%M"), int(drct))
     cursor.execute(sql, args)
 
     sql = "DELETE from camera_current WHERE cam = %s"
@@ -66,7 +66,7 @@ def do_db(cid, drct):
     cursor.execute(sql, args)
 
     sql = "INSERT into camera_current(cam, valid, drct) values (%s,%s,%s)"
-    args = (cid, NOW.strftime("%Y-%m-%d %H:%M"), drct)
+    args = (cid, NOW.strftime("%Y-%m-%d %H:%M"), int(drct))
     cursor.execute(sql, args)
     cursor.close()
     dbconn.commit()
