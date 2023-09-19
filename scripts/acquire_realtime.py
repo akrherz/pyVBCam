@@ -34,8 +34,7 @@ def main():
     for row in cursor:
         # async
         subprocess.Popen(
-            ("timeout 55 python get_still_image.py %s") % (row[0],),
-            shell=True,
+            ["timeout", "55", "python", "get_still_image.py", row["id"]],
             stderr=subprocess.PIPE,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
