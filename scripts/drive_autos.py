@@ -3,14 +3,12 @@ import datetime
 import subprocess
 import time
 
-import psycopg2.extras
-import pyvbcam.utils as camutils
+from pyiem.database import get_dbconnc
 
 
 def main():
     """Go Main"""
-    dbconn = camutils.get_dbconn()
-    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    dbconn, cursor = get_dbconnc("mesosite")
 
     lookingfor = datetime.datetime.now().strftime("%Y%m%d%H")
 
@@ -46,7 +44,8 @@ def main():
 
         if not row["is_daily"]:
             cursor.execute(
-                ("DELETE from webcam_scheduler WHERE oid = %s") % (row["oid"],)
+                "DELETE from webcam_scheduler WHERE oid = %s",
+                (row["oid"],),
             )
 
     cursor.close()

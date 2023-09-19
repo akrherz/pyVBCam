@@ -1,17 +1,14 @@
 """ Fire off long term lapses for a given network """
-from __future__ import print_function
 
 import subprocess
 import sys
 
-import psycopg2.extras
-import pyvbcam.utils as camutils
+from pyiem.database import get_dbconnc
 
 
 def go(network):
     """Fire a network"""
-    dbconn = camutils.get_dbconn()
-    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    dbconn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         """
     SELECT id from webcams where network = %s and online ORDER by id ASC
@@ -20,13 +17,13 @@ def go(network):
     )
     for row in cursor:
         proc = subprocess.Popen(
-            "python long_lapse.py %s 2" % (row[0],),
-            shell=True,
+            ["python", "long_lapse.py", row["id"], "2"],
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stdin=subprocess.PIPE,
         )
         print("%s PID: %s" % (row[0], proc.pid))
+    dbconn.close()
 
 
 def run(argv):

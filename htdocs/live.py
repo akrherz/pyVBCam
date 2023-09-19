@@ -10,7 +10,7 @@ from io import BytesIO
 import requests
 from paste.request import parse_formvars
 from PIL import Image, ImageDraw
-from pyiem.util import get_dbconn, get_properties
+from pyiem.util import get_dbconnc, get_properties
 from pymemcache.client import Client
 from requests.auth import HTTPDigestAuth
 
@@ -18,26 +18,25 @@ from requests.auth import HTTPDigestAuth
 def fetch(cid):
     """Do work to get the content"""
     # Get camera metadata
-    pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         "SELECT ip, fqdn, online, name, port, is_vapix, scrape_url, network "
         "from webcams WHERE id = %s",
         (cid,),
     )
     if cursor.rowcount != 1:
+        pgconn.close()
         return
-    (
-        ip,
-        fqdn,
-        online,
-        name,
-        port,
-        is_vapix,
-        scrape_url,
-        network,
-    ) = cursor.fetchone()
+    row = cursor.fetchone()
     pgconn.close()
+    ip = row["ip"]
+    fqdn = row["fqdn"]
+    online = row["online"]
+    name = row["name"]
+    port = row["port"]
+    is_vapix = row["is_vapix"]
+    scrape_url = row["scrape_url"]
+    network = row["network"]
     if scrape_url is not None or not online:
         return
     # Get IEM properties
@@ -86,7 +85,7 @@ def workflow(cid):
 def application(environ, start_response):
     """Do Fun Things"""
     form = parse_formvars(environ)
-    cid = form.get("id", "KCCI-027")[:10]  # Default to ISU Ames
+    cid = form.get("id", "KCCI-027")[:10]  # Default to Ag Farm
     imagedata = workflow(cid)
     if imagedata is None:
         # TOOD: make a sorry image

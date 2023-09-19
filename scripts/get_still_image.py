@@ -9,9 +9,9 @@ import time
 from io import BytesIO
 from zoneinfo import ZoneInfo
 
-import psycopg2.extras
 import pyvbcam.utils as camutils
 from PIL import Image, ImageDraw, ImageFont
+from pyiem.database import get_dbconnc
 from pyvbcam import vbcam
 
 NOW = datetime.datetime.now().replace(tzinfo=ZoneInfo("America/Chicago"))
@@ -75,12 +75,10 @@ def do_db(cid, drct):
 
 def get_row(cid):
     """Get the database row for this camera"""
-    dbconn = camutils.get_dbconn()
-    if dbconn is None:
-        return
-    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cursor.execute("""SELECT * from webcams where id = %s """, (cid,))
+    dbconn, cursor = get_dbconnc("mesosite")
+    cursor.execute("SELECT * from webcams where id = %s", (cid,))
     row = cursor.fetchone()
+    dbconn.close()
     return row
 
 

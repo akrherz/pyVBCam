@@ -1,14 +1,9 @@
 """Update the database to set proper sunrise and sunset times"""
 import datetime
-
-try:
-    from zoneinfo import ZoneInfo  # type: ignore
-except ImportError:
-    from backports.zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo
 
 import ephem
-import psycopg2.extras
-import pyvbcam.utils as camutils
+from pyiem.database import get_dbconnc
 
 NOW = datetime.datetime.now().replace(tzinfo=ZoneInfo("America/Chicago"))
 
@@ -24,11 +19,7 @@ def mydate(tstamp):
 
 def main():
     """Do things please!"""
-    dbconn = psycopg2.connect(
-        database=camutils.SETTINGS["database"]["name"],
-        host=camutils.SETTINGS["database"]["host"],
-    )
-    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    dbconn, cursor = get_dbconnc("mesosite")
     cursor2 = dbconn.cursor()
 
     sun = ephem.Sun()
