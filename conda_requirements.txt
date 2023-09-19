@@ -1,6 +1,6 @@
 ephem
 pillow
-psycopg2
+pyiem
 pytest-cov
 pytest-runner
 pytest

@@ -1,7 +1,6 @@
 """
   Drives the production of auto timed webcam lapses
 """
-from __future__ import print_function
 
 import datetime
 import logging
@@ -11,9 +10,8 @@ import subprocess
 import sys
 import time
 
-import psycopg2.extras
+from pyiem.database import get_dbconnc
 from pyvbcam import lapse, vbcam
-from pyvbcam import utils as camutils
 
 
 def check_resume(job):
@@ -64,13 +62,8 @@ def bootstrap(job):
     """
     Get us off and running!
     """
-    dbconn = camutils.get_dbconn()
-    if dbconn is None:
-        print("No database connection? huh")
-        print(job)
-        return
-    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cursor.execute("""SELECT * from webcams where id = %s""", (job.site,))
+    dbconn, cursor = get_dbconnc("mesosite")
+    cursor.execute("SELECT * from webcams where id = %s", (job.site,))
     row = cursor.fetchone()
     if row["scrape_url"] is None:
         job.camera = vbcam.get_vbcam(row["id"])

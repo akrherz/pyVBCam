@@ -2,22 +2,21 @@
  Something to calibrate the location of the webcam and direction!
 """
 import datetime
+import io
 import logging
 import math
 import os
 import sys
 import time
 
-import common
 import ephem
-import psycopg2.extras
-import StringIO
 from PIL import Image, ImageDraw
+from pyiem.database import get_dbconnc
+from pyvbcam import common
 
 logging.basicConfig(level=logging.DEBUG)
 
-mesosite = common.get_dbconn()
-cursor = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
+mesosite, cursor = get_dbconnc("mesosite")
 
 os.chdir("../tmp")
 
@@ -57,7 +56,7 @@ camera.panDrct(azimuth)
 time.sleep(5)
 
 # Get still image
-buf = StringIO.StringIO()
+buf = io.StringIO.StringIO()
 buf.write(camera.get_one_shot())
 buf.seek(0)
 i0 = Image.open(buf)

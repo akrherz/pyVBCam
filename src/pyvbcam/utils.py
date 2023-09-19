@@ -5,21 +5,8 @@
 import json
 import os
 
-import psycopg2
-
 DATADIR = os.sep.join([os.path.dirname(__file__), "data"])
 SETTINGS = json.load(open("settings.json"))
-
-
-def get_dbconn():
-    """Return a database cursor"""
-    return psycopg2.connect(
-        database=SETTINGS["database"]["name"],
-        user=SETTINGS["database"]["user"],
-        host=SETTINGS["database"]["host"],
-        connect_timeout=60,
-        gssencmode="disable",
-    )
 
 
 def get_password(camid):

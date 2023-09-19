@@ -5,7 +5,7 @@ import logging
 import re
 import time
 
-from psycopg2.extras import DictCursor
+from pyiem.database import get_dbconnc
 
 import pyvbcam.utils as camutils
 from pyvbcam.webcam import BasicWebcam
@@ -13,8 +13,7 @@ from pyvbcam.webcam import BasicWebcam
 
 def get_vbcam(camid):
     """Return a vbcam object for this camera ID"""
-    pgconn = camutils.get_dbconn()
-    cursor = pgconn.cursor(cursor_factory=DictCursor)
+    pgconn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         """
         SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
