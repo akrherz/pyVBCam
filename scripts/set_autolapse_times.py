@@ -1,10 +1,6 @@
 """Update the database to set proper sunrise and sunset times"""
 import datetime
-
-try:
-    from zoneinfo import ZoneInfo  # type: ignore
-except ImportError:
-    from backports.zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo
 
 import ephem
 from pyiem.database import get_dbconnc
