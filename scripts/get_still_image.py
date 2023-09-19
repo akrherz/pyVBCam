@@ -56,8 +56,7 @@ def draw_save(cid, img, dirtext, row):
 
 def do_db(cid, drct):
     """Save direction to database"""
-    dbconn = camutils.get_dbconn()
-    cursor = dbconn.cursor()
+    dbconn, cursor = get_dbconnc("mesosite")
     sql = "INSERT into camera_log(cam, valid, drct) values (%s,%s,%s)"
     args = (cid, NOW.strftime("%Y-%m-%d %H:%M"), drct)
     cursor.execute(sql, args)

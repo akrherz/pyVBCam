@@ -5,17 +5,13 @@ import datetime
 import subprocess
 import sys
 
-import pyvbcam.utils as camutils
+from pyiem.database import get_dbconnc
 
 
 def main():
     """Run Main"""
     now = datetime.datetime.now()
-    pgconn = camutils.get_dbconn()
-    if pgconn is None:
-        return
-    cursor = pgconn.cursor()
-
+    pgconn, cursor = get_dbconnc("mesosite")
     # Figure out how frequently we are to update
     cursor.execute(
         """
@@ -24,7 +20,7 @@ def main():
     )
     row = cursor.fetchone()
     # assumption is either 60 or 300 is set
-    if row[0] == "300" and now.minute % 5 != 0:
+    if row["propvalue"] == "300" and now.minute % 5 != 0:
         sys.exit(0)
 
     cursor.execute(
