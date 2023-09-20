@@ -100,43 +100,31 @@ class Lapse(object):
             now = datetime.datetime.now()
             (_, imgheight) = img.size
 
-            if self.network != "KELO":
-                # Place timestamp on the image
-                stamp = "%s   %s" % (
-                    camutils.dir2text(drct),
-                    now.strftime("%-I:%M %p"),
-                )
-                (width, height) = draw.textsize(stamp, self.font)
-                font_y_offset = self.font.getoffset(stamp)[1]
-                draw.rectangle(
-                    [
-                        205 - width - 10,
-                        imgheight - 110 - 5,
-                        205,
-                        imgheight - 110 + height,
-                    ],
-                    fill="#000000",
-                )
-                draw.text(
-                    (200 - width, imgheight - 110 - font_y_offset),
-                    stamp,
-                    font=self.font,
-                )
-                stamp = "%s" % (now.strftime("%d %b %Y"),)
-            else:
-                stamp = "%s  %s" % (
-                    now.strftime("%d %b %Y %-I:%M %p"),
-                    camutils.dir2text(drct),
-                )
-            (width, height) = draw.textsize(stamp, self.sfont)
-            font_y_offset = self.sfont.getoffset(stamp)[1]
+            # Place timestamp on the image
+            stamp = "%s   %s" % (
+                camutils.dir2text(drct),
+                now.strftime("%-I:%M %p"),
+            )
+            labelpt = (125, imgheight - 90)
+            bbox = draw.textbbox(labelpt, stamp, font=self.font, anchor="mm")
+            height = bbox[3] - bbox[1]
+            width = bbox[2] - bbox[0]
             draw.rectangle(
-                [0, imgheight - height - 5, 0 + width, imgheight],
+                [
+                    205 - width - 10,
+                    imgheight - 110,
+                    205,
+                    imgheight - 110 + height,
+                ],
+                [
+                    labelpt[0] - width / 2.0 - 5,
+                    labelpt[1] - height / 2.0 - 5,
+                    labelpt[0] + width / 2.0 + 5,
+                    labelpt[1] + height / 2.0 + 5,
+                ],
                 fill="#000000",
             )
-            draw.text(
-                (0, imgheight - height - font_y_offset), stamp, font=self.sfont
-            )
+            draw.text(labelpt, stamp, font=self.font, anchor="mm")
             del draw
 
             img.save("%05i.jpg" % (self.i,))
