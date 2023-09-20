@@ -64,39 +64,16 @@ class Lapse(object):
         self.site = None
         self.i = 0
 
-    def create_lapse(self):
-        """
-        Create the timelapse frames, please
-        """
-        fails = 0
-        # Assume 30fps
-
-        while self.i < self.frames:
-            logging.info("i = %s, fails = %s", self.i, fails)
-            if fails > 5:
-                logging.info("failed too many times")
-                sys.exit(0)
-
-            # Set up buffer for image to go to
-            buf = BytesIO()
-
-            try:
-                drct = self.camera.getDirection()
-                imgdata = self.camera.get_one_shot()
-                if imgdata is None:
-                    time.sleep(10)
-                    fails += 1
-                    continue
-                buf.write(imgdata)
-                buf.seek(0)
-                img = Image.open(buf)
-                draw = ImageDraw.Draw(img)
-                fails = 0
-            except IOError as exp:
-                logging.exception(exp)
-                time.sleep(10)
-                fails += 1
-                continue
+    def do_frame(self, buf):
+        """Do a single frame"""
+        drct = self.camera.getDirection()
+        imgdata = self.camera.get_one_shot()
+        if imgdata is None:
+            raise Exception("Failed to get image data")
+        buf.write(imgdata)
+        buf.seek(0)
+        with Image.open(buf) as img:
+            draw = ImageDraw.Draw(img)
             now = datetime.datetime.now()
             (_, imgheight) = img.size
 
@@ -121,11 +98,30 @@ class Lapse(object):
             draw.text(labelpt, stamp, font=self.font, anchor="mm")
             del draw
 
-            img.save("%05i.jpg" % (self.i,))
-            self.wait_for_next_frame(self.i)
-            del img
-            del buf
-            self.i += 1
+            img.save(f"{self.i:05.0f}.jpg")
+
+    def create_lapse(self):
+        """
+        Create the timelapse frames, please
+        """
+        fails = 0
+        # Assume 30fps
+
+        while self.i < self.frames:
+            logging.info("i = %s, fails = %s", self.i, fails)
+            if fails > 5:
+                logging.info("failed too many times")
+                sys.exit(0)
+            try:
+                with BytesIO() as buf:
+                    self.do_frame(buf)
+                self.i += 1
+                self.wait_for_next_frame(self.i)
+                fails = 0  # reset counter
+            except Exception as exp:
+                logging.exception(exp)
+                fails += 1
+                time.sleep(10)
 
     def wait_for_next_frame(self, i):
         """Sleep logic between frames"""
