@@ -111,12 +111,6 @@ class Lapse(object):
             width = bbox[2] - bbox[0]
             draw.rectangle(
                 [
-                    205 - width - 10,
-                    imgheight - 110,
-                    205,
-                    imgheight - 110 + height,
-                ],
-                [
                     labelpt[0] - width / 2.0 - 5,
                     labelpt[1] - height / 2.0 - 5,
                     labelpt[0] + width / 2.0 + 5,
