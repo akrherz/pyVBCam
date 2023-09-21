@@ -1,0 +1,9 @@
+dependencies:
+ - codecov
+ - ephem
+ - pillow
+ - pyiem
+ - pytest-cov
+ - pytest-runner
+ - pytest
+ - requests

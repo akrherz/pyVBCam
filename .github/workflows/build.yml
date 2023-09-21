@@ -1,7 +1,17 @@
 name: Install and Test
-on: [push]
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
 jobs:
   build-linux:
+    defaults:
+      run:
+        # Ensures environment gets sourced right
+        shell: bash -l {0}
     name: Python (${{ matrix.PYTHON_VERSION }})
     runs-on: ubuntu-latest
     strategy:
@@ -10,16 +20,32 @@ jobs:
     env:
       PYTHON_VERSION: ${{ matrix.PYTHON_VERSION }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
-    - name: Setup CI from ci-tooling
+    # setup conda-forge with micromamba
+    - name: Setup Python
+      uses: mamba-org/setup-micromamba@v1
+      with:
+        environment-file: environment.yml
+        condarc: |
+          channels:
+            - conda-forge
+            - defaults
+        create-args: >-
+          python=${{ env.PYTHON_VERSION }}
+        environment-name: prod
+        cache-environment: true
+
+    - name: Build and Test
       run: |
-        git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
-        . .ci_tooling/miniconda.sh
-        pip install codecov
         python -m pip install . --upgrade
         echo '{}' > settings.json
         coverage run --source=pyvbcam setup.py test
-        if [[ ${{ matrix.PYTHON_VERSION }} == "3.11" ]]; then
-          codecov
-        fi
+        coverage xml
+
+    - name: Code coverage
+      if: ${{ matrix.PYTHON_VERSION == '3.11' }}
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: coverage.xml
