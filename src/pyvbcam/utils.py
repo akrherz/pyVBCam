@@ -16,7 +16,7 @@ def get_camids(network):
     """Yield a list of camera IDs for a given network"""
     if network not in ["ALL", "KCCI", "KCRG", "ISUC", "MCFC"]:
         LOG.warning("Provided network '%s' is unknown", network)
-        return None
+        return
     networks = (
         ["KCCI", "KCRG", "ISUC", "MCFC"] if network == "ALL" else [network]
     )
