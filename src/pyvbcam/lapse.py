@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo
 
 import requests
 from PIL import Image, ImageDraw, ImageFont
+from pyiem.util import drct2text
 
 import pyvbcam.utils as camutils
 
@@ -79,7 +80,7 @@ class Lapse(object):
 
             # Place timestamp on the image
             stamp = "%s   %s" % (
-                camutils.dir2text(drct),
+                drct2text(drct),
                 now.strftime("%-I:%M %p"),
             )
             labelpt = (125, imgheight - 90)
