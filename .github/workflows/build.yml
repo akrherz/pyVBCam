@@ -50,10 +50,11 @@ jobs:
 
     - name: Build and Test
       run: |
+        # Ensure we exit on any failure
+        set -e
         python -m pip install . --upgrade
-        echo '{}' > settings.json
-        coverage run --source=pyvbcam -m pytest
-        coverage xml
+        python -m coverage run -m pytest
+        python -m coverage run -m pytest xml
 
     - name: Code coverage
       if: ${{ matrix.PYTHON_VERSION == '3.11' }}
