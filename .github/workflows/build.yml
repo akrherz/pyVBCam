@@ -59,8 +59,7 @@ jobs:
         set -e
         python -m pip install . --upgrade
         python -m coverage run -m pytest
-        python -m coverage run -m pytest combine
-        python -m coverage run -m pytest xml
+        python -m coverage xml
 
     - name: Code coverage
       if: ${{ matrix.PYTHON_VERSION == '3.11' }}
