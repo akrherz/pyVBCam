@@ -5,8 +5,30 @@
 import json
 import os
 
+from pyiem.util import get_dbconnc, logger
+
+LOG = logger()
 DATADIR = os.sep.join([os.path.dirname(__file__), "data"])
 SETTINGS = json.load(open("settings.json"))
+
+
+def get_camids(network):
+    """Yield a list of camera IDs for a given network"""
+    if network not in ["ALL", "KCCI", "KCRG", "ISUC", "MCFC"]:
+        LOG.warning("Provided network '%s' is unknown", network)
+        return None
+    networks = (
+        ["KCCI", "KCRG", "ISUC", "MCFC"] if network == "ALL" else [network]
+    )
+    dbconn, cursor = get_dbconnc("mesosite")
+    cursor.execute(
+        "SELECT id from webcams where network = ANY(%s) "
+        "and online ORDER by id ASC",
+        (networks,),
+    )
+    for row in cursor:
+        yield row["id"]
+    dbconn.close()
 
 
 def get_password(camid):
