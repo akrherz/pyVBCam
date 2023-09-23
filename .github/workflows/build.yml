@@ -58,7 +58,7 @@ jobs:
         # Ensure we exit on any failure
         set -e
         python -m pip install . --upgrade
-        python -m coverage run --source=src/pyvbcam -m pytest
+        python -m coverage run --source=pyvbcam -m pytest
         python -m coverage xml
 
     - name: Code coverage
