@@ -51,6 +51,7 @@ jobs:
         . .ci_tooling/postgres.sh
         cd database; sh bootstrap.sh
         python schema_manager.py
+        python store_test_data.py
 
     - name: Build and Test
       run: |
