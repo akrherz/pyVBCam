@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo
 import pyvbcam.utils as camutils
 from PIL import Image, ImageDraw, ImageFont
 from pyiem.database import get_dbconnc
+from pyiem.util import drct2text
 from pyvbcam import vbcam
 
 NOW = datetime.datetime.now().replace(tzinfo=ZoneInfo("America/Chicago"))
@@ -102,7 +103,7 @@ def workflow(cid):
         dirtext = cam.drct2txt(drct)
     else:
         drct = row["pan0"]
-        dirtext = camutils.dir2text(row["pan0"])
+        dirtext = drct2text(row["pan0"])
 
     (imgwidth, imgheight) = i0.size
     if imgwidth != 640 or imgheight != 480:

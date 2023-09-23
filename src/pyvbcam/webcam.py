@@ -3,8 +3,7 @@ import logging
 import sys
 
 import requests
-
-from pyvbcam.utils import dir2text
+from pyiem.util import drct2text
 
 
 class BasicWebcam(object):
@@ -39,7 +38,7 @@ class BasicWebcam(object):
 
     def drct2txt(self, mydir):
         """Convert this direction to text"""
-        return dir2text(mydir)
+        return drct2text(mydir)
 
     def realhttp(self, s):
         """Make a real connection"""
