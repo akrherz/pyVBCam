@@ -22,6 +22,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Add /etc/hosts entries
+      run: |
+        cat .github/workflows/etchosts.txt | sudo tee -a /etc/hosts
+
+    - name: Copy default settings.json
+      run: |
+        cp settings.json-in settings.json
+
     # setup conda-forge with micromamba
     - name: Setup Python
       uses: mamba-org/setup-micromamba@v1
@@ -36,12 +44,22 @@ jobs:
         environment-name: prod
         cache-environment: true
 
+    - name: Setup Postgres
+      run: |
+        git clone --depth 1 https://github.com/akrherz/iem-database.git database
+        git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
+        . .ci_tooling/postgres.sh
+        cd database; sh bootstrap.sh
+        python schema_manager.py
+        python store_test_data.py
+
     - name: Build and Test
       run: |
+        # Ensure we exit on any failure
+        set -e
         python -m pip install . --upgrade
-        echo '{}' > settings.json
-        coverage run --source=pyvbcam setup.py test
-        coverage xml
+        python -m coverage run -m pytest
+        python -m coverage xml
 
     - name: Code coverage
       if: ${{ matrix.PYTHON_VERSION == '3.11' }}
