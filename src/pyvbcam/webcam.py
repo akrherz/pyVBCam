@@ -6,7 +6,7 @@ import requests
 from pyiem.util import drct2text
 
 
-class BasicWebcam(object):
+class BasicWebcam:
     """An object that allows interaction with a remote webcam"""
 
     PREFIX = ""
@@ -27,10 +27,9 @@ class BasicWebcam(object):
 
         self.httpauth = requests.auth.HTTPDigestAuth(user, password)
         self.retries = 6
-        self.getSettings()
-        self.retries = 60
         self.connid = None
         self.haveControl = False
+        self.getSettings()
 
     def getSettings(self):
         """overide me"""
