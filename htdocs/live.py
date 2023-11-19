@@ -12,7 +12,7 @@ from paste.request import parse_formvars
 from PIL import Image, ImageDraw
 from pyiem.util import get_dbconnc, get_properties
 from pymemcache.client import Client
-from requests.auth import HTTPDigestAuth
+from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 
 
 def fetch(cid):
@@ -48,7 +48,15 @@ def fetch(cid):
     if is_vapix:
         uribase = "http://%s:%s/axis-cgi/jpg/image.cgi"
     uri = uribase % (ip if ip is not None else fqdn, port)
-    req = requests.get(uri, auth=HTTPDigestAuth(user, passwd), timeout=15)
+    ham = (
+        HTTPBasicAuth
+        if cid
+        in [
+            "KCRG-010",
+        ]
+        else HTTPDigestAuth
+    )
+    req = requests.get(uri, auth=ham(user, passwd), timeout=15)
     if req.status_code != 200:
         return
     image = Image.open(BytesIO(req.content))
@@ -73,7 +81,8 @@ def workflow(cid):
         return res
     try:
         res = fetch(cid)
-    except Exception:  # noqa
+    except Exception as exp:  # noqa
+        print(cid, exp)
         return None
     if res is not None:
         # Set for 15 seconds
