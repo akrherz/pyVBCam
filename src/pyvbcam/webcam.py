@@ -1,4 +1,5 @@
 """A basic definition of a webcam object"""
+
 import logging
 import sys
 

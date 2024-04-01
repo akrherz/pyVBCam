@@ -1,4 +1,5 @@
-""" Sync four webcams in time generating a timelapse """
+"""Sync four webcams in time generating a timelapse"""
+
 import logging
 import os
 import sys

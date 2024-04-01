@@ -1,4 +1,5 @@
 """proctor the exec of daily auto lapse scripts"""
+
 import datetime
 import subprocess
 import time

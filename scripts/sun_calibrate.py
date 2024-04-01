@@ -1,6 +1,7 @@
 """
- Something to calibrate the location of the webcam and direction!
+Something to calibrate the location of the webcam and direction!
 """
+
 import datetime
 import io
 import logging

@@ -1,7 +1,8 @@
 """Some common stuff used by the scripts
 
-    Note: It is important that this module not import other parts of this code
+Note: It is important that this module not import other parts of this code
 """
+
 import json
 import os
 

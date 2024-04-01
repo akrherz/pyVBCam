@@ -1,4 +1,5 @@
-""" Create a 16 panel lapse, after the fact :) """
+"""Create a 16 panel lapse, after the fact :)"""
+
 import datetime
 import glob
 import os

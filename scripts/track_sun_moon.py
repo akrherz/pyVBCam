@@ -1,4 +1,5 @@
-""" Track either the sun or the moon with a webcam """
+"""Track either the sun or the moon with a webcam"""
+
 import datetime
 import logging
 import math

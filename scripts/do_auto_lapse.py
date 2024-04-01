@@ -1,5 +1,5 @@
 """
-  Drives the production of auto timed webcam lapses
+Drives the production of auto timed webcam lapses
 """
 
 import datetime
