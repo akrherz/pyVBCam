@@ -1,6 +1,7 @@
 """
- Get still image for the website mostly
+Get still image for the website mostly
 """
+
 import datetime
 import logging
 import subprocess

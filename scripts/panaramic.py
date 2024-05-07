@@ -1,4 +1,5 @@
-""" Create a panoramic image for a given site """
+"""Create a panoramic image for a given site"""
+
 import logging
 import os
 import sys

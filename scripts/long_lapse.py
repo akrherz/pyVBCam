@@ -1,4 +1,5 @@
-""" Drive the generation of a long time lapse """
+"""Drive the generation of a long time lapse"""
+
 import datetime
 import logging
 import os

@@ -1,4 +1,5 @@
 """Create a stiched and synced 4-panel, after the fact"""
+
 import datetime
 import glob
 import os

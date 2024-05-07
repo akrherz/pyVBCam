@@ -1,4 +1,5 @@
 """Test the lapse module."""
+
 from io import BytesIO
 
 from pyvbcam import lapse

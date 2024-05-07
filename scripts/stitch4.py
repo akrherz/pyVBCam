@@ -1,4 +1,5 @@
 """Create a stiched and synced 4-panel, after the fact"""
+
 from __future__ import print_function
 
 import datetime
