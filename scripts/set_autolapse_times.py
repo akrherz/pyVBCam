@@ -1,4 +1,5 @@
 """Update the database to set proper sunrise and sunset times"""
+
 import datetime
 from zoneinfo import ZoneInfo
 

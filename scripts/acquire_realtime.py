@@ -1,6 +1,7 @@
 """
 Fire off the aquistion of RT webcam images
 """
+
 import datetime
 import subprocess
 import sys

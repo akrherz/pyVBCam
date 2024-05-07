@@ -1,4 +1,5 @@
 """Simple utility to print out the camera settings"""
+
 from __future__ import print_function
 
 import logging

@@ -1,4 +1,5 @@
-""" Fire off long term lapses for a given network """
+"""Fire off long term lapses for a given network"""
+
 import subprocess
 import sys
 
