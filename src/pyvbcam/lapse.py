@@ -1,6 +1,7 @@
 """A lapse"""
 
 import datetime
+import glob
 import logging
 import os
 import random
@@ -16,6 +17,14 @@ from PIL import Image, ImageDraw, ImageFont
 from pyiem.util import drct2text
 
 import pyvbcam.utils as camutils
+
+
+def safe_copy(src, dest):
+    """Copy file, safely"""
+    try:
+        shutil.copyfile(src, f"/mesonet/share/lapses/auto/{dest}")
+    except IOError as exp:
+        logging.error(exp)
 
 
 class scrape(object):
@@ -150,7 +159,6 @@ class Lapse(object):
         3. .tar file of the frames
         4. .mov for TV stations video system
         """
-        ffmpeg = "ffmpeg -i %05d.jpg"
         if self.filename != "test":
             # Lets sleep for around 12 minutes,
             # so that we don't have 27 ffmpegs going
@@ -160,25 +168,17 @@ class Lapse(object):
             )
             time.sleep(randsleep)
 
-        def safe_copy(src, dest):
-            """Copy file, safely"""
-            try:
-                shutil.copyfile(src, "/mesonet/share/lapses/auto/%s" % (dest,))
-            except IOError as exp:
-                logging.error(exp)
-
         # 1. Create Flash Video in full res!
         if os.path.isfile("out.flv"):
             os.unlink("out.flv")
         proc = subprocess.Popen(
-            "%s -b 1000k out.flv" % (ffmpeg,),
-            shell=True,
+            ["ffmpeg", "-i", "%05d.jpg", "-b", "1000k", "out.flv"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
         logging.info(proc.stdout.read())
         logging.error(proc.stderr.read())
-        safe_copy("out.flv", "%s.flv" % (self.filename,))
+        safe_copy("out.flv", f"{self.filename}.flv")
         # Cleanup after ourself
         os.unlink("out.flv")
 
@@ -186,43 +186,35 @@ class Lapse(object):
         if os.path.isfile("out.mp4"):
             os.unlink("out.mp4")
         proc = subprocess.Popen(
-            "%s out.mp4" % (ffmpeg,),
-            shell=True,
+            ["ffmpeg", "-i", "%05d.jpg", "out.mp4"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
         logging.info(proc.stdout.read())
         logging.error(proc.stderr.read())
-        safe_copy("out.mp4", "%s.mp4" % (self.filename,))
+        safe_copy("out.mp4", f"{self.filename}.mp4")
         # Cleanup after ourself
         os.unlink("out.mp4")
 
         # 3. Create tar file of images
         subprocess.call(
-            "tar -cf %s_frames.tar *.jpg" % (self.filename,), shell=True
+            ["tar", "-cf", f"{self.filename}_frames.tar", *glob.glob("*.jpg")]
         )
         safe_copy(
-            "%s_frames.tar" % (self.filename,),
-            "%s_frames.tar" % (self.filename,),
+            f"{self.filename}_frames.tar",
+            f"{self.filename}_frames.tar",
         )
         # Cleanup after ourselfs
-        os.unlink("%s_frames.tar" % (self.filename,))
+        os.unlink(f"{self.filename}_frames.tar")
 
         # 4. mov files
         if os.path.isfile("out.mov"):
             os.unlink("out.mov")
         proc = subprocess.Popen(
-            "%s -b 2000k out.mov" % (ffmpeg,),
-            shell=True,
+            ["ffmpeg", "-i", "%05d.jpg", "-b", "2000k", "out.mov"],
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,
         )
         logging.info(proc.stdout.read())
         logging.error(proc.stderr.read())
-        subprocess.call(
-            ("pqinsert -p 'lapse c " "000000000000 %s/%s.qt BOGUS qt' out.mov")
-            % (self.network, self.filename),
-            shell=True,
-        )
-        # Cleanup after ourself
         os.unlink("out.mov")
