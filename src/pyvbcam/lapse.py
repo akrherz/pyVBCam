@@ -141,7 +141,10 @@ class Lapse(object):
             secs_left = 0
         else:
             secs_left = delta.seconds
-        delay = (secs_left - ((self.frames - i) * 2)) / (self.frames - i)
+        if self.frames - i == 0:
+            delay = 0
+        else:
+            delay = (secs_left - ((self.frames - i) * 2)) / (self.frames - i)
         logging.info(
             "secs_left = %.2f, frames_left = %d, delay = %.2f",
             secs_left,
