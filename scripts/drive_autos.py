@@ -48,7 +48,6 @@ def main(label):
         movie_seconds = row["movie_seconds"]
         secs = (ets - sts).seconds
         init_delay = sts.minute * 60
-        # is the amphersand necessary?
         cmd = [
             "python",
             "do_auto_lapse.py",
@@ -58,9 +57,8 @@ def main(label):
             row["filename"],
             f"{movie_seconds}",
         ]
-        subprocess.call(cmd)
+        subprocess.Popen(cmd)  # needed to background
         time.sleep(1)  # Jitter to keep dups
-
         if not row["is_daily"]:
             cursor.execute(
                 "DELETE from webcam_scheduler WHERE oid = %s",
