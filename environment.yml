@@ -1,4 +1,5 @@
 dependencies:
+ - click
  - codecov
  - ephem
  - pillow
