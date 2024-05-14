@@ -16,7 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        PYTHON_VERSION: ["3.9", "3.11", "3.12"]
+        # 3.12 disabled for now as posix_ipc is not available in cf
+        PYTHON_VERSION: ["3.9", "3.11"]
     env:
       PYTHON_VERSION: ${{ matrix.PYTHON_VERSION }}
     steps:
