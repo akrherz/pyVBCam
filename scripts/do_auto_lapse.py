@@ -10,8 +10,16 @@ import subprocess
 import sys
 import time
 
+import posix_ipc
 from pyiem.database import get_dbconnc
 from pyvbcam import lapse, vbcam
+
+# Limit postprocessing to 4 at a time
+SEMAPHORE = posix_ipc.Semaphore(
+    "/pyvbcam_postprocess",
+    flags=posix_ipc.O_CREAT,
+    initial_value=4,
+)
 
 
 def check_resume(job):
@@ -100,7 +108,11 @@ def main():
     setup_job(job)
     bootstrap(job)
     job.create_lapse()
-    job.postprocess()
+    SEMAPHORE.acquire()
+    try:
+        job.postprocess()
+    finally:
+        SEMAPHORE.release()
     if os.path.isfile("do_auto_lapse.pid"):
         os.unlink("do_auto_lapse.pid")
     logging.info("Done!")

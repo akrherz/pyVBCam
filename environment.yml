@@ -2,6 +2,7 @@ dependencies:
  - codecov
  - ephem
  - pillow
+ - posix_ipc
  - pyiem
  - pytest-cov
  - pytest-runner
