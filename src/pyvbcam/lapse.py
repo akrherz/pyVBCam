@@ -4,7 +4,6 @@ import datetime
 import glob
 import logging
 import os
-import random
 import shutil
 import subprocess
 import sys
@@ -162,15 +161,6 @@ class Lapse(object):
         3. .tar file of the frames
         4. .mov for TV stations video system
         """
-        if self.filename != "test":
-            # Lets sleep for around 12 minutes,
-            # so that we don't have 27 ffmpegs going
-            randsleep = 720.0 * random.random()
-            logging.info(
-                "Sleeping %.2f seconds before launching ffmpeg", randsleep
-            )
-            time.sleep(randsleep)
-
         # 1. Create Flash Video in full res!
         if os.path.isfile("out.flv"):
             os.unlink("out.flv")
