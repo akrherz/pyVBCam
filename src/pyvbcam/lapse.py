@@ -13,7 +13,7 @@ from zoneinfo import ZoneInfo
 
 import requests
 from PIL import Image, ImageDraw, ImageFont
-from pyiem.util import drct2text
+from pyiem.util import drct2text, utc
 
 import pyvbcam.utils as camutils
 
@@ -135,11 +135,7 @@ class Lapse(object):
 
     def wait_for_next_frame(self, i):
         """Sleep logic between frames"""
-        delta = self.ets - datetime.datetime.now()
-        if delta.days < 0:
-            secs_left = 0
-        else:
-            secs_left = delta.seconds
+        secs_left = max((self.ets - utc()).total_seconds(), 0)
         if self.frames - i == 0:
             delay = 0
         else:
