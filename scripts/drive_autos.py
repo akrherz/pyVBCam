@@ -41,21 +41,24 @@ def main(label):
         )
     LOG.info("Found %s database rows", cursor.rowcount)
     for row in cursor:
-        sts = row["begints"]
-        ets = row["endts"]
+        sts = row["begints"].astimezone(datetime.timezone.utc)
+        ets = row["endts"].astimezone(datetime.timezone.utc)
+        # A quirk of pyephem at one time, unsure if still valid.
         if ets < sts:
             ets += datetime.timedelta(days=1)
-        movie_seconds = row["movie_seconds"]
-        secs = (ets - sts).seconds
-        init_delay = sts.minute * 60
         cmd = [
             "python",
             "do_auto_lapse.py",
-            f"{init_delay}",
+            "--cid",
             row["cid"],
-            f"{secs}",
+            "--sts",
+            f"{sts:%Y-%m-%dT%H:%M:%S}",
+            "--ets",
+            f"{ets:%Y-%m-%dT%H:%M:%S}",
+            "--label",
             row["filename"],
-            f"{movie_seconds}",
+            "--duration",
+            f"{row['movie_seconds']}",
         ]
         subprocess.Popen(cmd)  # needed to background
         time.sleep(1)  # Jitter to keep dups

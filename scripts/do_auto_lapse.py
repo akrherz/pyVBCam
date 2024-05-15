@@ -10,8 +10,10 @@ import subprocess
 import sys
 import time
 
+import click
 import posix_ipc
 from pyiem.database import get_dbconnc
+from pyiem.util import utc
 from pyvbcam import lapse, vbcam
 
 # Limit postprocessing to 4 at a time
@@ -40,17 +42,20 @@ def check_resume(job):
     output.close()
 
 
-def setup_job(job):
+def setup_job(job, cid, sts, ets, label, duration):
     """
     Setup our lapse job
     """
-    job.init_delay = int(sys.argv[1])
-    job.site = sys.argv[2]
+    job.site = cid
+    job.ets = ets
     job.network = job.site[:4]
-    job.secs = int(float(sys.argv[3]))
-    job.filename = sys.argv[4]
-    job.movie_duration = int(float(sys.argv[5]))
+    job.filename = label
+    job.movie_duration = duration
     job.frames = job.movie_duration * 30
+
+    # Figure out how much to delay the start
+    diff = (sts - utc()).total_seconds()
+    job.init_delay = 0 if diff < 0 else int(diff)
 
     outdir = "../tmp/autoframes.%s" % (job.filename,)
     if not os.path.isdir(outdir):
@@ -89,23 +94,19 @@ def bootstrap(job):
     logging.debug("Initial sleep of: %s", job.init_delay)
     time.sleep(job.init_delay + random.random())
 
-    # compute
-    sts = datetime.datetime.now()
-    job.ets = sts + datetime.timedelta(seconds=job.secs)
 
-
-def main():
+@click.command()
+@click.option("--cid", required=True, help="Camera ID")
+@click.option("--sts", required=True, type=click.DateTime(), help="UTC Start")
+@click.option("--ets", required=True, type=click.DateTime(), help="UTC End")
+@click.option("--label", required=True, help="Generated lapse name.")
+@click.option("--duration", required=True, type=int, help="Duration seconds")
+def main(cid, sts, ets, label, duration):
     """Do Something"""
-    if len(sys.argv) != 6:
-        print(
-            (
-                "USAGE: python do_auto_lapse.py init_delay_sec camid "
-                "realtime_secs filename movie_secs"
-            )
-        )
-        sys.exit()
+    sts = sts.replace(tzinfo=datetime.timezone.utc)
+    ets = ets.replace(tzinfo=datetime.timezone.utc)
     job = lapse.Lapse()
-    setup_job(job)
+    setup_job(job, cid, sts, ets, label, duration)
     bootstrap(job)
     job.create_lapse()
     SEMAPHORE.acquire()
