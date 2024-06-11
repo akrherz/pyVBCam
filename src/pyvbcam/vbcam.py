@@ -92,11 +92,11 @@ class VAPIX(BasicWebcam):
         """Get the direction of the current pan"""
         if "pan" not in self.settings:
             self.log.debug(
-                ("%s %s pan was missing from settings, using zero"),
+                "%s %s pan was missing from settings, using pan0/zero",
                 self.cid,
                 self.name,
             )
-            return 0
+            return self.pan0
         deg_pan = float(self.settings["pan"])  # in deg
         off = self.pan0 + deg_pan
         if off < 0:
