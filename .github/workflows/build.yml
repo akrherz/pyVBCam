@@ -11,7 +11,7 @@ jobs:
     defaults:
       run:
         # Ensures environment gets sourced right
-        shell: bash -l {0}
+        shell: bash -l -e {0}
     name: Python (${{ matrix.PYTHON_VERSION }})
     runs-on: ubuntu-latest
     strategy:
@@ -57,8 +57,6 @@ jobs:
 
     - name: Build and Test
       run: |
-        # Ensure we exit on any failure
-        set -e
         python -m pip install . --upgrade
         python -m coverage run --source=pyvbcam -m pytest
         python -m coverage xml
