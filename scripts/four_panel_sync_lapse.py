@@ -8,6 +8,7 @@ import time
 import common
 import mx.DateTime
 from PIL import Image, ImageDraw, ImageFont
+
 from pyvbcam.utils import DATADIR
 
 os.chdir("../tmp")

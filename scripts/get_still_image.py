@@ -10,10 +10,11 @@ import time
 from io import BytesIO
 from zoneinfo import ZoneInfo
 
-import pyvbcam.utils as camutils
 from PIL import Image, ImageDraw, ImageFont
 from pyiem.database import get_dbconnc
 from pyiem.util import drct2text
+
+import pyvbcam.utils as camutils
 from pyvbcam import vbcam
 
 NOW = datetime.datetime.now().replace(tzinfo=ZoneInfo("America/Chicago"))

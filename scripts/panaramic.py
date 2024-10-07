@@ -6,6 +6,7 @@ import sys
 import time
 
 from PIL import Image, ImageDraw
+
 from pyvbcam import vbcam
 
 logging.basicConfig(level=logging.DEBUG)

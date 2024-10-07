@@ -4,6 +4,7 @@ import subprocess
 import sys
 
 from pyiem.util import logger
+
 from pyvbcam.utils import get_camids
 
 LOG = logger()

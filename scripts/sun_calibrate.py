@@ -13,6 +13,7 @@ import time
 import ephem
 from PIL import Image, ImageDraw
 from pyiem.database import get_dbconnc
+
 from pyvbcam import common
 
 logging.basicConfig(level=logging.DEBUG)

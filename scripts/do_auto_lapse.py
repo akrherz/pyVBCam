@@ -14,6 +14,7 @@ import click
 import posix_ipc
 from pyiem.database import get_dbconnc
 from pyiem.util import utc
+
 from pyvbcam import lapse, vbcam
 
 # Limit postprocessing to 4 at a time

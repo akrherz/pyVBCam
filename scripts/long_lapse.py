@@ -8,6 +8,7 @@ import time
 from io import BytesIO
 
 from PIL import Image, ImageDraw, ImageFont
+
 from pyvbcam.utils import DATADIR
 from pyvbcam.vbcam import get_vbcam
 
