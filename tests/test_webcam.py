@@ -1,6 +1,7 @@
 """Test pyvbcam.webcam module."""
 
 import pytest
+
 from pyvbcam import webcam
 
 
