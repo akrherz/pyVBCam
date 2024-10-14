@@ -160,13 +160,21 @@ class Lapse(object):
         # 1. Create Flash Video in full res!
         if os.path.isfile("out.flv"):
             os.unlink("out.flv")
-        proc = subprocess.Popen(
+        with subprocess.Popen(
             ["ffmpeg", "-i", "%05d.jpg", "-b", "1000k", "out.flv"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-        )
-        logging.info(proc.stdout.read())
-        logging.error(proc.stderr.read())
+        ) as proc:
+            logging.info(proc.stdout.read())
+            logging.error(proc.stderr.read())
+            # check the exit code
+            if proc.returncode != 0:
+                logging.error("ffmpeg failed to create FLV")
+                return
+        # belt and suspenders
+        if not os.path.isfile("out.flv"):
+            logging.error("Failed to create out.flv")
+            return
         safe_copy("out.flv", f"{self.filename}.flv")
         # Cleanup after ourself
         os.unlink("out.flv")
