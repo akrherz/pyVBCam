@@ -167,10 +167,7 @@ class Lapse(object):
         ) as proc:
             logging.info(proc.stdout.read())
             logging.error(proc.stderr.read())
-            # check the exit code
-            if proc.returncode != 0:
-                logging.error("ffmpeg failed to create FLV")
-                return
+            # NB: ffmpeg exit code is not reliable
         # belt and suspenders
         if not os.path.isfile("out.flv"):
             logging.error("Failed to create out.flv")
