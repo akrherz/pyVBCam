@@ -1,11 +1,35 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+
+requires = [ "setuptools>=64", "setuptools-scm>=8" ]
+
+[project]
+name = "pyvbcam"
+description = "Clunky code to interface with IP webcams."
+readme = "README.md"
+
+keywords = [ "webcam" ]
+license = { text = "Apache" }
+classifiers = [
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+dynamic = [ "version" ]
+urls."homepage" = "https://github.com/akrherz/pyVBCam"
+
+[tool.setuptools_scm]
+version_scheme = "post-release"
 
 [tool.ruff]
-line-length = 79
 target-version = "py39"
 
-[tool.ruff.lint]
-select = [
-    "E",
-    "F",
-    "I",
+line-length = 79
+lint.select = [
+  "E",
+  "F",
+  "I",
 ]
