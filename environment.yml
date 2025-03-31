@@ -8,5 +8,7 @@ dependencies:
  - posix_ipc
  - pyiem
  - pytest-cov
+ # mocking
+ - pytest-httpx
  - pytest-runner
  - pytest

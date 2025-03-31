@@ -67,11 +67,11 @@ class BasicWebcam:
             return None
         return req.content
 
-    def http(self, s):
+    def http(self, s, retries: int = 6):
         """http helper"""
         c = 0
         data = None
-        while c < 6:
+        while c < retries:
             try:
                 data = self.realhttp(s)
                 if data is not None:
