@@ -88,12 +88,12 @@ class VAPIX(BasicWebcam):
         """Tilt"""
         return self.http("com/ptz.cgi?tilt=%s" % (val,))
 
-    def get_one_shot(self, res=None):
+    def get_one_shot(self, res: str = None):
         """Get a still image"""
         if res is None:
             res = self.config.res
         return self.http(
-            ("jpg/image.cgi?clock=0&date=0&text=0&resolution=%s") % (res,)
+            f"jpg/image.cgi?clock=0&date=0&text=0&resolution={res}"
         )
 
     def getDirection(self):
