@@ -15,7 +15,7 @@ from pyvbcam.webcam import BasicWebcam
 
 
 @with_sqlalchemy_conn("mesosite")
-def get_vbcam(camid: str, conn: Connection = None):
+def get_vbcam(camid: str, conn: Connection = None, settings: dict = None):
     """Return a vbcam object for this camera ID"""
     res = conn.execute(
         sql_helper("""
@@ -38,7 +38,7 @@ def get_vbcam(camid: str, conn: Connection = None):
         res=row["fullres"],
         username=camutils.get_user(camid),
     )
-    return (VAPIX if row["is_vapix"] else VBCam)(cfg)
+    return (VAPIX if row["is_vapix"] else VBCam)(cfg, settings=settings)
 
 
 class VAPIX(BasicWebcam):
@@ -77,8 +77,8 @@ class VAPIX(BasicWebcam):
 
     def pan(self, deg):
         """Pan to the relative to webcam direction"""
-        print("Panning to camera relative: %s deg" % (deg,))
-        return self.http("com/ptz.cgi?pan=%.2f" % (deg,))
+        self.log.info("Panning to camera relative: %s deg", deg)
+        return self.http(f"com/ptz.cgi?pan={deg:.2f}")
 
     def zoom(self, val):
         """Zoom to the given zoom"""
@@ -154,7 +154,7 @@ class VBCam(BasicWebcam):
             % (self.connid, tilt * 100)
         )
 
-    def get_one_shot(self):
+    def get_one_shot(self, res: str = None):
         """Get one shot which is more forgiving that GetStillImage"""
         return self.http("GetOneShot")
 

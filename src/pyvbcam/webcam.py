@@ -14,8 +14,13 @@ class BasicWebcam:
 
     PREFIX = ""
 
-    def __init__(self, config: WebCamConfig):
-        """The constructor"""
+    def __init__(self, config: WebCamConfig, settings: dict = None):
+        """Constructor.
+
+        args:
+            config: a WebCamConfig object
+            settings: a dictionary of settings to use
+        """
         # hold the config object
         self.config = config
         self.webbase = (
@@ -23,14 +28,15 @@ class BasicWebcam:
             f"{config.port}"
         )
         self.httpauth = httpx.DigestAuth(config.username, config.password)
-        self.settings = {}
+        self.settings = {} if settings is None else settings
         self.retries = 6
         self.connid = None
         self.haveControl = False
 
         self.log = logging.getLogger(__name__)
 
-        self.getSettings()
+        if settings is None:
+            self.getSettings()
 
     def getSettings(self):
         """overide me"""
