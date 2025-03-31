@@ -6,32 +6,30 @@ import sys
 import httpx
 from pyiem.util import drct2text
 
+from pyvbcam import WebCamConfig
+
 
 class BasicWebcam:
     """An object that allows interaction with a remote webcam"""
 
     PREFIX = ""
 
-    def __init__(self, cid, row, user: str, password: str):
+    def __init__(self, config: WebCamConfig):
         """The constructor"""
-        self.cid = cid
-        self.pan0 = row["pan0"]
-        self.ip = row["ip"]
-        self.fqdn = row["fqdn"]
-        self.port = row["port"]
-        self.name = row["name"]
+        # hold the config object
+        self.config = config
+        self.webbase = (
+            f"http://{config.ip if config.fqdn is None else config.fqdn}:"
+            f"{config.port}"
+        )
+        self.httpauth = httpx.DigestAuth(config.username, config.password)
         self.settings = {}
-        self.res = row["fullres"]
-        self.lat = row["lat"]
-        self.lon = row["lon"]
-        self.log = logging.getLogger(__name__)
-
-        self.user = user
-        self.password = password
-        self.httpauth = httpx.DigestAuth(user, password)
         self.retries = 6
         self.connid = None
         self.haveControl = False
+
+        self.log = logging.getLogger(__name__)
+
         self.getSettings()
 
     def getSettings(self):
@@ -45,13 +43,7 @@ class BasicWebcam:
     def realhttp(self, s):
         """Make a real connection"""
         req = httpx.get(
-            "http://%s:%s/%s/%s"
-            % (
-                self.ip if self.ip is not None else self.fqdn,
-                self.port,
-                self.PREFIX,
-                s,
-            ),
+            f"{self.webbase}{self.PREFIX}/{s}",
             auth=self.httpauth,
             timeout=30,
         )
@@ -60,15 +52,11 @@ class BasicWebcam:
             self.httpauth, httpx.DigestAuth
         ):
             logging.debug("downgrading HTTPAuth to Basic")
-            self.httpauth = httpx.BasicAuth(self.user, self.password)
+            self.httpauth = httpx.BasicAuth(
+                self.config.username, self.config.password
+            )
             req = httpx.get(
-                "http://%s:%s/%s/%s"
-                % (
-                    self.ip if self.ip is not None else self.fqdn,
-                    self.port,
-                    self.PREFIX,
-                    s,
-                ),
+                f"{self.webbase}{self.PREFIX}/{s}",
                 auth=self.httpauth,
                 timeout=30,
             )

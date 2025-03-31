@@ -6,43 +6,51 @@ import logging
 import re
 import time
 
-from pyiem.database import get_dbconnc
+from pyiem.database import sql_helper, with_sqlalchemy_conn
+from sqlalchemy.engine import Connection
 
 import pyvbcam.utils as camutils
+from pyvbcam import WebCamConfig
 from pyvbcam.webcam import BasicWebcam
 
 
-def get_vbcam(camid):
+@with_sqlalchemy_conn("mesosite")
+def get_vbcam(camid: str, conn: Connection = None):
     """Return a vbcam object for this camera ID"""
-    pgconn, cursor = get_dbconnc("mesosite")
-    cursor.execute(
-        """
+    res = conn.execute(
+        sql_helper("""
         SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
-        from webcams where id = %s
-    """,
-        (camid,),
+        from webcams where id = :cid
+    """),
+        {"cid": camid},
     )
-    row = cursor.fetchone()
-    pgconn.close()
-    if row["is_vapix"]:
-        return VAPIX(
-            camid, row, camutils.get_user(camid), camutils.get_password(camid)
-        )
-    return vbcam(
-        camid, row, camutils.get_user(camid), camutils.get_password(camid)
+    row = res.mappings().fetchone()
+    cfg = WebCamConfig(
+        cid=camid,
+        fqdn=row["fqdn"],
+        ip=row["ip"],
+        lat=row["lat"],
+        lon=row["lon"],
+        name=row["name"],
+        pan0=row["pan0"],
+        password=camutils.get_password(camid),
+        port=row["port"],
+        res=row["fullres"],
+        username=camutils.get_user(camid),
     )
+    return (VAPIX if row["is_vapix"] else vbcam)(cfg)
 
 
 class VAPIX(BasicWebcam):
     """Class representing access to a VAPIX webcam"""
 
-    PREFIX = "axis-cgi"
+    PREFIX = "/axis-cgi"
 
     def getSettings(self):
         """Get the current PTZ"""
         data = self.http("com/ptz.cgi?query=position")
         if data is None:
-            logging.debug("Failed to get settings for ip: %s", self.ip)
+            logging.debug("Failed to get settings for: %s", self)
             return
         for line in data.decode("ascii", "ignore").split("\n"):
             tokens = line.split("=")
@@ -51,11 +59,11 @@ class VAPIX(BasicWebcam):
 
     def dir2pan(self, drct):
         """Compute a pan based on a given direction, yikes?"""
-        offset = drct - self.pan0
+        offset = drct - self.config.pan0
         if offset < -180:  # We need to go the other way
-            offset = (360 + drct) - self.pan0
+            offset = (360 + drct) - self.config.pan0
         elif offset > 180:  # We need to go the other way
-            offset = (drct - 360) - self.pan0
+            offset = (drct - 360) - self.config.pan0
 
         if offset < -179.9:
             offset = -179.9
@@ -83,7 +91,7 @@ class VAPIX(BasicWebcam):
     def get_one_shot(self, res=None):
         """Get a still image"""
         if res is None:
-            res = self.res
+            res = self.config.res
         return self.http(
             ("jpg/image.cgi?clock=0&date=0&text=0&resolution=%s") % (res,)
         )
@@ -92,13 +100,12 @@ class VAPIX(BasicWebcam):
         """Get the direction of the current pan"""
         if "pan" not in self.settings:
             self.log.debug(
-                "%s %s pan was missing from settings, using pan0/zero",
-                self.cid,
-                self.name,
+                "%s pan was missing from settings, using pan0/zero",
+                self.config.cid,
             )
-            return self.pan0
+            return self.config.pan0
         deg_pan = float(self.settings["pan"])  # in deg
-        off = self.pan0 + deg_pan
+        off = self.config.pan0 + deg_pan
         if off < 0:
             off = 360 + off
         if off >= 360:
@@ -113,7 +120,7 @@ class VAPIX(BasicWebcam):
 class vbcam(BasicWebcam):
     """Canon VB-Webcam"""
 
-    PREFIX = "-wvhttp-01-"
+    PREFIX = "/-wvhttp-01-"
 
     def closeConnection(self):
         """Drop the lock we have going with the server"""
@@ -157,17 +164,16 @@ class vbcam(BasicWebcam):
 
     def dir2pan(self, drct):
         """Compute a pan based on a given direction, yikes?"""
-        offset = drct - self.pan0
+        offset = drct - self.config.pan0
         if offset < -180:  # We need to go the other way
-            offset = (360 + drct) - self.pan0
+            offset = (360 + drct) - self.config.pan0
         elif offset > 180:  # We need to go the other way
-            offset = (drct - 360) - self.pan0
+            offset = (drct - 360) - self.config.pan0
 
         if offset < -170:
             offset = -170
         if offset > 170:
             offset = 170
-        # print "pan0: %s drct: %s offset: %s" % (self.pan0, drct, offset)
         return offset
 
     def getTilt(self):
@@ -186,7 +192,7 @@ class vbcam(BasicWebcam):
             logging.debug("Don't have pan_current_value set, asumming 0")
             pan = 0
         deg_pan = float(int(pan)) / float(100)
-        off = self.pan0 + deg_pan
+        off = self.config.pan0 + deg_pan
         if off < 0:
             off = 360 + off
         if off >= 360:

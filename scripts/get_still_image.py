@@ -4,6 +4,7 @@ Get still image for the website mostly
 
 import datetime
 import logging
+import os
 import subprocess
 import sys
 import time
@@ -12,10 +13,11 @@ from zoneinfo import ZoneInfo
 
 from PIL import Image, ImageDraw, ImageFont
 from pyiem.database import get_dbconnc
-from pyiem.util import drct2text
+from pyiem.util import drct2text, utc
 
 import pyvbcam.utils as camutils
 from pyvbcam import vbcam
+from pyvbcam.vbcam import BasicWebcam
 
 NOW = datetime.datetime.now().replace(tzinfo=ZoneInfo("America/Chicago"))
 FONT = ImageFont.truetype(camutils.DATADIR + "/veramono.ttf", 10)
@@ -23,7 +25,7 @@ log = logging.getLogger()
 log.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.WARNING)
 
 
-def get_buffer_and_cam(row, cid, gmt):
+def get_buffer_and_cam(cid):
     """Get things"""
     cam = vbcam.get_vbcam(cid)
     cam.retries = 2
@@ -32,16 +34,16 @@ def get_buffer_and_cam(row, cid, gmt):
     buf = BytesIO()
     buf.write(cam.get_one_shot())
     buf.seek(0)
-    return buf, cam, gmt
+    return buf, cam
 
 
-def draw_save(cid, img, dirtext, row):
+def draw_save(cam: BasicWebcam, img, dirtext):
     """Draw and Save Image"""
     (imgwidth, imgheight) = img.size
     draw = ImageDraw.Draw(img)
     text = "(%s) %s %s" % (
         dirtext,
-        row["name"],
+        cam.config.name,
         NOW.strftime("%-2I:%M:%S %p - %d %b %Y"),
     )
     (left, top, right, bottom) = FONT.getbbox(text)
@@ -52,7 +54,10 @@ def draw_save(cid, img, dirtext, row):
     )
     draw.text((5, imgheight - 5 - height), text, font=FONT)
 
-    fn = f"../tmp/{cid}-{imgwidth:.0f}x{imgheight:.0f}.jpg"
+    tmpdir = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "..", "tmp"
+    )
+    fn = f"{tmpdir}/{cam.config.cid}-{imgwidth:.0f}x{imgheight:.0f}.jpg"
     img.save(fn)
     return fn
 
@@ -75,15 +80,6 @@ def do_db(cid, drct):
     dbconn.commit()
 
 
-def get_row(cid):
-    """Get the database row for this camera"""
-    dbconn, cursor = get_dbconnc("mesosite")
-    cursor.execute("SELECT * from webcams where id = %s", (cid,))
-    row = cursor.fetchone()
-    dbconn.close()
-    return row
-
-
 def workflow(cid):
     """Make some magic happen
 
@@ -91,37 +87,35 @@ def workflow(cid):
       - A `fullres` image as per database setting
       - A 640x480 image as for consistent saving
     """
-    row = get_row(cid)
-    gmt = datetime.datetime.utcnow()
-    buf, cam, gmt = get_buffer_and_cam(row, cid, gmt)
+    buf, cam = get_buffer_and_cam(cid)
     try:
         i0 = Image.open(buf)
     except IOError:
         return
 
     # Get direction cam is looking
-    if row["scrape_url"] is None:
+    if cam.config.scrape_url is None:
         drct = cam.getDirection()
         dirtext = cam.drct2txt(drct)
     else:
-        drct = row["pan0"]
-        dirtext = drct2text(row["pan0"])
+        drct = cam.config.pan0
+        dirtext = drct2text(cam.config.pan0)
 
     (imgwidth, imgheight) = i0.size
     if imgwidth != 640 or imgheight != 480:
         i640 = i0.resize((640, 480), Image.LANCZOS)
-        fn640 = draw_save(cid, i640, dirtext, row)
-        fnfull = draw_save(cid, i0, dirtext, row)
+        fn640 = draw_save(cam, i640, dirtext)
+        fnfull = draw_save(cam, i0, dirtext)
     else:
-        fnfull = draw_save(cid, i0, dirtext, row)
+        fnfull = draw_save(cam, i0, dirtext)
         fn640 = fnfull
     cmd = [
         "pqinsert",
         "-i",
         "-p",
         (
-            f"webcam c {gmt:%Y%m%d%H%M} camera/640x480/{cid}.jpg "
-            f"camera/{cid}/{cid}_{gmt:%Y%m%d%H%M}.jpg jpg"
+            f"webcam c {utc():%Y%m%d%H%M} camera/640x480/{cid}.jpg "
+            f"camera/{cid}/{cid}_{utc():%Y%m%d%H%M}.jpg jpg"
         ),
         fn640,
     ]
@@ -137,8 +131,8 @@ def workflow(cid):
         "-i",
         "-p",
         (
-            f"webcam ac {gmt:%Y%m%d%H%M} camera/stills/{cid}.jpg "
-            f"camera/{cid}/{cid}_{gmt:%Y%m%d%H%M}.jpg jpg"
+            f"webcam ac {utc():%Y%m%d%H%M} camera/stills/{cid}.jpg "
+            f"camera/{cid}/{cid}_{utc():%Y%m%d%H%M}.jpg jpg"
         ),
         fnfull,
     ]
