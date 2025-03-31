@@ -8,12 +8,11 @@ URIs look like so:
 import datetime
 from io import BytesIO
 
-import requests
+import httpx
 from paste.request import parse_formvars
 from PIL import Image, ImageDraw
 from pyiem.util import get_dbconnc, get_properties
 from pymemcache.client import Client
-from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 
 
 def fetch(cid):
@@ -50,14 +49,14 @@ def fetch(cid):
         uribase = "http://%s:%s/axis-cgi/jpg/image.cgi"
     uri = uribase % (ip if ip is not None else fqdn, port)
     ham = (
-        HTTPBasicAuth
+        httpx.BasicAuth
         if cid
         in [
             "KCRG-010",
         ]
-        else HTTPDigestAuth
+        else httpx.DigestAuth
     )
-    req = requests.get(uri, auth=ham(user, passwd), timeout=15)
+    req = httpx.get(uri, auth=ham(user, passwd), timeout=15)
     if req.status_code != 200:
         return
     image = Image.open(BytesIO(req.content))

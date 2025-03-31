@@ -11,7 +11,7 @@ import time
 from io import BytesIO
 from zoneinfo import ZoneInfo
 
-import requests
+import httpx
 from PIL import Image, ImageDraw, ImageFont
 from pyiem.util import drct2text, utc
 
@@ -44,7 +44,7 @@ class scrape(object):
         now = now.replace(tzinfo=ZoneInfo("America/Chicago"))
 
         url = self.row["scrape_url"]
-        req = requests.get(url)
+        req = httpx.get(url)
         modified = req.headers.get("Last-Modified")
         if modified:
             gmt = datetime.datetime.strptime(

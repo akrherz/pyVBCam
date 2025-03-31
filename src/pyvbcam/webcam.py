@@ -3,8 +3,10 @@
 import logging
 import sys
 
-import requests
+import httpx
 from pyiem.util import drct2text
+
+from pyvbcam import WebCamConfig
 
 
 class BasicWebcam:
@@ -12,25 +14,29 @@ class BasicWebcam:
 
     PREFIX = ""
 
-    def __init__(self, cid, row, user, password):
-        """The constructor"""
-        self.cid = cid
-        self.pan0 = row["pan0"]
-        self.ip = row["ip"]
-        self.fqdn = row["fqdn"]
-        self.port = row["port"]
-        self.name = row["name"]
-        self.settings = {}
-        self.res = row["fullres"]
-        self.lat = row["lat"]
-        self.lon = row["lon"]
-        self.log = logging.getLogger(__name__)
+    def __init__(self, config: WebCamConfig, settings: dict = None):
+        """Constructor.
 
-        self.httpauth = requests.auth.HTTPDigestAuth(user, password)
+        args:
+            config: a WebCamConfig object
+            settings: a dictionary of settings to use
+        """
+        # hold the config object
+        self.config = config
+        self.webbase = (
+            f"http://{config.ip if config.fqdn is None else config.fqdn}:"
+            f"{config.port}"
+        )
+        self.httpauth = httpx.DigestAuth(config.username, config.password)
+        self.settings = {} if settings is None else settings
         self.retries = 6
         self.connid = None
         self.haveControl = False
-        self.getSettings()
+
+        self.log = logging.getLogger(__name__)
+
+        if settings is None:
+            self.getSettings()
 
     def getSettings(self):
         """overide me"""
@@ -42,33 +48,21 @@ class BasicWebcam:
 
     def realhttp(self, s):
         """Make a real connection"""
-        req = requests.get(
-            "http://%s:%s/%s/%s"
-            % (
-                self.ip if self.ip is not None else self.fqdn,
-                self.port,
-                self.PREFIX,
-                s,
-            ),
+        req = httpx.get(
+            f"{self.webbase}{self.PREFIX}/{s}",
             auth=self.httpauth,
             timeout=30,
         )
         logging.debug("HTTP request => %s, status = %s", s, req.status_code)
         if req.status_code == 401 and isinstance(
-            self.httpauth, requests.auth.HTTPDigestAuth
+            self.httpauth, httpx.DigestAuth
         ):
             logging.debug("downgrading HTTPAuth to Basic")
-            self.httpauth = requests.auth.HTTPBasicAuth(
-                self.httpauth.username, self.httpauth.password
+            self.httpauth = httpx.BasicAuth(
+                self.config.username, self.config.password
             )
-            req = requests.get(
-                "http://%s:%s/%s/%s"
-                % (
-                    self.ip if self.ip is not None else self.fqdn,
-                    self.port,
-                    self.PREFIX,
-                    s,
-                ),
+            req = httpx.get(
+                f"{self.webbase}{self.PREFIX}/{s}",
                 auth=self.httpauth,
                 timeout=30,
             )
@@ -79,17 +73,17 @@ class BasicWebcam:
             return None
         return req.content
 
-    def http(self, s):
+    def http(self, s, retries: int = 6):
         """http helper"""
         c = 0
         data = None
-        while c < 6:
+        while c < retries:
             try:
                 data = self.realhttp(s)
                 if data is not None:
                     break
-            except requests.exceptions.ConnectTimeout:
-                logging.debug("requests timout!")
+            except httpx.ConnectTimeout:
+                logging.debug("request timout!")
             except KeyboardInterrupt:
                 sys.exit(0)
             except Exception as exp:

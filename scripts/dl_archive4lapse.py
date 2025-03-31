@@ -6,7 +6,7 @@ from __future__ import print_function
 
 import datetime
 
-import requests
+import httpx
 
 
 def main():
@@ -25,7 +25,7 @@ def main():
                 "ISUC-002_%Y%m%d%H%M.jpg"
             )
         )
-        req = requests.get(uri)
+        req = httpx.get(uri)
         if req.status_code == 200:
             fp = open("/mesonet/tmp/frames/%05d.jpg" % (i,), "w")
             fp.write(req.content)

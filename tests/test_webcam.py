@@ -2,16 +2,11 @@
 
 import pytest
 
-from pyvbcam import webcam
+from pyvbcam import WebCamConfig
+from pyvbcam.webcam import BasicWebcam
 
 
-@pytest.mark.parametrize("database", ["mesosite"])
-def test_webcam(dbcursor):
+def test_webcam_get_settings_failure():
     """Test webcam class."""
-    dbcursor.execute(
-        "select *, st_x(geom) as lon, st_y(geom) as lat from webcams "
-        "where id = 'KCCI-027'"
-    )
-    row = dbcursor.fetchone()
     with pytest.raises(NotImplementedError):
-        webcam.BasicWebcam("KCCI-027", row, "user", "password")
+        BasicWebcam(WebCamConfig(cid="KCCI-027"))

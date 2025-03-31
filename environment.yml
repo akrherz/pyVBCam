@@ -2,10 +2,13 @@ dependencies:
  - click
  - codecov
  - ephem
+ # To make web calls
+ - httpx
  - pillow
  - posix_ipc
  - pyiem
  - pytest-cov
+ # mocking
+ - pytest-httpx
  - pytest-runner
  - pytest
- - requests
