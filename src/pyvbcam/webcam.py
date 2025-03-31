@@ -3,7 +3,7 @@
 import logging
 import sys
 
-import requests
+import httpx
 from pyiem.util import drct2text
 
 
@@ -12,7 +12,7 @@ class BasicWebcam:
 
     PREFIX = ""
 
-    def __init__(self, cid, row, user, password):
+    def __init__(self, cid, row, user: str, password: str):
         """The constructor"""
         self.cid = cid
         self.pan0 = row["pan0"]
@@ -26,7 +26,9 @@ class BasicWebcam:
         self.lon = row["lon"]
         self.log = logging.getLogger(__name__)
 
-        self.httpauth = requests.auth.HTTPDigestAuth(user, password)
+        self.user = user
+        self.password = password
+        self.httpauth = httpx.DigestAuth(user, password)
         self.retries = 6
         self.connid = None
         self.haveControl = False
@@ -42,7 +44,7 @@ class BasicWebcam:
 
     def realhttp(self, s):
         """Make a real connection"""
-        req = requests.get(
+        req = httpx.get(
             "http://%s:%s/%s/%s"
             % (
                 self.ip if self.ip is not None else self.fqdn,
@@ -55,13 +57,11 @@ class BasicWebcam:
         )
         logging.debug("HTTP request => %s, status = %s", s, req.status_code)
         if req.status_code == 401 and isinstance(
-            self.httpauth, requests.auth.HTTPDigestAuth
+            self.httpauth, httpx.DigestAuth
         ):
             logging.debug("downgrading HTTPAuth to Basic")
-            self.httpauth = requests.auth.HTTPBasicAuth(
-                self.httpauth.username, self.httpauth.password
-            )
-            req = requests.get(
+            self.httpauth = httpx.BasicAuth(self.user, self.password)
+            req = httpx.get(
                 "http://%s:%s/%s/%s"
                 % (
                     self.ip if self.ip is not None else self.fqdn,
@@ -88,8 +88,8 @@ class BasicWebcam:
                 data = self.realhttp(s)
                 if data is not None:
                     break
-            except requests.exceptions.ConnectTimeout:
-                logging.debug("requests timout!")
+            except httpx.ConnectTimeout:
+                logging.debug("request timout!")
             except KeyboardInterrupt:
                 sys.exit(0)
             except Exception as exp:
