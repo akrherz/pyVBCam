@@ -38,7 +38,7 @@ def get_vbcam(camid: str, conn: Connection = None):
         res=row["fullres"],
         username=camutils.get_user(camid),
     )
-    return (VAPIX if row["is_vapix"] else vbcam)(cfg)
+    return (VAPIX if row["is_vapix"] else VBCam)(cfg)
 
 
 class VAPIX(BasicWebcam):
@@ -117,7 +117,7 @@ class VAPIX(BasicWebcam):
         return
 
 
-class vbcam(BasicWebcam):
+class VBCam(BasicWebcam):
     """Canon VB-Webcam"""
 
     PREFIX = "/-wvhttp-01-"
