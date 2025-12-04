@@ -1,7 +1,7 @@
 dependencies:
  - click
  - codecov
- - ephem
+ - ephem>=4.2
  # help dep solver for now
  - gdal>=3.10,<3.11
  # To make web calls
