@@ -2,11 +2,14 @@ dependencies:
  - click
  - codecov
  - ephem
+ # help dep solver for now
+ - gdal>=3.10,<3.11
  # To make web calls
  - httpx
  - pillow
  - posix_ipc
- - pyiem
+ # help dep solver
+ - pyiem>=1.25.0
  - pytest-cov
  # mocking
  - pytest-httpx
