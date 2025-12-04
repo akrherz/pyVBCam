@@ -17,3 +17,5 @@ dependencies:
  - pytest-httpx
  - pytest-runner
  - pytest
+ # dep solving help
+ - rasterstats>=0.20.0
