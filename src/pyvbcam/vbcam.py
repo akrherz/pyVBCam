@@ -212,7 +212,7 @@ class VBCam(BasicWebcam):
         """Grab control of the webcam for this session."""
         self.haveControl = False
 
-        for attempt in range(10):
+        for _ in range(10):
             if self.connid is None:
                 self.startSession()
             if self.connid is None:
