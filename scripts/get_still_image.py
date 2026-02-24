@@ -90,7 +90,7 @@ def workflow(cid):
     buf, cam = get_buffer_and_cam(cid)
     try:
         i0 = Image.open(buf)
-    except IOError:
+    except OSError:
         return
 
     # Get direction cam is looking

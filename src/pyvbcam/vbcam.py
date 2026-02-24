@@ -65,10 +65,8 @@ class VAPIX(BasicWebcam):
         elif offset > 180:  # We need to go the other way
             offset = (drct - 360) - self.config.pan0
 
-        if offset < -179.9:
-            offset = -179.9
-        if offset > 179.9:
-            offset = 179.9
+        offset = max(offset, -179.9)
+        offset = min(offset, 179.9)
         return offset
 
     def panDrct(self, drct):
@@ -170,10 +168,8 @@ class VBCam(BasicWebcam):
         elif offset > 180:  # We need to go the other way
             offset = (drct - 360) - self.config.pan0
 
-        if offset < -170:
-            offset = -170
-        if offset > 170:
-            offset = 170
+        offset = max(offset, -170)
+        offset = min(offset, 170)
         return offset
 
     def getTilt(self):

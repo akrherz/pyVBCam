@@ -6,7 +6,8 @@ Note: It is important that this module not import other parts of this code
 import json
 import os
 
-from pyiem.util import LOG, get_dbconnc
+from pyiem.database import get_dbconnc
+from pyiem.util import LOG
 
 DATADIR = os.sep.join([os.path.dirname(__file__), "data"])
 SETTINGS = json.load(open("settings.json"))

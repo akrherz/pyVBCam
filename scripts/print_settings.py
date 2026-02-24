@@ -1,11 +1,9 @@
 """Simple utility to print out the camera settings"""
 
-from __future__ import print_function
-
 import logging
 import sys
 
-import pyvbcam.vbcam as vbcam
+from pyvbcam import vbcam
 
 logging.basicConfig(level=logging.DEBUG)
 

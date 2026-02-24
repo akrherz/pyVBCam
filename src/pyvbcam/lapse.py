@@ -22,11 +22,11 @@ def safe_copy(src, dest):
     """Copy file, safely"""
     try:
         shutil.copyfile(src, f"/mesonet/share/lapses/auto/{dest}")
-    except IOError as exp:
+    except OSError as exp:
         logging.error(exp)
 
 
-class scrape(object):
+class scrape:
     """This is a vanilla scrapper"""
 
     def __init__(self, cid, row):
@@ -54,7 +54,7 @@ class scrape(object):
         return req.content
 
 
-class Lapse(object):
+class Lapse:
     """Represents a timelapse"""
 
     font = ImageFont.truetype(camutils.DATADIR + "/veramono.ttf", 22)
