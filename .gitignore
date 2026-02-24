@@ -9,4 +9,6 @@
 /scripts/secret.py
 /scripts/settings.json
 /.coverage
+/coverage.xml
+/00000.jpg
 /settings.json

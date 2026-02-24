@@ -2,8 +2,6 @@
 Download the frames archived to produce a longterm lapse
 """
 
-from __future__ import print_function
-
 import datetime
 
 import httpx
@@ -19,11 +17,9 @@ def main():
     now = sts
     while now < ets:
         uri = now.strftime(
-            (
-                "http://mesonet.agron.iastate.edu/archive/"
-                "data/%Y/%m/%d/camera/ISUC-002/"
-                "ISUC-002_%Y%m%d%H%M.jpg"
-            )
+            "http://mesonet.agron.iastate.edu/archive/"
+            "data/%Y/%m/%d/camera/ISUC-002/"
+            "ISUC-002_%Y%m%d%H%M.jpg"
         )
         req = httpx.get(uri)
         if req.status_code == 200:
