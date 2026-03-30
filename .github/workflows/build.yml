@@ -62,7 +62,7 @@ jobs:
 
     - name: Code coverage
       if: ${{ matrix.PYTHON_VERSION == '3.14' }}
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@v6
       with:
         files: coverage.xml
         fail_ci_if_error: true
