@@ -108,7 +108,7 @@ class Lapse:
             draw.text(labelpt, stamp, font=self.font, anchor="mm")
             del draw
 
-            if self.site.startswith("WOI"):
+            if self.site and self.site.startswith("WOI"):
                 camutils.overlay_logo(img)
 
             img.save(f"{self.i:05.0f}.jpg")
