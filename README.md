@@ -1,4 +1,4 @@
-Python Scripts and Library to interface with 
+Python Scripts and Library to interface with
 ============================================
 
 * Canon VBC10
