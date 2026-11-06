@@ -9,7 +9,7 @@ from io import BytesIO
 
 from PIL import Image, ImageDraw, ImageFont
 
-from pyvbcam.utils import DATADIR
+from pyvbcam.utils import DATADIR, overlay_logo
 from pyvbcam.vbcam import get_vbcam
 
 
@@ -45,6 +45,9 @@ def doimage(cam, i, font):
     )
     draw.text(labelpt, label, font=font, anchor="mm")
     del draw
+
+    if cam.config.cid.startswith("WOI"):
+        overlay_logo(i0)
 
     i0.save("%05i.jpg" % (i,))
     del i0

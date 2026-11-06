@@ -33,7 +33,7 @@ def workflow(conn: Connection):
         sql_helper("""
         SELECT id from webcams WHERE
         online = 't'
-        and network in ('KCCI','KCRG','ISUC', 'MCFC')
+        and network in ('KCCI','KCRG','ISUC', 'MCFC', 'WOI')
     """)
     )
 

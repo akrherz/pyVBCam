@@ -108,6 +108,9 @@ class Lapse:
             draw.text(labelpt, stamp, font=self.font, anchor="mm")
             del draw
 
+            if self.cid.startswith("WOI"):
+                camutils.overlay_logo(img)
+
             img.save(f"{self.i:05.0f}.jpg")
 
     def create_lapse(self):

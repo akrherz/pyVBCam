@@ -17,6 +17,7 @@ from pyiem.util import drct2text, utc
 
 import pyvbcam.utils as camutils
 from pyvbcam import vbcam
+from pyvbcam.utils import overlay_logo
 from pyvbcam.vbcam import BasicWebcam
 
 NOW = datetime.datetime.now().replace(tzinfo=ZoneInfo("America/Chicago"))
@@ -80,7 +81,7 @@ def do_db(cid, drct):
     dbconn.commit()
 
 
-def workflow(cid):
+def workflow(cid: str):
     """Make some magic happen
 
     We have two image goals:
@@ -100,6 +101,9 @@ def workflow(cid):
     else:
         drct = cam.config.pan0
         dirtext = drct2text(cam.config.pan0)
+
+    if cid.startswith("WOI"):
+        overlay_logo(i0)
 
     (imgwidth, imgheight) = i0.size
     if imgwidth != 640 or imgheight != 480:
