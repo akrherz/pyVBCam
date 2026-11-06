@@ -8,6 +8,7 @@ from pyvbcam import lapse
 def test_lapse_basic():
     """Test the lapse module."""
     lp = lapse.Lapse()
+    lp.site = ""
     # Mock lp.camera
     lp.camera = lapse.scrape(1, {"pan0": 0, "scrape_url": "http://localhost"})
     lp.camera.getDirection = lambda: 0

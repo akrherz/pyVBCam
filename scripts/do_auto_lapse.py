@@ -49,7 +49,7 @@ def setup_job(job, cid, sts, ets, label, duration):
     """
     job.site = cid
     job.ets = ets
-    job.network = job.site[:4]
+    job.network = job.site.split("-")[0]
     job.filename = label
     job.movie_duration = duration
     job.frames = job.movie_duration * 30

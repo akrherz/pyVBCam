@@ -26,7 +26,7 @@ def main():
     cursor.execute(
         """
         SELECT id, ST_x(geom) as lon, ST_y(geom) as lat from webcams WHERE
-        online = 't' and network in ('KCCI','KCRG','ISUC', 'MCFC')
+        online = 't' and network in ('KCCI','KCRG','ISUC', 'MCFC', 'WOI')
         """
     )
 
